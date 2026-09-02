@@ -157,10 +157,15 @@ function colorClass(c){
   return"n-green";
 }
 
+let lastDetectedIssue = null;
+let lastDetectedAt = 0;
+
 async function fetchFeed(){
+  const detectedAt = Date.now();
+
   const url =
     "https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json?ts="
-    + Date.now();
+    + detectedAt;
 
   const r = await fetch(url, {
     cache: "no-store",
@@ -172,7 +177,35 @@ async function fetchFeed(){
   if(!r.ok) throw new Error("HTTP " + r.status);
 
   const j = await r.json();
-  return j?.data?.list || [];
+  const list = j?.data?.list || [];
+
+  if(list.length){
+    const issue = String(list[0].issueNumber);
+
+    if(issue !== lastDetectedIssue){
+      lastDetectedIssue = issue;
+      lastDetectedAt = Date.now();
+
+      console.log(
+        "[FEED] New issue detected:",
+        issue,
+        "at",
+        new Date(lastDetectedAt).toISOString()
+      );
+
+      const status = document.getElementById("feedStatus");
+
+      if(status){
+        status.textContent =
+          "🟢 New result detected · " +
+          issue +
+          " · " +
+          new Date(lastDetectedAt).toLocaleTimeString();
+      }
+    }
+  }
+
+  return list;
 }
 
 function predictNext(history){
