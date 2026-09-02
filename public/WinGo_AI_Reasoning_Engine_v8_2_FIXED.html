@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WinGo AI Reasoning Engine v8.2</title>
+<style>
+:root{--bg:#f6faf7;--card:#fff;--ink:#0f172a;--muted:#64748b;--green:#16a34a;--red:#dc2626;--blue:#2563eb;--violet:#6366f1;--line:#e5e7eb;--soft:#f1f5f9;--amber:#d97706}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:560px;margin:auto;padding:14px 12px 42px}.card{background:var(--card);border:1px solid #edf1f3;border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 8px 24px -20px #0005}
+header{display:flex;justify-content:space-between;align-items:center;padding:7px 4px 14px}.logo{font-weight:900;font-size:19px;color:var(--green);font-style:italic}.avatar{width:32px;height:32px;border-radius:50%;background:#bbf7d0;display:grid;place-items:center;font-weight:800;color:#166534}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.period{font-size:12px;color:var(--muted)}.period b{color:var(--ink)}.count{background:var(--soft);border-radius:99px;padding:6px 11px;font-size:12px;color:var(--muted)}.count b{color:var(--ink)}
+h2{font-size:16px;margin:0 0 4px}.sub{font-size:11.5px;color:var(--muted);margin-bottom:10px}.hero{text-align:center;padding:18px 0 12px}.label{font-size:11px;letter-spacing:.16em;color:var(--muted)}.pred{font-size:52px;font-weight:900;line-height:1;margin-top:5px}.big{color:var(--green)}.small{color:var(--violet)}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.metric{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:9px;text-align:center}.metric .k{font-size:9px;color:var(--muted);letter-spacing:.1em}.metric .v{font-weight:800;margin-top:3px;font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.stat{text-align:center;padding:7px 0}.stat .n{font-size:19px;font-weight:900}.stat .l{font-size:9px;color:var(--muted);letter-spacing:.1em}
+.g{color:var(--green)}.r{color:var(--red)}.b{color:var(--blue)}.a{color:var(--amber)}
+table{width:100%;border-collapse:collapse;font-size:11.5px}th{font-size:10px;color:var(--muted);text-align:left;padding:7px 4px;border-bottom:1px solid var(--line)}td{padding:7px 4px;border-bottom:1px solid #f1f5f9}.right{text-align:right}.center{text-align:center}
+.pill{display:inline-block;padding:3px 8px;border-radius:99px;font-size:10px;font-weight:800}.pill.big,.pill.win{background:#dcfce7;color:#166534}.pill.small{background:#e0e7ff;color:#3730a3}.pill.loss{background:#fee2e2;color:#991b1b}.pill.warn{background:#fef3c7;color:#92400e}
+.balls{display:flex;flex-wrap:wrap;gap:7px}.ball{width:29px;height:29px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:12px}.red{background:#ef4444}.green{background:#22c55e}.violet{background:linear-gradient(135deg,#22c55e,#7c3aed)}.violetred{background:linear-gradient(135deg,#ef4444,#7c3aed)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.box{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px}.box b{display:block;font-size:13px;margin-bottom:3px}.box span{font-size:10.5px;color:var(--muted);line-height:1.35}
+.reason{font-size:11.5px;line-height:1.5;color:#334155}.reason strong{color:var(--ink)}.bar{height:7px;border-radius:99px;background:#e5e7eb;overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;background:var(--green)}.bar.v i{background:var(--violet)}
+.smalltxt{font-size:10px;color:var(--muted)}.foot{font-size:10.5px;color:var(--muted);text-align:center;line-height:1.5;margin-top:8px}
+button{border:0;border-radius:10px;padding:8px 11px;background:#e2e8f0;color:#0f172a;font-weight:700;font-size:11px}button:active{transform:scale(.98)}.btnrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+details summary{cursor:pointer;font-weight:800;font-size:12px}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;word-break:break-all}
+.ok{color:var(--green)}.bad{color:var(--red)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div class="logo">● Aᴋᴋɪ Bʜᴀɪ · AI REASONING</div><div class="avatar">A</div></header>
+
+<div class="card">
+  <div class="row">
+    <div class="period">Next period: <b id="nextPeriod">—</b></div>
+    <div class="count">Next in <b id="countdown">--</b>s</div>
+  </div>
+  <div class="hero">
+    <div class="label">AI DECISION</div>
+    <div id="predValue" class="pred">WAIT</div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="k">CONFIDENCE</div><div class="v" id="conf">—</div></div>
+    <div class="metric"><div class="k">P(BIG)</div><div class="v" id="pbig">—</div></div>
+    <div class="metric"><div class="k">EVIDENCE</div><div class="v" id="evidence">WAIT</div></div>
+  </div>
+  <div class="reason" id="reason" style="margin-top:12px">Waiting for a complete 10-result API snapshot.</div>
+</div>
+
+<div class="card">
+  <div class="row"><h2>Engine Status</h2><span id="feedStatus" class="smalltxt">Checking…</span></div>
+  <div class="stats">
+    <div class="stat"><div id="wins" class="n g">0</div><div class="l">WINS</div></div>
+    <div class="stat"><div id="losses" class="n r">0</div><div class="l">LOSSES</div></div>
+    <div class="stat"><div id="winrate" class="n b">0%</div><div class="l">RATE</div></div>
+    <div class="stat"><div id="learned" class="n a">0</div><div class="l">HISTORY</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Last Result Intelligence</h2><div class="sub">The latest settled result is treated as a state, not a simple reversal signal.</div>
+  <div class="grid">
+    <div class="box"><b id="lastDigit">—</b><span>Last digit</span></div>
+    <div class="box"><b id="lastSide">—</b><span>Last BIG/SMALL</span></div>
+    <div class="box"><b id="lastParity">—</b><span>Parity</span></div>
+    <div class="box"><b id="lastStreak">—</b><span>Current streak</span></div>
+  </div>
+  <div id="lastAnalysis" class="reason" style="margin-top:10px">—</div>
+</div>
+
+<div class="card">
+  <h2>Pattern & Trend Analyzer</h2><div class="sub">Short, medium and long context are compared before the decision.</div>
+  <div class="grid">
+    <div class="box"><b id="trend5">—</b><span>5-result trend</span></div>
+    <div class="box"><b id="trend10">—</b><span>10-result trend</span></div>
+    <div class="box"><b id="trend20">—</b><span>20-result baseline</span></div>
+    <div class="box"><b id="regime">—</b><span>Regime shift</span></div>
+  </div>
+  <div id="patternAnalysis" class="reason" style="margin-top:10px">—</div>
+</div>
+
+<div class="card">
+  <h2>Model Council</h2><div class="sub">Independent evidence streams vote with reliability learned from walk-forward history.</div>
+  <table><thead><tr><th>Model</th><th>Signal</th><th class="center">Weight</th><th class="right">Support</th></tr></thead>
+  <tbody id="modelBody"></tbody></table>
+</div>
+
+<div class="card">
+  <h2>Randomness Diagnostics</h2><div class="sub">Diagnostics do not prove predictability; they measure whether the observed sequence departs from simple random behavior.</div>
+  <div class="grid">
+    <div class="box"><b id="runs">—</b><span>Runs Z</span></div>
+    <div class="box"><b id="acf">—</b><span>Lag-1 autocorrelation</span></div>
+    <div class="box"><b id="entropy">—</b><span>Binary entropy</span></div>
+    <div class="box"><b id="structure">—</b><span>Structure level</span></div>
+  </div>
+  <div id="randomNote" class="reason" style="margin-top:10px">—</div>
+</div>
+
+<div class="card">
+  <h2>Recent Game Results</h2><div class="sub">The engine will not start a fresh decision until the API returns 10 valid unique results.</div>
+  <div class="balls" id="balls"></div>
+</div>
+
+<div class="card">
+  <h2>Prediction History</h2>
+  <table><thead><tr><th>Period</th><th>Prediction</th><th>Actual</th><th class="center">No.</th><th class="right">Status</th></tr></thead>
+  <tbody id="historyBody"></tbody></table>
+</div>
+
+<div class="card">
+  <details>
+    <summary>Research / Engine Controls</summary>
+    <div class="sub" style="margin-top:8px">Local learning data is stored only in this browser. Clear it if you want a clean research run.</div>
+    <div class="btnrow"><button id="clearBtn">Clear learned history</button><button id="exportBtn">Export JSON</button></div>
+    <div id="engineMeta" class="smalltxt" style="margin-top:9px"></div>
+  </details>
+</div>
+
+<div class="foot">
+  Public feed analytics / research tool. No outcome is guaranteed. If the underlying process is random, sophisticated models cannot manufacture a reliable edge.
+</div>
+</div>
+
+<script>
+"use strict";
+
+const CFG={
+  endpoint:"https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json",
+  refresh:1000, periodSec:30, requiredFeed:10, maxHistory:5000,
+  maxPredictions:500, orders:[1,2,3,4]
+};
+
+const LS={
+  history:"wingo_reasoning_v8_history",
+  predictions:"wingo_reasoning_v8_predictions",
+  metrics:"wingo_reasoning_v8_metrics",
+  lastIssue:"wingo_reasoning_v8_last_issue"
+};
+
+const $=id=>document.getElementById(id);
+const side=n=>Number(n)>=5?"BIG":"SMALL";
+const parity=n=>Number(n)%2===0?"EVEN":"ODD";
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const pct=x=>Math.round(clamp(x,0,1)*100);
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+
+function load(k,d){try{const x=JSON.parse(localStorage.getItem(k));return x??d}catch{return d}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+
+let history=load(LS.history,[]);
+let predictions=load(LS.predictions,{});
+if(!predictions || typeof predictions!=="object" || Array.isArray(predictions)) predictions={};
+for(const k of Object.keys(predictions)){
+  const p=predictions[k];
+  if(!p || typeof p!=="object" || !p.pick) delete predictions[k];
+}
+save(LS.predictions,predictions);
+let metrics=load(LS.metrics,{wins:0,losses:0,total:0});
+let lastIssue=load(LS.lastIssue,null);
+let latestList=[];
+
+function normalize(r){
+  const n=Number(r?.number);
+  const issue=String(r?.issueNumber??"");
+  if(!issue || !Number.isFinite(n) || n<0 || n>9)return null;
+  return {issue,number:n,side:side(n),parity:parity(n),color:String(r?.color??""),ts:Date.now()};
+}
+function mergeHistory(list){
+  const map=new Map(history.map(x=>[String(x.issue),x]));
+  for(const r of list){
+    const n=(r && r.issue!=null && r.number!=null)
+      ? {issue:String(r.issue),number:Number(r.number),side:r.side||side(r.number),
+         parity:r.parity||parity(r.number),color:String(r.color||""),ts:r.ts||Date.now()}
+      : normalize(r);
+    if(n && n.issue && Number.isFinite(n.number))
+      map.set(n.issue,{...map.get(n.issue),...n});
+  }
+  history=[...map.values()]
+    .filter(x=>x && x.issue && Number.isFinite(Number(x.number)))
+    .sort((a,b)=>String(a.issue).localeCompare(String(b.issue)));
+  if(history.length>CFG.maxHistory)history=history.slice(-CFG.maxHistory);
+  save(LS.history,history);
+}
+function chronological(list=history){return list.slice().sort((a,b)=>a.issue.localeCompare(b.issue))}
+function binarySeq(arr=history){return chronological(arr).map(x=>x.side)}
+function digitSeq(arr=history){return chronological(arr).map(x=>x.number)}
+
+function betaProb(success,total,prior=.5){
+  return (success+1)/(total+2)*prior + (success/Math.max(1,total))*(1-prior);
+}
+function conditionalProb(seq,ctx,target){
+  let hits=0,total=0;
+  for(let i=ctx.length;i<seq.length;i++){
+    if(seq.slice(i-ctx.length,i).join("|")===ctx.join("|")){
+      total++; if(seq[i]===target)hits++;
+    }
+  }
+  return {p:(hits+1)/(total+2),n:total};
+}
+function markov(arr,order){
+  const seq=binarySeq(arr); if(seq.length<=order)return {p:.5,n:0};
+  const ctx=seq.slice(-order);
+  let r=conditionalProb(seq,ctx,"BIG");
+  for(let k=order-1;k>=1;k--){
+    if(r.n>=3)break;
+    r=conditionalProb(seq,ctx.slice(-k),"BIG");
+  }
+  return r;
+}
+function digitMarkov(arr,order){
+  const seq=digitSeq(arr); if(seq.length<=order)return {dist:Array(10).fill(1/10),n:0};
+  const ctx=seq.slice(-order).join("|");
+  const counts=Array(10).fill(1), total=10;
+  let n=0;
+  for(let i=order;i<seq.length;i++){
+    if(seq.slice(i-order,i).join("|")===ctx){counts[seq[i]]++;n++}
+  }
+  const sum=counts.reduce((a,b)=>a+b,0);
+  return {dist:counts.map(x=>x/sum),n};
+}
+
+function weightedRecent(arr,window=20){
+  const seq=binarySeq(arr).slice(-window);
+  if(!seq.length)return .5;
+  let b=0,w=0;
+  seq.forEach((x,i)=>{const wt=Math.exp((i-seq.length+1)/Math.max(3,window*.45));w+=wt;if(x==="BIG")b+=wt});
+  return b/w;
+}
+
+function streakInfo(seq){
+  if(!seq.length)return {side:"—",len:0};
+  const s=seq[seq.length-1];let n=1;
+  for(let i=seq.length-2;i>=0&&seq[i]===s;i--)n++;
+  return {side:s,len:n};
+}
+function lastResultSignal(arr){
+  const seq=binarySeq(arr);if(seq.length<3)return {p:.5,n:0,label:"INSUFFICIENT"};
+  const last=seq[seq.length-1];
+  const r=conditionalProb(seq,[last],"BIG");
+  return {p:r.p,n:r.n,label:`After ${last}: ${pct(r.p)}% BIG (${r.n} cases)`};
+}
+function streakSignal(arr){
+  const seq=binarySeq(arr),st=streakInfo(seq);
+  if(st.len<2)return {p:.5,n:0,label:"No meaningful streak"};
+  let hits=0,total=0;
+  for(let i=st.len;i<seq.length;i++){
+    let k=1;
+    for(let j=i-1;j>0&&seq[j]===seq[i-1];j--)k++;
+    if(k===st.len && seq[i-1]===st.side){total++;if(seq[i]==="BIG")hits++}
+  }
+  return {p:total?(hits+1)/(total+2):.5,n:total,label:`${st.side}×${st.len} → ${total?pct((hits+1)/(total+2)):"—"}% BIG`};
+}
+function patternSignal(arr){
+  const seq=binarySeq(arr);
+  if(seq.length<6)return {p:.5,n:0,label:"Need more history"};
+  let best={p:.5,n:0,order:0};
+  for(const o of [5,4,3,2]){
+    const ctx=seq.slice(-o),r=conditionalProb(seq,ctx,"BIG");
+    if(r.n>best.n || (r.n===best.n&&o>best.order))best={...r,order:o};
+  }
+  return {...best,label:`${best.order}-step pattern · ${best.n} matches`};
+}
+function frequencySignal(arr){
+  const seq=binarySeq(arr);
+  const windows=[5,10,20,50].filter(n=>seq.length>=n);
+  if(!windows.length)return {p:.5,n:0,label:"Insufficient"};
+  let sum=0,w=0;
+  windows.forEach((n,i)=>{const q=seq.slice(-n);const p=q.filter(x=>x==="BIG").length/n;const wt=(i+1);sum+=p*wt;w+=wt});
+  const p=sum/w;return {p,n:Math.max(...windows),label:`Multi-window BIG rate ${pct(p)}%`};
+}
+function trendSignal(arr){
+  const seq=binarySeq(arr);if(seq.length<10)return {p:.5,label:"Insufficient trend history"};
+  const rates=[5,10,20].map(n=>seq.length>=n?seq.slice(-n).filter(x=>x==="BIG").length/n:null);
+  const r5=rates[0]??.5,r10=rates[1]??r5,r20=rates[2]??r10;
+  const accel=(r5-r10)*.55+(r10-r20)*.45;
+  const p=clamp(.5+(r5-.5)*.45+accel*.8,.08,.92);
+  return {p,label:`5/10/20 BIG: ${pct(r5)} / ${pct(r10)} / ${pct(r20)}`};
+}
+function regimeSignal(arr){
+  const seq=binarySeq(arr);if(seq.length<30)return {p:.5,label:"Baseline building"};
+  const a=seq.slice(-10),b=seq.slice(-30,-10);
+  const pa=a.filter(x=>x==="BIG").length/a.length,pb=b.filter(x=>x==="BIG").length/b.length;
+  return {p:clamp(.5+(pa-pb)*.65,.15,.85),label:`Recent ${pct(pa)}% vs baseline ${pct(pb)}%`};
+}
+function paritySignal(arr){
+  const seq=chronological(arr);if(seq.length<10)return {p:.5,n:0,label:"Insufficient"};
+  const last=seq[seq.length-1].parity;let b=0,t=0;
+  for(let i=1;i<seq.length;i++)if(seq[i-1].parity===last){t++;if(seq[i].side==="BIG")b++}
+  return {p:t?(b+1)/(t+2):.5,n:t,label:`After ${last}: ${t?pct((b+1)/(t+2)):"—"}% BIG`};
+}
+
+function runsTest(seq){
+  const x=seq.map(s=>s==="BIG"?1:0);const n1=x.filter(v=>v===1).length,n2=x.length-n1;
+  if(n1<2||n2<2)return null;
+  let R=1;for(let i=1;i<x.length;i++)if(x[i]!==x[i-1])R++;
+  const mean=2*n1*n2/(n1+n2)+1;
+  const variance=(2*n1*n2*(2*n1*n2-n1-n2))/(((n1+n2)**2)*(n1+n2-1));
+  return {z:(R-mean)/Math.sqrt(Math.max(variance,1e-9)),runs:R};
+}
+function autocorr(seq,lag=1){
+  const x=seq.map(s=>s==="BIG"?1:0);if(x.length<=lag+2)return 0;
+  const m=x.reduce((a,b)=>a+b,0)/x.length;
+  let num=0,den=0;
+  for(let i=0;i<x.length;i++)den+=(x[i]-m)**2;
+  for(let i=0;i<x.length-lag;i++)num+=(x[i]-m)*(x[i+lag]-m);
+  return den?num/den:0;
+}
+function entropy(seq){
+  if(!seq.length)return 0;const p=seq.filter(x=>x==="BIG").length/seq.length;
+  if(p===0||p===1)return 0;
+  return -(p*Math.log2(p)+(1-p)*Math.log2(1-p));
+}
+function diagnostics(arr){
+  const seq=binarySeq(arr).slice(-100);
+  const rt=runsTest(seq),ac=autocorr(seq,1),h=entropy(seq);
+  const structure=clamp(Math.abs((rt?.z||0))/3*.4+Math.abs(ac)*.6,0,1);
+  return {z:rt?.z??0,ac,h,structure};
+}
+
+function brierForPrediction(p,y){return (p-y)**2}
+
+function historicalModelAccuracy(modelName,arr){
+  const seq=chronological(arr);
+  if(seq.length<30)return .5;
+  let correct=0,total=0;
+  const start=Math.max(20,seq.length-250);
+  for(let i=start;i<seq.length;i++){
+    const train=seq.slice(0,i), y=seq[i].side==="BIG"?1:0;
+    let p=.5;
+    if(modelName==="markov1")p=markov(train,1).p;
+    if(modelName==="markov2")p=markov(train,2).p;
+    if(modelName==="markov3")p=markov(train,3).p;
+    if(modelName==="markov4")p=markov(train,4).p;
+    if(modelName==="pattern")p=patternSignal(train).p;
+    if(modelName==="last")p=lastResultSignal(train).p;
+    if(modelName==="streak")p=streakSignal(train).p;
+    if(modelName==="frequency")p=frequencySignal(train).p;
+    if(modelName==="trend")p=trendSignal(train).p;
+    if(modelName==="regime")p=regimeSignal(train).p;
+    if(modelName==="parity")p=paritySignal(train).p;
+    if(modelName==="digit"){
+      const d=digitMarkov(train,2);p=d.dist.reduce((s,q,n)=>s+(n>=5?q:0),0);
+    }
+    total++; if((p>=.5)===(y===1))correct++;
+  }
+  return total?correct/total:.5;
+}
+
+const MODEL_NAMES=[
+  ["markov1","Markov M1"],["markov2","Markov M2"],["markov3","Markov M3"],["markov4","Markov M4"],
+  ["digit","Digit transition"],["pattern","Pattern memory"],["last","Last-result state"],
+  ["streak","Dragon/streak"],["frequency","Frequency"],["trend","Trend"],["regime","Regime"],["parity","Parity"]
+];
+const BASE={
+  markov1:.12,markov2:.11,markov3:.09,markov4:.06,digit:.12,pattern:.12,last:.11,
+  streak:.07,frequency:.07,trend:.07,regime:.04,parity:.02
+};
+
+function modelSignal(name,arr){
+  if(name.startsWith("markov"))return markov(arr,Number(name.slice(-1))).p;
+  if(name==="digit"){const d=digitMarkov(arr,2);return d.dist.reduce((s,p,n)=>s+(n>=5?p:0),0)}
+  if(name==="pattern")return patternSignal(arr).p;
+  if(name==="last")return lastResultSignal(arr).p;
+  if(name==="streak")return streakSignal(arr).p;
+  if(name==="frequency")return frequencySignal(arr).p;
+  if(name==="trend")return trendSignal(arr).p;
+  if(name==="regime")return regimeSignal(arr).p;
+  if(name==="parity")return paritySignal(arr).p;
+  return .5;
+}
+function reliability(name,arr){
+  const a=historicalModelAccuracy(name,arr);
+  const n=arr.length;
+  const shrink=n<60?.35:n<120?.55:n<250?.75:.9;
+  return .5+(a-.5)*shrink;
+}
+
+function analyze(arr){
+  const d=diagnostics(arr);
+  const signals=[];
+  let signedSum=0,ws=0;
+
+  for(const [name,label] of MODEL_NAMES){
+    const p=clamp(modelSignal(name,arr),0.02,0.98);
+    const rel=reliability(name,arr);
+    const reliabilityBoost=0.55+Math.min(1.5,Math.abs(rel-.5)*4);
+    const w=BASE[name]*reliabilityBoost;
+    const evidence=(p-.5)*2;
+    signals.push({name,label,p,rel,w,evidence});
+    signedSum+=evidence*w; ws+=w;
+  }
+
+  // Center every model around a neutral 50% prior. This prevents tiny
+  // one-sided smoothing artifacts from accumulating into a permanent BIG bias.
+  let edge=ws?signedSum/ws:0;
+  edge=clamp(edge,-0.38,0.38);
+
+  // If the sequence looks close to random, shrink the apparent edge.
+  const structureTrust=clamp(0.35+d.structure*0.9,0.35,1);
+  edge*=structureTrust;
+
+  let pBig=clamp(.5+edge,.18,.82);
+
+  const agree=signals.filter(s=>s.p>.56).length;
+  const disagree=signals.filter(s=>s.p<.44).length;
+  const active=signals.filter(s=>s.p>.56||s.p<.44).length;
+  const consensus=active?Math.abs(agree-disagree)/active:0;
+
+  const last=chronological(arr).at(-1),seq=binarySeq(arr),st=streakInfo(seq);
+  const pattern=patternSignal(arr),lastSig=lastResultSignal(arr),
+        trend=trendSignal(arr),reg=regimeSignal(arr),
+        freq=frequencySignal(arr),dig=digitMarkov(arr,2);
+
+  const candidateDigits=dig.dist.map((p,n)=>({n,p}))
+    .sort((a,b)=>b.p-a.p).slice(0,3);
+
+  // Evidence quality is separate from direction. A directional prediction
+  // with weak/contradictory evidence is explicitly labelled weak.
+  const directionEdge=Math.abs(pBig-.5);
+  let evidence="WEAK";
+  if(directionEdge>=.13 && consensus>=.25) evidence="STRONG";
+  else if(directionEdge>=.075 && consensus>=.15) evidence="MIXED";
+
+  let confidence=50+directionEdge*105+consensus*9;
+  if(d.structure<.12)confidence-=9;
+  if(history.length<30)confidence-=5;
+  confidence=clamp(confidence,50,91);
+
+  const pick=pBig>.5?"BIG":pBig<.5?"SMALL":
+    (last?.side==="BIG"?"SMALL":"BIG");
+
+  const reasons=[];
+  reasons.push(`<strong>Last result:</strong> ${last?.number??"—"} (${last?.side??"—"}). ${lastSig.label}.`);
+  reasons.push(`<strong>Pattern:</strong> ${pattern.label}, ${pct(pattern.p)}% BIG.`);
+  reasons.push(`<strong>Trend:</strong> ${trend.label}.`);
+  reasons.push(`<strong>Streak:</strong> ${st.side} × ${st.len}; ${streakSignal(arr).label}.`);
+  reasons.push(`<strong>Council:</strong> ${agree} bullish vs ${disagree} bearish active signals.`);
+  reasons.push(`<strong>Decision:</strong> ${pick} · P(BIG) ${pct(pBig)}% · ${confidence.toFixed(0)}% confidence · ${evidence.toLowerCase()} evidence.`);
+
+  return {pBig,confidence,pick,evidence,signals,diag:d,last,st,pattern,lastSig,trend,reg,freq,digit:dig,candidateDigits,reasons,agree,disagree};
+}
+function colorClass(c){
+  c=String(c||"").toLowerCase();
+  if(c.includes("red")&&c.includes("violet"))return"violetred";
+  if(c.includes("green")&&c.includes("violet"))return"violet";
+  if(c.includes("red"))return"red";
+  return"green";
+}
+
+function nextPeriod(issue){try{return(String(BigInt(issue)+1n))}catch{return issue+"+1"}}
+
+function makePrediction(arr){
+  if(arr.length<CFG.requiredFeed)return null;
+  const a=analyze(arr);
+  return {pick:a.pick,confidence:a.confidence,pBig:a.pBig,created:Date.now(),model:"reasoning.v8.2",evidence:a.evidence,candidateDigits:a.candidateDigits};
+}
+
+function scoreSettled(list){
+  const chrono=chronological(list);
+  for(const row of chrono){
+    const p=predictions[row.issue];
+    if(!p || p.scored)continue;
+    const actual=side(row.number);
+    p.actual=actual;p.actualNumber=row.number;p.scored=true;p.win=p.pick===actual;
+    save(LS.predictions,predictions);
+  }
+  const scored=Object.values(predictions).filter(p=>p && typeof p==="object" && p.scored);
+  metrics.wins=scored.filter(p=>p.win).length;
+  metrics.losses=scored.filter(p=>!p.win).length;
+  metrics.total=scored.length;
+  save(LS.metrics,metrics);
+}
+
+function render(list){
+  const valid=list.map(normalize).filter(Boolean);
+  if(!valid.length)return;
+
+  // IMPORTANT: predictions for a period are generated from data that existed
+  // BEFORE that period. We never train on the result we are scoring.
+  const incoming=chronological(valid);
+  const existingByIssue=new Map(history.map(x=>[String(x.issue),x]));
+
+  for(const row of incoming){
+    const issue=String(row.issue);
+    if(!existingByIssue.has(issue)){
+      // Use all known history strictly before this issue.
+      const prior=chronological([...history]).filter(x=>String(x.issue)<issue);
+      const training=prior;
+      if(training.length>=CFG.requiredFeed && !predictions[issue]){
+        const pp=makePrediction(training);
+        if(pp)predictions[issue]=pp;
+      }
+    }
+    existingByIssue.set(issue,row);
+  }
+
+  // Merge the newly observed results only AFTER any prediction for them is made.
+  history=[...existingByIssue.values()]
+    .filter(x=>x&&x.issue&&Number.isFinite(Number(x.number)))
+    .sort((a,b)=>String(a.issue).localeCompare(String(b.issue)));
+  if(history.length>CFG.maxHistory)history=history.slice(-CFG.maxHistory);
+  save(LS.history,history);
+
+  // Score every prediction whose result is now known, including periods that
+  // were missed while the browser was suspended or a call interrupted.
+  for(const row of incoming){
+    const p=predictions[String(row.issue)];
+    if(p && !p.scored){
+      p.actual=side(row.number);
+      p.actualNumber=row.number;
+      p.scored=true;
+      p.win=p.pick===p.actual;
+    }
+  }
+  save(LS.predictions,predictions);
+
+  const scored=Object.values(predictions).filter(p=>p&&p.scored);
+  metrics.wins=scored.filter(p=>p.win).length;
+  metrics.losses=scored.filter(p=>!p.win).length;
+  metrics.total=scored.length;
+  save(LS.metrics,metrics);
+
+  const latest=history.at(-1);
+  const next=nextPeriod(latest.issue);
+  $("nextPeriod").textContent=next;
+
+  // Fresh current decision uses the complete learned history, including the
+  // latest settled result, but is locked only to the next issue.
+  const a=analyze(history);
+  const current=makePrediction(history);
+  if(current){
+    const prior=predictions[next];
+    // Replace an unscored prediction if it was created from an older snapshot.
+    if(current && (!prior || prior.scored || prior.sourceHistorySize!==history.length)){
+      current.sourceHistorySize=history.length;
+      predictions[next]=current;
+      save(LS.predictions,predictions);
+    }
+  }
+  const p=predictions[next];
+
+  if(p&&p.pick){
+    $("predValue").textContent=p.pick;
+    $("predValue").className="pred "+p.pick.toLowerCase();
+    $("conf").textContent=Math.round(p.confidence)+"%";
+    $("pbig").textContent=pct(p.pBig)+"%";
+    $("evidence").textContent=p.evidence;
+    $("reason").innerHTML=a.reasons.join(" ");
+
+    $("lastDigit").textContent=a.last?.number??"—";
+    $("lastSide").textContent=a.last?.side??"—";
+    $("lastParity").textContent=a.last?.parity??"—";
+    $("lastStreak").textContent=`${a.st.side} × ${a.st.len}`;
+    $("lastAnalysis").innerHTML=`<strong>Conditional state:</strong> ${esc(a.lastSig.label)}. The engine compares the exact previous-side state before applying streak evidence.`;
+
+    const bs=binarySeq(history);
+    const r5=bs.slice(-5),r10=bs.slice(-10),r20=bs.slice(-20);
+    $("trend5").textContent=`${pct(r5.filter(x=>x==="BIG").length/Math.max(1,r5.length))}% BIG`;
+    $("trend10").textContent=`${pct(r10.filter(x=>x==="BIG").length/Math.max(1,r10.length))}% BIG`;
+    $("trend20").textContent=`${pct(r20.filter(x=>x==="BIG").length/Math.max(1,r20.length))}% BIG`;
+    $("regime").textContent=a.reg.label;
+    $("patternAnalysis").innerHTML=`<strong>Pattern search:</strong> ${esc(a.pattern.label)}. <strong>Trend:</strong> ${esc(a.trend.label)}. <strong>Regime:</strong> ${esc(a.reg.label)}.`;
+
+    $("runs").textContent=a.diag.z.toFixed(2);
+    $("acf").textContent=a.diag.ac.toFixed(3);
+    $("entropy").textContent=a.diag.h.toFixed(3);
+    $("structure").textContent=(a.diag.structure*100).toFixed(0)+"%";
+    $("randomNote").textContent=a.diag.structure<.15
+      ?"Low detected structure: confidence is deliberately restrained."
+      :"Some serial structure is present, but that does not prove future predictability.";
+
+    $("modelBody").innerHTML=a.signals.map(s=>`<tr>
+      <td>${esc(s.label)}</td>
+      <td><span class="pill ${s.p>=.5?"big":"small"}">${s.p>=.5?"BIG":"SMALL"} ${pct(s.p)}%</span></td>
+      <td class="center">${(s.w*100).toFixed(1)}</td>
+      <td class="right">${pct(s.rel)}%</td>
+    </tr>`).join("");
+  }
+
+  $("learned").textContent=history.length;
+  $("wins").textContent=metrics.wins;
+  $("losses").textContent=metrics.losses;
+  $("winrate").textContent=metrics.total?Math.round(metrics.wins*100/metrics.total)+"%":"0%";
+
+  $("balls").innerHTML=incoming.slice().sort((a,b)=>String(b.issue).localeCompare(String(a.issue)))
+    .slice(0,10).map(r=>`<span class="ball ${colorClass(r.color)}">${r.number}</span>`).join("");
+
+  const rows=Object.entries(predictions)
+    .filter(([,q])=>q&&q.scored)
+    .sort((a,b)=>b[0].localeCompare(a[0])).slice(0,15);
+
+  $("historyBody").innerHTML=rows.length?rows.map(([issue,q])=>`<tr>
+    <td>#${esc(issue.slice(-6))}</td>
+    <td><span class="pill ${q.pick==="BIG"?"big":"small"}">${q.pick}</span></td>
+    <td>${q.actual}</td><td class="center">${q.actualNumber}</td>
+    <td class="right"><span class="pill ${q.win?"win":"loss"}">${q.win?"WIN":"LOSS"}</span></td>
+  </tr>`).join(""):`<tr><td colspan="5" class="center">Waiting for settled predictions…</td></tr>`;
+
+  $("engineMeta").textContent=`History ${history.length} · Feed gate ${CFG.requiredFeed} · Models ${MODEL_NAMES.length} · Leak-safe scoring`;
+}
+async function fetchFeed(){
+  const url=CFG.endpoint+"?ts="+Date.now();
+  const r=await fetch(url,{
+    cache:"no-store",
+    headers:{accept:"application/json, text/plain, */*"}
+  });
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  const j=await r.json();
+  return Array.isArray(j?.data?.list)?j.data.list:[];
+}
+
+let busy=false;
+async function tick(){
+  if(busy)return;
+  busy=true;
+  try{
+    const list=await fetchFeed();
+    const valid=list.map(normalize).filter(Boolean);
+    $("feedStatus").innerHTML=`<span class="ok">🟢 API connected · ${valid.length}/${CFG.requiredFeed} valid results</span>`;
+    if(valid.length){
+      const issue=valid[0].issue;
+      if(issue!==lastIssue){
+        lastIssue=issue;save(LS.lastIssue,lastIssue);
+        console.log("[REASONING v8.2] New issue",issue,new Date().toISOString());
+      }
+    }
+    try{
+      render(list);
+      if(valid.length<CFG.requiredFeed){
+        $("reason").textContent=`The API returned ${valid.length} valid result(s). The engine intentionally waits for ${CFG.requiredFeed} valid results before making a fresh decision.`;
+      }
+    }catch(renderErr){
+      console.error("[REASONING v8.2] render error",renderErr);
+      $("feedStatus").innerHTML=`<span class="bad">🟠 API connected · internal UI error · ${esc(renderErr?.message||"Render error")}</span>`;
+      $("reason").textContent="The API is responding; an internal UI function failed. The engine has not lost the feed.";
+    }
+  }catch(e){
+    console.warn("[REASONING v8.2] fetch error",e);
+    $("feedStatus").innerHTML=`<span class="bad">🔴 Feed error · ${esc(e?.message||"Unknown error")}</span>`;
+    $("reason").textContent="The feed request failed. The previous valid state is preserved.";
+  }finally{busy=false}
+}
+function updateCountdown(){
+  const s=CFG.periodSec-(Math.floor(Date.now()/1000)%CFG.periodSec);
+  $("countdown").textContent=String(s).padStart(2,"0");
+}
+$("clearBtn").onclick=()=>{if(confirm("Clear local learned history and prediction records?")){localStorage.removeItem(LS.history);localStorage.removeItem(LS.predictions);localStorage.removeItem(LS.metrics);localStorage.removeItem(LS.lastIssue);location.reload()}};
+$("exportBtn").onclick=()=>{
+  const data={engine:"WinGo AI Reasoning Engine v8.2",exported:new Date().toISOString(),history,predictions,metrics};
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));a.download="wingo-reasoning-v6-data.json";a.click();URL.revokeObjectURL(a.href);
+};
+
+tick();setInterval(tick,CFG.refresh);setInterval(updateCountdown,250);updateCountdown();
+</script>
+</body>
+</html>
