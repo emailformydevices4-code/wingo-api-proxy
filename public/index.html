@@ -299,11 +299,19 @@ function render(list){
 }
 
 async function tick(){
+  const status = document.getElementById("feedStatus");
+
   try{
-    const list=await fetchFeed();
+    const list = await fetchFeed();
     render(list);
+
+    status.textContent =
+      "🟢 Feed connected · " + list.length + " results";
   }catch(e){
-    console.warn("feed error",e);
+    console.warn("feed error", e);
+
+    status.textContent =
+      "🔴 Feed error · " + (e?.message || "Failed to fetch");
   }
 }
 
