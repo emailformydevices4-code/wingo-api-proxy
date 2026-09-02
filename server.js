@@ -22,9 +22,10 @@ async function fetchUpstream() {
     const response = await fetch(url, {
       cache: 'no-store',
       headers: {
-        accept: 'application/json,text/plain,*/*',
-        'user-agent': 'WinGo-Feed-Proxy/1.0'
-      },
+  accept: 'application/json, text/plain, */*',
+  'user-agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 Chrome/131.0.0.0 Mobile Safari/537.36',
+  'accept-language': 'en-US,en;q=0.9'
+},
       signal: AbortSignal.timeout(2500)
     });
 
