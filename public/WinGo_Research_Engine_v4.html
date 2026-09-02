@@ -1,0 +1,1324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WinGo 30s AI Predictor</title>
+<style>
+:root{
+  --bg:#f7fbf7;--card:#fff;--ink:#0f172a;--muted:#64748b;
+  --green:#16a34a;--red:#dc2626;--blue:#2563eb;
+  --line:#e5e7eb;--soft:#f1f5f9
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:520px;margin:auto;padding:16px 14px 40px}
+header{display:flex;justify-content:space-between;align-items:center;padding:10px 4px 14px}
+.logo{font-weight:800;font-size:20px;color:var(--green);font-style:italic}
+.avatar{width:32px;height:32px;border-radius:50%;background:#a7f3d0;
+display:grid;place-items:center;font-weight:700;color:#065f46}
+.card{background:var(--card);border-radius:18px;padding:18px 16px;
+margin-bottom:14px;box-shadow:0 8px 24px -18px #0002;border:1px solid #eef2f5}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+h2{margin:0 0 5px;font-size:17px}
+.sub{color:var(--muted);font-size:12.5px;margin-bottom:12px}
+.period{font-size:13px;color:var(--muted)}
+.period b{color:var(--ink)}
+.countdown{background:var(--soft);border-radius:999px;padding:6px 12px;
+font-size:12px;color:var(--muted)}
+.countdown b{color:var(--ink)}
+.pred-hero{text-align:center;padding:22px 0 12px}
+.label{font-size:12px;color:var(--muted);letter-spacing:.14em}
+.value{font-size:56px;font-weight:800;line-height:1;margin-top:6px}
+.value.big{color:var(--green)}
+.value.small{color:#6366f1}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.metric{background:#fff5f5;border:1px solid #ffe4e6;border-radius:12px;
+padding:10px;text-align:center}
+.metric.blue{background:#eff6ff;border-color:#dbeafe}
+.metric .k{font-size:11px;color:var(--muted);letter-spacing:.1em}
+.metric .v{font-weight:700;margin-top:2px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 10px}
+.stat{text-align:center;padding:8px 0}
+.stat .n{font-size:22px;font-weight:800}
+.g{color:var(--green)}.r{color:var(--red)}.b{color:var(--blue)}
+.stat .l{font-size:10.5px;color:var(--muted);letter-spacing:.14em}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-weight:600;color:var(--muted);text-align:left;padding:8px 6px;
+border-bottom:1px solid var(--line);font-size:12px}
+td{padding:9px 6px;border-bottom:1px solid #f1f5f9}
+.tcenter{text-align:center}.tright{text-align:right}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;
+font-size:11.5px;font-weight:700}
+.pill.big,.pill.win{background:#dcfce7;color:#166534}
+.pill.small{background:#e0e7ff;color:#3730a3}
+.pill.loss{background:#fee2e2;color:#991b1b}
+.num-ball{width:26px;height:26px;border-radius:50%;display:inline-grid;
+place-items:center;color:#fff;font-weight:700;font-size:12px}
+.n-red{background:#ef4444}.n-green{background:#22c55e}
+.n-violet{background:linear-gradient(135deg,#22c55e,#7c3aed)}
+.n-violet-red{background:linear-gradient(135deg,#ef4444,#7c3aed)}
+.balls{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.balls .num-ball{width:30px;height:30px;font-size:13px}
+.foot{color:var(--muted);font-size:11.5px;text-align:center;margin-top:8px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;
+display:inline-block;margin-right:6px}
+.timing-card{margin-top:14px}
+.timing-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.timing-grid .metric{background:#f8fafc;border-color:#e2e8f0}
+.timing-note{margin-top:10px;padding:10px 12px;border-radius:10px;
+  background:#f8fafc;color:var(--muted);font-size:11.5px;line-height:1.45}
+.timing-card{margin-top:14px}
+.timing-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.timing-grid .metric{background:#f8fafc;border-color:#e2e8f0}
+.timing-stats{margin:10px 0 4px}
+.timing-table-wrap{overflow-x:auto;margin-top:8px}
+.timing-table{font-size:11.5px}
+.timing-table th{font-size:10.5px;padding:7px 5px}
+.timing-table td{padding:7px 5px;white-space:nowrap}
+.timing-note{margin-top:10px;padding:10px 12px;border-radius:10px;
+  background:#f8fafc;color:var(--muted);font-size:11.5px;line-height:1.45}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<header>
+  <div class="logo">● Aᴋᴋɪ Bʜᴀɪ</div>
+  <div class="avatar">A</div>
+</header>
+
+<div class="card">
+  <div class="row">
+    <div class="period">Next period: <b id="nextPeriod">—</b></div>
+    <div class="countdown">
+      <span class="status-dot"></span>Next in <b id="countdown">--</b>s
+    </div>
+  </div>
+
+  <div class="pred-hero">
+    <div class="label">AI Prediction</div>
+    <div id="predValue" class="value big">—</div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="k">Confidence</div>
+      <div class="v" id="predConf">0%</div>
+    </div>
+    <div class="metric blue">
+      <div class="k">Model</div>
+      <div class="v">research.engine.v4</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="row">
+    <h2>Live Prediction History</h2>
+    <span class="sub">Auto-refresh 1s</span>
+  </div>
+
+  <div class="sub">Latest settled predictions from the feed</div>
+
+  <div class="stats">
+    <div class="stat"><div class="n g" id="wins">0</div><div class="l">Wins</div></div>
+    <div class="stat"><div class="n r" id="losses">0</div><div class="l">Losses</div></div>
+    <div class="stat"><div class="n b" id="winrate">0%</div><div class="l">Win rate</div></div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Period</th>
+        <th>Prediction</th>
+        <th>Actual</th>
+        <th class="tcenter">Number</th>
+        <th class="tright">Status</th>
+      </tr>
+    </thead>
+    <tbody id="histBody"></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Recent Game Results</h2>
+  <div class="sub">Latest numbers from the API feed</div>
+  <div class="balls" id="ballsRow"></div>
+</div>
+<div class="card timing-card">
+  <div class="row">
+    <h2>API Timing Monitor</h2>
+    <span class="sub" id="timingCount">0 samples</span>
+  </div>
+  <div class="sub">Browser-side measurements of when a new result first reaches this page.</div>
+
+  <div class="timing-grid">
+    <div class="metric blue">
+      <div class="k">LAST ISSUE</div>
+      <div class="v" id="timingIssue">—</div>
+    </div>
+    <div class="metric">
+      <div class="k">RESULT</div>
+      <div class="v" id="timingNumber">—</div>
+    </div>
+    <div class="metric blue">
+      <div class="k">DETECTED AT</div>
+      <div class="v" id="timingDetected">—</div>
+    </div>
+    <div class="metric">
+      <div class="k">COUNTDOWN</div>
+      <div class="v" id="timingCountdown">—</div>
+    </div>
+  </div>
+
+  <div class="stats timing-stats">
+    <div class="stat">
+      <div class="n b" id="timingAvg">—</div>
+      <div class="l">AVG</div>
+    </div>
+    <div class="stat">
+      <div class="n g" id="timingMin">—</div>
+      <div class="l">MIN</div>
+    </div>
+    <div class="stat">
+      <div class="n r" id="timingMax">—</div>
+      <div class="l">MAX</div>
+    </div>
+  </div>
+
+  <div class="timing-table-wrap">
+    <table class="timing-table">
+      <thead>
+        <tr>
+          <th>Issue</th>
+          <th>Result</th>
+          <th>Detected</th>
+          <th class="tright">Countdown</th>
+        </tr>
+      </thead>
+      <tbody id="timingBody">
+        <tr><td colspan="4" class="tcenter">Waiting for samples…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="timing-note" id="timingNote">
+    Waiting for a new issue…
+  </div>
+</div>
+
+<div class="foot">
+  Data source: public result feed · Research/statistical analysis only; no outcome is guaranteed.
+  <br>
+  <span id="feedStatus">🔄 Checking feed…</span>
+</div>
+
+
+</div>
+
+<script>
+const REFRESH_MS=1000;
+const PERIOD_SEC=30;
+
+const bigSmall=n=>Number(n)>=5?"BIG":"SMALL";
+
+function colorClass(c){
+  if(!c)return"n-green";
+  c=String(c).toLowerCase();
+  if(c.includes("red")&&c.includes("violet"))return"n-violet-red";
+  if(c.includes("green")&&c.includes("violet"))return"n-violet";
+  if(c.includes("red"))return"n-red";
+  return"n-green";
+}
+
+let lastDetectedIssue = null;
+let lastDetectedAt = 0;
+
+const TIMING_KEY = "wingo_api_timing_v4";
+const LAST_ISSUE_KEY = "wingo_api_last_issue_v3";
+const MAX_TIMING_SAMPLES = 30;
+
+// The first detection after opening the page is treated as an initialization
+// sample and is excluded from clean timing statistics.
+let sessionFirstDetection = true;
+
+let timingSamples = [];
+try{
+  const saved = JSON.parse(localStorage.getItem(TIMING_KEY) || "[]");
+  if(Array.isArray(saved)) timingSamples = saved.slice(-MAX_TIMING_SAMPLES);
+}catch(e){
+  console.warn("timing storage read error", e);
+}
+
+try{
+  lastDetectedIssue = localStorage.getItem(LAST_ISSUE_KEY) || null;
+}catch(e){
+  console.warn("last issue storage read error", e);
+}
+
+function currentCountdown(){
+  return PERIOD_SEC-(Math.floor(Date.now()/1000)%PERIOD_SEC);
+}
+
+function saveTimingSamples(){
+  try{
+    localStorage.setItem(TIMING_KEY, JSON.stringify(timingSamples));
+  }catch(e){
+    console.warn("timing storage write error", e);
+  }
+}
+
+function renderTimingMonitor(){
+  const count = document.getElementById("timingCount");
+  const issue = document.getElementById("timingIssue");
+  const number = document.getElementById("timingNumber");
+  const detected = document.getElementById("timingDetected");
+  const countdown = document.getElementById("timingCountdown");
+  const avg = document.getElementById("timingAvg");
+  const min = document.getElementById("timingMin");
+  const max = document.getElementById("timingMax");
+  const body = document.getElementById("timingBody");
+  const note = document.getElementById("timingNote");
+
+  const cleanCount = timingSamples.filter(x => x.clean === true).length;
+  if(count) count.textContent =
+    timingSamples.length + " samples · " + cleanCount + " clean";
+
+  const last = timingSamples[timingSamples.length-1];
+
+  if(!last){
+    if(body) body.innerHTML =
+      '<tr><td colspan="4" class="tcenter">Waiting for samples…</td></tr>';
+    if(note) note.textContent = "Waiting for a new issue…";
+    return;
+  }
+
+  if(issue) issue.textContent = last.issue;
+  if(number) number.textContent = last.number ?? "—";
+  if(detected) detected.textContent = new Date(last.detectedAt).toLocaleTimeString();
+  if(countdown) countdown.textContent = last.countdown + "s";
+
+  // Only clean samples are used for AVG / MIN / MAX.
+  const cleanValues = timingSamples
+    .filter(x => x.clean === true)
+    .map(x => Number(x.countdown))
+    .filter(Number.isFinite);
+
+  if(cleanValues.length){
+    const sum = cleanValues.reduce((a,b)=>a+b,0);
+    if(avg) avg.textContent = Math.round(sum/cleanValues.length) + "s";
+    if(min) min.textContent = Math.min(...cleanValues) + "s";
+    if(max) max.textContent = Math.max(...cleanValues) + "s";
+  }else{
+    if(avg) avg.textContent = "—";
+    if(min) min.textContent = "—";
+    if(max) max.textContent = "—";
+  }
+
+  if(body){
+    body.innerHTML = timingSamples.slice().reverse().slice(0,10).map(s => `
+      <tr>
+        <td>#${String(s.issue).slice(-4)}</td>
+        <td>${s.number ?? "—"}</td>
+        <td>${new Date(s.detectedAt).toLocaleTimeString()}</td>
+        <td class="tright">${s.countdown}s${s.clean ? "" : " *"}</td>
+      </tr>
+    `).join("");
+  }
+
+  if(note){
+    note.innerHTML =
+      "<b>Clean statistics:</b> the first detection after opening the page is excluded. " +
+      "Only subsequent uninterrupted detections are used for AVG / MIN / MAX. " +
+      "The countdown is measured against this page's 30-second cycle; it is not the official website's publication delay.";
+  }
+}
+
+renderTimingMonitor();
+
+async function fetchFeed(){
+  const detectedAt = Date.now();
+
+  const url =
+    "https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json?ts="
+    + detectedAt;
+
+  const r = await fetch(url, {
+    cache: "no-store",
+    headers: {
+      accept: "application/json, text/plain, */*"
+    }
+  });
+
+  if(!r.ok) throw new Error("HTTP " + r.status);
+
+  const j = await r.json();
+  const list = j?.data?.list || [];
+
+  if(list.length){
+    const issue = String(list[0].issueNumber);
+
+    if(issue !== lastDetectedIssue){
+      lastDetectedIssue = issue;
+      lastDetectedAt = Date.now();
+
+      try{
+        localStorage.setItem(LAST_ISSUE_KEY, issue);
+      }catch(e){
+        console.warn("last issue storage write error", e);
+      }
+
+      const countdownAtDetection = currentCountdown();
+
+      const sample = {
+        issue,
+        number: list[0].number,
+        detectedAt: lastDetectedAt,
+        detectedIso: new Date(lastDetectedAt).toISOString(),
+        countdown: countdownAtDetection,
+        clean: !sessionFirstDetection
+      };
+
+      sessionFirstDetection = false;
+
+      timingSamples.push(sample);
+      timingSamples = timingSamples.slice(-MAX_TIMING_SAMPLES);
+      saveTimingSamples();
+      renderTimingMonitor();
+
+      console.log(
+        "[TIMING] New issue detected:",
+        issue,
+        "at",
+        sample.detectedIso,
+        "number:",
+        list[0].number,
+        "countdown:",
+        countdownAtDetection + "s"
+      );
+
+      const status = document.getElementById("feedStatus");
+
+      if(status){
+        status.textContent =
+          "🟢 New result detected · " +
+          issue +
+          " · " +
+          new Date(lastDetectedAt).toLocaleTimeString();
+      }
+    }
+  }
+
+  return list;
+}
+
+
+
+/* ==========================================================
+   WIN GO RESEARCH ENGINE v4
+   - Requires a complete 10-result API snapshot before analysis
+   - Maintains chronological local history
+   - Multi-order Markov for BIG/SMALL and exact digits
+   - Dragon/streak state analysis
+   - Alternation / transition analysis
+   - Recency-weighted frequency
+   - Walk-forward online validation
+   - Adaptive component weighting from past performance
+   - Calibration-aware confidence
+   - Randomness diagnostics (runs + lag autocorrelation)
+   - Strict no-look-ahead prediction locking
+   ========================================================== */
+
+const MODEL = Object.freeze({
+  requiredFeedSize: 10,
+  minHistoryForLearning: 20,
+  maxHistory: 5000,
+  maxStoredPredictions: 1000,
+  markovOrders: [1,2,3],
+  windows: [10,20,50,100],
+  baseWeights: {
+    markov1: 0.18,
+    markov2: 0.24,
+    markov3: 0.18,
+    digitMarkov: 0.12,
+    frequency: 0.10,
+    dragon: 0.08,
+    alternation: 0.05,
+    regime: 0.05
+  }
+});
+
+const STORAGE = {
+  history: "wingo_research_history_v4",
+  predictions: "wingo_research_predictions_v4",
+  metrics: "wingo_research_metrics_v4"
+};
+
+function loadJSON(key, fallback){
+  try{
+    const v = JSON.parse(localStorage.getItem(key));
+    return v ?? fallback;
+  }catch{
+    return fallback;
+  }
+}
+
+const state = {
+  history: loadJSON(STORAGE.history, []),
+  predictions: new Map(Object.entries(loadJSON(STORAGE.predictions, {}))),
+  metrics: loadJSON(STORAGE.metrics, {
+    total:0, wins:0, losses:0,
+    byComponent:{},
+    confidenceBuckets:{
+      "50-54":{n:0,w:0},
+      "55-59":{n:0,w:0},
+      "60-69":{n:0,w:0},
+      "70-79":{n:0,w:0},
+      "80-95":{n:0,w:0}
+    }
+  }),
+  currentSnapshotKey: null,
+  lastAnalysis: null
+};
+
+function persist(){
+  localStorage.setItem(STORAGE.history, JSON.stringify(state.history.slice(-MODEL.maxHistory)));
+  localStorage.setItem(STORAGE.predictions, JSON.stringify(Object.fromEntries(
+    [...state.predictions.entries()].slice(-MODEL.maxStoredPredictions)
+  )));
+  localStorage.setItem(STORAGE.metrics, JSON.stringify(state.metrics));
+}
+
+function num(v){
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function normalizeResult(raw){
+  const issue = String(raw?.issueNumber ?? "");
+  const number = num(raw?.number);
+  if(!issue || number === null || number < 0 || number > 9) return null;
+
+  return {
+    issue,
+    number: Math.trunc(number),
+    side: bigSmall(number),
+    color: raw?.color ? String(raw.color) : "",
+    observedAt: Date.now()
+  };
+}
+
+function chronological(list){
+  return list.slice().reverse();
+}
+
+function ensureCompleteSnapshot(list){
+  if(!Array.isArray(list) || list.length < MODEL.requiredFeedSize) return null;
+
+  const normalized = list
+    .slice(0, MODEL.requiredFeedSize)
+    .map(normalizeResult)
+    .filter(Boolean);
+
+  if(normalized.length !== MODEL.requiredFeedSize) return null;
+
+  const issues = new Set(normalized.map(x=>x.issue));
+  if(issues.size !== MODEL.requiredFeedSize) return null;
+
+  return normalized;
+}
+
+function mergeHistory(snapshot){
+  let changed = false;
+
+  for(const item of chronological(snapshot)){
+    const idx = state.history.findIndex(x => x.issue === item.issue);
+
+    if(idx === -1){
+      state.history.push(item);
+      changed = true;
+    }else if(state.history[idx].number !== item.number){
+      // A settled result should not normally change. If it does,
+      // replace it and mark the data source as corrected.
+      state.history[idx] = {...state.history[idx], ...item, corrected:true};
+      changed = true;
+    }
+  }
+
+  state.history.sort((a,b)=>{
+    try { return BigInt(a.issue) < BigInt(b.issue) ? -1 : 1; }
+    catch { return String(a.issue).localeCompare(String(b.issue)); }
+  });
+
+  if(state.history.length > MODEL.maxHistory){
+    state.history = state.history.slice(-MODEL.maxHistory);
+    changed = true;
+  }
+
+  if(changed) persist();
+  return changed;
+}
+
+/* ---------- Probability helpers ---------- */
+
+function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+
+function entropyBinary(p){
+  if(p <= 0 || p >= 1) return 0;
+  return -(p*Math.log2(p) + (1-p)*Math.log2(1-p));
+}
+
+function confidenceFromProbability(p){
+  return Math.round(clamp(50 + Math.abs(p-.5)*100, 50, 95));
+}
+
+/* ---------- Markov: BIG/SMALL ---------- */
+
+function markovBinary(sequence, order){
+  if(sequence.length <= order) return null;
+
+  const counts = new Map();
+
+  for(let i=order;i<sequence.length;i++){
+    const key = sequence.slice(i-order,i).join("|");
+    const next = sequence[i];
+
+    if(!counts.has(key)) counts.set(key,{BIG:0,SMALL:0});
+    counts.get(key)[next]++;
+  }
+
+  const key = sequence.slice(-order).join("|");
+  const row = counts.get(key);
+  if(!row) return null;
+
+  const total = row.BIG + row.SMALL;
+  if(!total) return null;
+
+  // Laplace smoothing avoids zero-probability states.
+  const pBig = (row.BIG + 1) / (total + 2);
+
+  return {
+    order,
+    pBig,
+    pick:pBig>=.5?"BIG":"SMALL",
+    samples:total,
+    rawBig:row.BIG,
+    rawSmall:row.SMALL,
+    confidence:Math.abs(pBig-.5)*2
+  };
+}
+
+/* ---------- Markov: exact digit ---------- */
+
+function markovDigit(sequence, order){
+  if(sequence.length <= order) return null;
+
+  const counts = new Map();
+
+  for(let i=order;i<sequence.length;i++){
+    const key = sequence.slice(i-order,i).join("|");
+    const next = sequence[i];
+
+    if(!counts.has(key)) counts.set(key, Array(10).fill(0));
+    counts.get(key)[next]++;
+  }
+
+  const key = sequence.slice(-order).join("|");
+  const row = counts.get(key);
+  if(!row) return null;
+
+  const total = row.reduce((a,b)=>a+b,0);
+  if(!total) return null;
+
+  const probs = row.map(c => (c+1)/(total+10));
+  let digit = 0;
+
+  for(let d=1;d<10;d++){
+    if(probs[d] > probs[digit]) digit=d;
+  }
+
+  return {order, digit, probability:probs[digit], samples:total, probs};
+}
+
+/* ---------- Frequency / recency ---------- */
+
+function frequencySignal(sequence, windowSize){
+  const win = sequence.slice(-Math.min(windowSize,sequence.length));
+  if(!win.length) return null;
+
+  const big = win.filter(x=>x==="BIG").length;
+  const pBig = big/win.length;
+
+  return {
+    window:win.length,
+    pBig,
+    pick:pBig>=.5?"BIG":"SMALL",
+    confidence:Math.abs(pBig-.5)*2
+  };
+}
+
+/* ---------- Dragon / streak state ---------- */
+
+function dragonSignal(sequence){
+  if(!sequence.length) return null;
+
+  const last = sequence.at(-1);
+  let streak = 1;
+
+  for(let i=sequence.length-2;i>=0;i--){
+    if(sequence[i]===last) streak++;
+    else break;
+  }
+
+  // Dragon is a STATE, not a forced reversal rule.
+  // The model learns continuation/reversal historically below.
+  const threshold = 4;
+  const isDragon = streak >= threshold;
+
+  let continuation = .5;
+  let matched = 0;
+
+  // Search historical occurrences of the same streak length/state
+  // and measure what happened immediately afterward.
+  for(let i=streak;i<sequence.length-1;i++){
+    let s=1;
+    for(let j=i-1;j>=0 && sequence[j]===sequence[i-1];j--) s++;
+    if(s===streak && sequence[i-1]===last){
+      matched++;
+      if(sequence[i]===last) continuation++;
+      else continuation--;
+    }
+  }
+
+  if(matched){
+    // Convert centered continuation signal back into probability.
+    continuation = clamp(0.5 + continuation/(2*matched),0.05,0.95);
+  }else{
+    // No historical evidence: remain neutral.
+    continuation = .5;
+  }
+
+  return {
+    last,
+    streak,
+    isDragon,
+    matched,
+    pBig: last==="BIG" ? continuation : 1-continuation,
+    continuation
+  };
+}
+
+/* ---------- Alternation / regime ---------- */
+
+function alternationSignal(sequence){
+  if(sequence.length < 4) return null;
+
+  const w=sequence.slice(-10);
+  let switches=0;
+
+  for(let i=1;i<w.length;i++){
+    if(w[i]!==w[i-1]) switches++;
+  }
+
+  const rate=switches/Math.max(1,w.length-1);
+  const last=w.at(-1);
+
+  // If alternation is strong, continuation means switching side.
+  if(rate>=0.7){
+    return {
+      pBig:last==="BIG" ? 0.25 : 0.75,
+      confidence:(rate-.5)*1.5,
+      state:"ALTERNATING"
+    };
+  }
+
+  if(rate<=0.3){
+    return {
+      pBig:last==="BIG" ? 0.60 : 0.40,
+      confidence:(.5-rate)*0.5,
+      state:"CLUSTERING"
+    };
+  }
+
+  return {pBig:.5,confidence:0,state:"NEUTRAL"};
+}
+
+function regimeSignal(sequence){
+  if(sequence.length < 20) return null;
+
+  const recent=sequence.slice(-10);
+  const older=sequence.slice(-20,-10);
+
+  const recentBig=recent.filter(x=>x==="BIG").length/10;
+  const olderBig=older.filter(x=>x==="BIG").length/10;
+  const shift=recentBig-olderBig;
+
+  // Only a modest adjustment; regime detection must not dominate.
+  const pBig=clamp(.5 + shift*.25,.25,.75);
+
+  return {
+    recentBig,
+    olderBig,
+    shift,
+    pBig,
+    confidence:Math.abs(shift)*.5
+  };
+}
+
+/* ---------- Randomness diagnostics ---------- */
+
+function runsTest(sequence){
+  if(sequence.length < 10) return null;
+
+  let runs=1;
+  for(let i=1;i<sequence.length;i++){
+    if(sequence[i]!==sequence[i-1]) runs++;
+  }
+
+  const n1=sequence.filter(x=>x==="BIG").length;
+  const n2=sequence.length-n1;
+
+  if(n1===0 || n2===0) return {runs,z:0,pApprox:1};
+
+  const mean=(2*n1*n2)/(n1+n2)+1;
+  const variance=
+    (2*n1*n2*(2*n1*n2-n1-n2)) /
+    (((n1+n2)**2)*(n1+n2-1));
+
+  const sd=Math.sqrt(Math.max(variance,1e-9));
+  const z=(runs-mean)/sd;
+
+  // Normal-tail approximation using erf.
+  const erf=x=>{
+    const sign=x<0?-1:1;
+    x=Math.abs(x);
+    const a1=.254829592,a2=-.284496736,a3=1.421413741;
+    const a4=-1.453152027,a5=1.061405429,p=.3275911;
+    const t=1/(1+p*x);
+    const y=1-((((a5*t+a4)*t+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);
+    return sign*y;
+  };
+
+  const pApprox=1-erf(Math.abs(z)/Math.SQRT2);
+
+  return {runs,z,pApprox};
+}
+
+function lagCorrelation(sequence, lag=1){
+  if(sequence.length<=lag+2) return null;
+
+  const x=sequence.map(v=>v==="BIG"?1:0);
+  const a=x.slice(lag);
+  const b=x.slice(0,-lag);
+
+  const ma=a.reduce((s,v)=>s+v,0)/a.length;
+  const mb=b.reduce((s,v)=>s+v,0)/b.length;
+
+  let num=0,da=0,db=0;
+  for(let i=0;i<a.length;i++){
+    const xa=a[i]-ma, xb=b[i]-mb;
+    num+=xa*xb; da+=xa*xa; db+=xb*xb;
+  }
+
+  return da&&db ? num/Math.sqrt(da*db) : 0;
+}
+
+/* ---------- Adaptive model weighting ---------- */
+
+function componentAccuracy(name){
+  const s=state.metrics.byComponent[name];
+  if(!s || s.n<20) return null;
+  return s.w/s.n;
+}
+
+function adaptiveWeight(name){
+  const base=MODEL.baseWeights[name] ?? .05;
+  const acc=componentAccuracy(name);
+
+  // Until enough observations exist, retain the research prior.
+  if(acc===null) return base;
+
+  // Shrink toward the 50% baseline to avoid overreacting to small samples.
+  const edge=(acc-.5)*0.6;
+  return Math.max(.02,base*(1+edge*10));
+}
+
+function normalizedWeights(names){
+  const raw=names.map(name=>[name,adaptiveWeight(name)]);
+  const total=raw.reduce((s,x)=>s+x[1],0);
+  return Object.fromEntries(raw.map(([n,w])=>[n,w/total]));
+}
+
+/* ---------- Full analysis ---------- */
+
+function analyze(history){
+  const usable=history.slice(-MODEL.maxHistory);
+  const sequence=usable.map(x=>x.side);
+  const digits=usable.map(x=>x.number);
+
+  if(sequence.length < MODEL.minHistoryForLearning){
+    return {
+      ready:false,
+      pick:"—",
+      confidence:0,
+      level:"COLLECTING HISTORY",
+      pBig:.5,
+      agreement:0,
+      markov:[],
+      digitMarkov:[],
+      frequency:null,
+      dragon:null,
+      alternation:null,
+      regime:null,
+      randomness:null
+    };
+  }
+
+  const signals=[];
+  const markov=[];
+
+  for(const order of MODEL.markovOrders){
+    const m=markovBinary(sequence,order);
+    if(!m || m.samples<2) continue;
+
+    const name=`markov${order}`;
+    markov.push(m);
+    signals.push({name,pBig:m.pBig,confidence:m.confidence,samples:m.samples});
+  }
+
+  const digitMarkov=[];
+  for(const order of MODEL.markovOrders){
+    const d=markovDigit(digits,order);
+    if(d) digitMarkov.push(d);
+  }
+
+  const frequency=frequencySignal(sequence,10);
+  if(frequency){
+    signals.push({
+      name:"frequency",
+      pBig:frequency.pBig,
+      confidence:frequency.confidence,
+      samples:frequency.window
+    });
+  }
+
+  const dragon=dragonSignal(sequence);
+  if(dragon && dragon.isDragon && dragon.matched>=3){
+    signals.push({
+      name:"dragon",
+      pBig:dragon.pBig,
+      confidence:Math.min(.35,dragon.matched/30),
+      samples:dragon.matched
+    });
+  }
+
+  const alternation=alternationSignal(sequence);
+  if(alternation && alternation.confidence>0){
+    signals.push({
+      name:"alternation",
+      pBig:alternation.pBig,
+      confidence:alternation.confidence,
+      samples:10
+    });
+  }
+
+  const regime=regimeSignal(sequence);
+  if(regime && regime.confidence>0){
+    signals.push({
+      name:"regime",
+      pBig:regime.pBig,
+      confidence:regime.confidence,
+      samples:20
+    });
+  }
+
+  const weights=normalizedWeights(signals.map(s=>s.name));
+
+  let pBig=.5;
+  let weightTotal=0;
+
+  for(const s of signals){
+    const w=weights[s.name]*Math.max(.15,s.confidence);
+    pBig += (s.pBig-.5)*w;
+    weightTotal += w;
+  }
+
+  if(weightTotal>0){
+    pBig=clamp(pBig,.01,.99);
+  }
+
+  const pick=pBig>=.5?"BIG":"SMALL";
+  const confidence=confidenceFromProbability(pBig);
+
+  const votes=signals.map(s=>s.pBig>=.5?"BIG":"SMALL");
+  const agreement=votes.length
+    ? Math.round(Math.max(
+        votes.filter(x=>x==="BIG").length,
+        votes.filter(x=>x==="SMALL").length
+      )*100/votes.length)
+    : 0;
+
+  const randomness={
+    runs:runsTest(sequence),
+    lag1:lagCorrelation(sequence,1),
+    lag2:lagCorrelation(sequence,2)
+  };
+
+  let level="LOW";
+  if(agreement>=75 && confidence>=65) level="HIGH";
+  else if(agreement>=60 && confidence>=57) level="MEDIUM";
+
+  // If diagnostics look close to random, explicitly suppress confidence.
+  const nearRandom =
+    randomness.runs &&
+    randomness.runs.pApprox > .10 &&
+    Math.abs(randomness.lag1 ?? 0) < .20;
+
+  if(nearRandom && confidence>65){
+    level="LOW";
+  }
+
+  return {
+    ready:true,
+    pick,
+    confidence,
+    level,
+    pBig,
+    agreement,
+    markov,
+    digitMarkov,
+    frequency,
+    dragon,
+    alternation,
+    regime,
+    randomness,
+    weights,
+    signals,
+    entropy:entropyBinary(pBig)
+  };
+}
+
+function predictNext(history){
+  const a=analyze(history);
+
+  if(!a.ready){
+    return {
+      pick:"—",
+      conf:0,
+      analysis:a,
+      locked:false,
+      createdAt:Date.now()
+    };
+  }
+
+  // Best exact-number candidate comes from the highest-order digit
+  // model with enough matching samples; otherwise aggregate digit models.
+  let digit=null;
+
+  const candidates=a.digitMarkov.filter(x=>x.samples>=2);
+  if(candidates.length){
+    candidates.sort((x,y)=>{
+      if(y.order!==x.order) return y.order-x.order;
+      return y.probability-x.probability;
+    });
+    digit=candidates[0].digit;
+  }
+
+  // Ensure the exact digit agrees with the side when possible.
+  if(digit!==null){
+    const digitSide=bigSmall(digit);
+    if(digitSide!==a.pick){
+      const sideDigits=a.pick==="BIG"?[5,6,7,8,9]:[0,1,2,3,4];
+      const ranked=a.digitMarkov
+        .flatMap(x=>x.probs.map((p,d)=>({p,d})))
+        .filter(x=>sideDigits.includes(x.d))
+        .sort((x,y)=>y.p-x.p);
+      if(ranked.length) digit=ranked[0].d;
+    }
+  }
+
+  return {
+    pick:a.pick,
+    conf:a.confidence,
+    digit,
+    analysis:a,
+    locked:true,
+    createdAt:Date.now()
+  };
+}
+
+const predictions=state.predictions;
+
+function nextPeriod(issue){
+  try{return(BigInt(issue)+1n).toString()}
+  catch{return issue+"+1"}
+}
+
+
+function saveModelStats(){
+  localStorage.setItem("wingo_model_stats_v5", JSON.stringify(state.modelStats));
+}
+
+function renderAnalysis(a){
+  const level = document.getElementById("modelLevel");
+  const agreement = document.getElementById("agreement");
+  const m1 = document.getElementById("m1");
+  const m2 = document.getElementById("m2");
+  const text = document.getElementById("analysisText");
+
+  if(!a || !a.markov){
+    if(level) level.textContent = "Waiting";
+    return;
+  }
+
+  if(level) level.textContent = a.level;
+  if(agreement) agreement.textContent = a.agreement + "%";
+
+  const one = a.markov.find(x => x.order === 1);
+  const two = a.markov.find(x => x.order === 2);
+
+  if(m1) m1.textContent = one ? one.pick : "—";
+  if(m2) m2.textContent = two ? two.pick : "—";
+
+  const freq = a.frequency ? `Freq ${a.frequency.pick}` : "Freq —";
+  const streak = a.streak ? `Streak ${a.streak.streak}` : "Streak —";
+
+  if(text){
+    text.textContent =
+      `${freq} · ${streak} · ${a.markov.length} Markov orders available · ` +
+      `P(BIG) ${Math.round(a.pBig*100)}% · ensemble ${a.pick} · ` +
+      `confidence ${a.confidence}%`;
+  }
+}
+
+
+function scorePrediction(period, actualNumber){
+  const key=String(period);
+  const pred=state.predictions.get(key);
+  if(!pred || pred.settled) return;
+
+  const actualSide=bigSmall(actualNumber);
+  pred.settled=true;
+  pred.actual=actualSide;
+  pred.actualNumber=Number(actualNumber);
+  pred.win=pred.pick===actualSide;
+
+  state.metrics.total++;
+  if(pred.win) state.metrics.wins++;
+  else state.metrics.losses++;
+
+  const bucket =
+    pred.conf<55 ? "50-54" :
+    pred.conf<60 ? "55-59" :
+    pred.conf<70 ? "60-69" :
+    pred.conf<80 ? "70-79" : "80-95";
+
+  state.metrics.confidenceBuckets[bucket].n++;
+  if(pred.win) state.metrics.confidenceBuckets[bucket].w++;
+
+  // Update component scores using each component's frozen prediction
+  // from the moment the target prediction was created.
+  for(const [name,side] of Object.entries(pred.componentPicks || {})){
+    if(!state.metrics.byComponent[name])
+      state.metrics.byComponent[name]={n:0,w:0};
+    state.metrics.byComponent[name].n++;
+    if(side===actualSide) state.metrics.byComponent[name].w++;
+  }
+
+  persist();
+}
+
+function renderDiagnostics(a){
+  const level=document.getElementById("modelLevel");
+  const agreement=document.getElementById("agreement");
+  const historySize=document.getElementById("historySize");
+  const pBig=document.getElementById("pBig");
+  const text=document.getElementById("analysisText");
+  const details=document.getElementById("analysisDetails");
+
+  if(historySize) historySize.textContent=state.history.length;
+
+  if(!a || !a.ready){
+    if(level) level.textContent="COLLECTING";
+    if(agreement) agreement.textContent="0%";
+    if(pBig) pBig.textContent="50%";
+    if(text) text.textContent=
+      `Need ${MODEL.minHistoryForLearning} historical results before adaptive learning. `+
+      `Current history: ${state.history.length}.`;
+    if(details) details.textContent="";
+    return;
+  }
+
+  if(level) level.textContent=a.level;
+  if(agreement) agreement.textContent=a.agreement+"%";
+  if(pBig) pBig.textContent=Math.round(a.pBig*100)+"%";
+
+  const dragon=a.dragon?.isDragon
+    ? `Dragon ${a.dragon.last}×${a.dragon.streak} (${a.dragon.matched} historical matches)`
+    : "Dragon: none";
+
+  const lag=a.randomness?.lag1;
+  const lagText=Number.isFinite(lag) ? `lag1 ${lag.toFixed(2)}` : "lag1 —";
+
+  if(text){
+    text.textContent=
+      `Ensemble ${a.pick} · ${a.confidence}% · `+
+      `agreement ${a.agreement}% · ${dragon} · ${lagText}`;
+  }
+
+  if(details){
+    const mk=a.markov.map(m=>`M${m.order}:${m.pick} ${Math.round(m.pBig*100)}%/${m.samples}`).join(" · ");
+    const freq=a.frequency ? `Freq:${Math.round(a.frequency.pBig*100)}%` : "Freq:—";
+    const reg=a.regime ? `Regime:${Math.round(a.regime.pBig*100)}%` : "Regime:—";
+    details.textContent=`${mk || "Markov:—"} · ${freq} · ${reg}`;
+  }
+}
+
+function render(list){
+  const snapshot=ensureCompleteSnapshot(list);
+
+  // Hard gate: never predict until all 10 API records are valid.
+  if(!snapshot){
+    document.getElementById("feedStatus").textContent=
+      "🟡 Waiting for complete 10-result snapshot…";
+    renderDiagnostics({ready:false});
+    return;
+  }
+
+  const latest=snapshot[0];
+  const next=nextPeriod(latest.issue);
+
+  mergeHistory(snapshot);
+
+  // Close the previous prediction ONLY after the actual target issue exists.
+  const latestIssue=String(latest.issue);
+  if(state.predictions.has(latestIssue)){
+    scorePrediction(latestIssue,latest.number);
+  }
+
+  // The target prediction is frozen once generated.
+  if(!state.predictions.has(next)){
+    const pred=predictNext(state.history);
+
+    if(pred.locked){
+      const componentPicks={};
+
+      for(const s of pred.analysis.signals){
+        componentPicks[s.name]=s.pBig>=.5?"BIG":"SMALL";
+      }
+
+      state.predictions.set(next,{
+        ...pred,
+        targetPeriod:next,
+        sourceLatestIssue:latestIssue,
+        sourceSnapshot:snapshot.map(x=>x.issue),
+        componentPicks
+      });
+
+      persist();
+    }
+  }
+
+  const cur=state.predictions.get(next);
+  if(!cur || !cur.locked){
+    document.getElementById("nextPeriod").textContent=next;
+    document.getElementById("predValue").textContent="—";
+    document.getElementById("predConf").textContent="0%";
+    renderDiagnostics(cur?.analysis);
+    return;
+  }
+
+  document.getElementById("nextPeriod").textContent=next;
+
+  const value=document.getElementById("predValue");
+  value.textContent=cur.pick;
+  value.className="value "+(cur.pick==="BIG"?"big":"small");
+
+  document.getElementById("predConf").textContent=cur.conf+"%";
+
+  // Show exact-number candidate when the model has enough evidence.
+  const numberMetric=document.getElementById("predNumberMetric");
+  if(numberMetric){
+    numberMetric.textContent=cur.digit===null ? "—" : String(cur.digit);
+  }
+
+  renderDiagnostics(cur.analysis);
+
+  const settled=snapshot
+    .filter(x=>state.predictions.has(String(x.issue)))
+    .slice(0,10);
+
+  const rows=settled.map(row=>{
+    const pred=state.predictions.get(String(row.issue));
+    const actual=bigSmall(row.number);
+    const win=pred.pick===actual;
+
+    return `<tr>
+      <td>#${String(row.issue).slice(-4)}</td>
+      <td><span class="pill ${pred.pick==="BIG"?"big":"small"}">${pred.pick}</span></td>
+      <td><span class="pill ${actual==="BIG"?"big":"small"}">${actual}</span></td>
+      <td class="tcenter">
+        <span class="num-ball ${colorClass(row.color)}">${row.number}</span>
+      </td>
+      <td class="tright">
+        <span class="pill ${win?"win":"loss"}">${win?"WIN":"LOSS"}</span>
+      </td>
+    </tr>`;
+  }).join("");
+
+  document.getElementById("histBody").innerHTML=rows ||
+    `<tr><td colspan="5" class="tcenter">Waiting for settled predictions…</td></tr>`;
+
+  document.getElementById("wins").textContent=state.metrics.wins;
+  document.getElementById("losses").textContent=state.metrics.losses;
+
+  const total=state.metrics.total;
+  document.getElementById("winrate").textContent=
+    total ? Math.round(state.metrics.wins*100/total)+"%" : "0%";
+
+  document.getElementById("ballsRow").innerHTML=
+    snapshot.map(r=>
+      `<span class="num-ball ${colorClass(r.color)}">${r.number}</span>`
+    ).join("");
+}
+
+async function tick(){
+  const status = document.getElementById("feedStatus");
+
+  try{
+    const list = await fetchFeed();
+    render(list);
+
+    status.textContent =
+      "🟢 Feed connected · " + list.length + " results";
+  }catch(e){
+    console.warn("feed error", e);
+
+    status.textContent =
+      "🔴 Feed error · " + (e?.message || "Failed to fetch");
+  }
+}
+
+function updateCountdown(){
+  const s=currentCountdown();
+  document.getElementById("countdown").textContent=
+    String(s).padStart(2,"0");
+
+  const last = timingSamples[timingSamples.length-1];
+  const timingCountdown = document.getElementById("timingCountdown");
+
+  if(timingCountdown && last){
+    timingCountdown.textContent = last.countdown + "s";
+  }
+}
+
+tick();
+setInterval(tick,REFRESH_MS);
+setInterval(updateCountdown,250);
+updateCountdown();
+</script>
+</body>
+</html>
