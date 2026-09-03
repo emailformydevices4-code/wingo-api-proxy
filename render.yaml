@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: wingo-house-ai
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SERVER_COLLECTOR_ENABLED
+        value: "false"
+      - key: POLL_MS
+        value: "1000"
+      - key: PERIOD_SEC
+        value: "30"
+      - key: MAX_HISTORY
+        value: "10000"
+      - key: TIMING_LIMIT
+        value: "5000"
+      - key: UPSTREAM_URL
+        value: https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json
