@@ -1,0 +1,16 @@
+{
+  "name": "wingo-house-ai-v12",
+  "version": "2.2.0",
+  "private": true,
+  "description": "House research ledger, Big/Small behavioural analysis, timing telemetry and CSPRNG reference audit",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "pg": "^8.16.3"
+  }
+}
