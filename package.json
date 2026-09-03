@@ -1,0 +1,10 @@
+{
+  "name": "wingo-house-ai-v11",
+  "version": "11.0.0",
+  "private": true,
+  "description": "WinGo house-side research API with PostgreSQL ledger, timing telemetry, and CSPRNG reference audit",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": { "pg": "^8.16.3" }
+}
