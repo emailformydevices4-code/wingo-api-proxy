@@ -1,0 +1,1386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WinGo AI Autonomous Deep Analysis v10 · Ingestion Bridge</title>
+<style>
+:root{--bg:#f6faf7;--card:#fff;--ink:#0f172a;--muted:#64748b;--green:#16a34a;--red:#dc2626;--blue:#2563eb;--violet:#6366f1;--line:#e5e7eb;--soft:#f1f5f9;--amber:#d97706}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:560px;margin:auto;padding:14px 12px 42px}.card{background:var(--card);border:1px solid #edf1f3;border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 8px 24px -20px #0005}
+header{display:flex;justify-content:space-between;align-items:center;padding:7px 4px 14px}.logo{font-weight:900;font-size:19px;color:var(--green);font-style:italic}.avatar{width:32px;height:32px;border-radius:50%;background:#bbf7d0;display:grid;place-items:center;font-weight:800;color:#166534}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.period{font-size:12px;color:var(--muted)}.period b{color:var(--ink)}.count{background:var(--soft);border-radius:99px;padding:6px 11px;font-size:12px;color:var(--muted)}.count b{color:var(--ink)}
+h2{font-size:16px;margin:0 0 4px}.sub{font-size:11.5px;color:var(--muted);margin-bottom:10px}.hero{text-align:center;padding:18px 0 12px}.label{font-size:11px;letter-spacing:.16em;color:var(--muted)}.pred{font-size:52px;font-weight:900;line-height:1;margin-top:5px}.big{color:var(--green)}.small{color:var(--violet)}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.metric{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:9px;text-align:center}.metric .k{font-size:9px;color:var(--muted);letter-spacing:.1em}.metric .v{font-weight:800;margin-top:3px;font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.stat{text-align:center;padding:7px 0}.stat .n{font-size:19px;font-weight:900}.stat .l{font-size:9px;color:var(--muted);letter-spacing:.1em}
+.g{color:var(--green)}.r{color:var(--red)}.b{color:var(--blue)}.a{color:var(--amber)}
+table{width:100%;border-collapse:collapse;font-size:11.5px}th{font-size:10px;color:var(--muted);text-align:left;padding:7px 4px;border-bottom:1px solid var(--line)}td{padding:7px 4px;border-bottom:1px solid #f1f5f9}.right{text-align:right}.center{text-align:center}
+.pill{display:inline-block;padding:3px 8px;border-radius:99px;font-size:10px;font-weight:800}.pill.big,.pill.win{background:#dcfce7;color:#166534}.pill.small{background:#e0e7ff;color:#3730a3}.pill.loss{background:#fee2e2;color:#991b1b}.pill.warn{background:#fef3c7;color:#92400e}
+.balls{display:flex;flex-wrap:wrap;gap:7px}.ball{width:29px;height:29px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:12px}.red{background:#ef4444}.green{background:#22c55e}.violet{background:linear-gradient(135deg,#22c55e,#7c3aed)}.violetred{background:linear-gradient(135deg,#ef4444,#7c3aed)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.box{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px}.box b{display:block;font-size:13px;margin-bottom:3px}.box span{font-size:10.5px;color:var(--muted);line-height:1.35}
+.reason{font-size:11.5px;line-height:1.5;color:#334155}.reason strong{color:var(--ink)}.bar{height:7px;border-radius:99px;background:#e5e7eb;overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;background:var(--green)}.bar.v i{background:var(--violet)}
+.smalltxt{font-size:10px;color:var(--muted)}.foot{font-size:10.5px;color:var(--muted);text-align:center;line-height:1.5;margin-top:8px}
+button{border:0;border-radius:10px;padding:8px 11px;background:#e2e8f0;color:#0f172a;font-weight:700;font-size:11px}button:active{transform:scale(.98)}.btnrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+details summary{cursor:pointer;font-weight:800;font-size:12px}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;word-break:break-all}
+.ok{color:var(--green)}.bad{color:var(--red)}
+
+.deepgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.deepbox{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px}
+.deepbox b{display:block;font-size:13px;margin-bottom:3px}
+.deepbox span{font-size:10.5px;color:var(--muted);line-height:1.35}
+.brain{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:10px}
+.step{border:1px solid var(--line);background:#f8fafc;border-radius:10px;padding:7px 3px;text-align:center;font-size:8.5px;font-weight:900;color:var(--muted)}
+.step.on{color:var(--blue);border-color:#bfdbfe;background:#eff6ff}
+.brainbar{height:7px;border-radius:99px;background:#e5e7eb;overflow:hidden;margin-top:9px}
+.brainbar i{display:block;height:100%;width:0;background:var(--blue);transition:width .25s ease}
+.audit{font-size:10.5px;line-height:1.48;color:#475569;margin-top:9px}
+.audit strong{color:var(--ink)}
+.mono2{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:9.5px;word-break:break-word}
+
+/* Outcome feedback animations — shown only when a prediction is newly settled. */
+#resultFlash{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;pointer-events:none;opacity:0;visibility:hidden;background:rgba(15,23,42,.10);backdrop-filter:blur(2px)}
+#resultFlash.show{visibility:visible;animation:flashFade 1.15s ease forwards}
+#resultFlash .flashCard{min-width:210px;max-width:78vw;text-align:center;padding:22px 28px;border-radius:24px;background:rgba(255,255,255,.96);box-shadow:0 20px 60px rgba(15,23,42,.22);transform:scale(.72)}
+#resultFlash.show .flashCard{animation:flashPop .72s cubic-bezier(.2,.9,.25,1.25) forwards}
+#resultFlash.win .flashCard{border:2px solid #86efac}
+#resultFlash.loss .flashCard{border:2px solid #fca5a5}
+.flashIcon{font-size:34px;line-height:1;margin-bottom:5px}
+.flashTitle{font-size:30px;font-weight:950;letter-spacing:.04em}
+.flashMeta{font-size:11px;color:var(--muted);margin-top:5px}
+#decisionCard.outcome-win{animation:decisionWin .9s ease}
+#decisionCard.outcome-loss{animation:decisionLoss .72s ease}
+#predValue.outcome-win{animation:predWin .8s cubic-bezier(.2,.9,.25,1.25)}
+#predValue.outcome-loss{animation:predLoss .72s ease}
+.stat.flash-win{animation:statWin .8s ease}
+.stat.flash-loss{animation:statLoss .65s ease}
+.outcomeSpark{position:absolute;width:7px;height:7px;border-radius:50%;left:50%;top:50%;opacity:0;pointer-events:none}
+#resultFlash.show .outcomeSpark{animation:spark 1s ease-out forwards}
+#resultFlash.show .s1{--x:-105px;--y:-70px;animation-delay:.02s}
+#resultFlash.show .s2{--x:105px;--y:-62px;animation-delay:.06s}
+#resultFlash.show .s3{--x:-125px;--y:35px;animation-delay:.09s}
+#resultFlash.show .s4{--x:125px;--y:42px;animation-delay:.13s}
+#resultFlash.show .s5{--x:-55px;--y:105px;animation-delay:.16s}
+#resultFlash.show .s6{--x:55px;--y:105px;animation-delay:.19s}
+@keyframes flashFade{0%{opacity:0}12%{opacity:1}78%{opacity:1}100%{opacity:0}}
+@keyframes flashPop{0%{transform:scale(.72);opacity:0}55%{transform:scale(1.06);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes decisionWin{0%,100%{transform:none}25%{transform:translateY(-5px) scale(1.01)}50%{transform:translateY(2px) scale(.995)}75%{transform:translateY(-2px)}}
+@keyframes decisionLoss{0%,100%{transform:translateX(0)}15%,45%,75%{transform:translateX(-5px)}30%,60%,90%{transform:translateX(5px)}}
+@keyframes predWin{0%{transform:scale(.86);opacity:.65}55%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes predLoss{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+@keyframes statWin{0%{transform:scale(1)}45%{transform:scale(1.22)}100%{transform:scale(1)}}
+@keyframes statLoss{0%{transform:scale(1)}35%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes spark{0%{transform:translate(0,0) scale(.3);opacity:0}15%{opacity:1}100%{transform:translate(var(--x),var(--y)) scale(1);opacity:0}}
+@media (prefers-reduced-motion:reduce){#resultFlash.show,#resultFlash.show .flashCard,#resultFlash.show .outcomeSpark,#decisionCard.outcome-win,#decisionCard.outcome-loss,#predValue.outcome-win,#predValue.outcome-loss,.stat.flash-win,.stat.flash-loss{animation:none!important}#resultFlash.show{opacity:1;visibility:visible}#resultFlash.show .flashCard{transform:scale(1);opacity:1}}
+</style>
+</head>
+<body>
+<div id="resultFlash" aria-live="polite" aria-atomic="true">
+  <div class="flashCard">
+    <div class="flashIcon" id="flashIcon">✓</div>
+    <div class="flashTitle" id="flashTitle">WIN</div>
+    <div class="flashMeta" id="flashMeta">Prediction settled</div>
+  </div>
+  <i class="outcomeSpark s1"></i><i class="outcomeSpark s2"></i><i class="outcomeSpark s3"></i>
+  <i class="outcomeSpark s4"></i><i class="outcomeSpark s5"></i><i class="outcomeSpark s6"></i>
+</div>
+<div class="wrap">
+<header><div class="logo">● Aᴋᴋɪ Bʜᴀɪ · AUTONOMOUS DEEP AI</div><div class="avatar">A</div></header>
+
+<div class="card" id="decisionCard">
+  <div class="row">
+    <div class="period">Next period: <b id="nextPeriod">—</b></div>
+    <div class="count">Next in <b id="countdown">--</b>s</div>
+  </div>
+  <div class="hero">
+    <div class="label">AI DECISION</div>
+    <div id="predValue" class="pred">WAIT</div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="k">CONFIDENCE</div><div class="v" id="conf">—</div></div>
+    <div class="metric"><div class="k">P(BIG)</div><div class="v" id="pbig">—</div></div>
+    <div class="metric"><div class="k">EVIDENCE</div><div class="v" id="evidence">WAIT</div></div>
+  </div>
+  <div class="reason" id="reason" style="margin-top:12px">Waiting for a complete 10-result API snapshot.</div>
+</div>
+
+<div class="card">
+  <div class="row"><h2>Engine Status</h2><span id="feedStatus" class="smalltxt">Checking…</span></div>
+  <div class="stats">
+    <div class="stat"><div id="wins" class="n g">0</div><div class="l">WINS</div></div>
+    <div class="stat"><div id="losses" class="n r">0</div><div class="l">LOSSES</div></div>
+    <div class="stat"><div id="winrate" class="n b">0%</div><div class="l">RATE</div></div>
+    <div class="stat"><div id="learned" class="n a">0</div><div class="l">HISTORY</div></div>
+  </div>
+</div>
+
+
+<div class="card">
+  <div class="row"><h2>3-Second Early Arrival Monitor</h2><span id="timingStatus" class="smalltxt">CALIBRATING…</span></div>
+  <div class="sub">Measures when the browser first receives a new result relative to the 30-second cycle boundary. The observed ~3-second lead is measured feed timing, not proof of a predictive advantage.</div>
+  <div class="deepgrid">
+    <div class="deepbox"><b id="arrivalLead">—</b><span>Latest arrival lead</span></div>
+    <div class="deepbox"><b id="arrivalAvg">—</b><span>Average clean lead</span></div>
+    <div class="deepbox"><b id="arrivalMinMax">—</b><span>Min / max lead</span></div>
+    <div class="deepbox"><b id="arrivalSamples">0</b><span>Clean timing samples</span></div>
+  </div>
+  <div id="timingAnalysis" class="audit">Waiting for a new API issue to measure its arrival time.</div>
+</div>
+
+<div class="card">
+  <div class="row"><h2>House Research Core</h2><span id="houseStatus" class="smalltxt">OFFLINE</span></div>
+  <div class="sub">PostgreSQL is the durable evidence store. The ledger is tamper-evident and the CSPRNG module is an independent cryptographic reference, not a replica of the upstream generator.</div>
+  <div class="deepgrid">
+    <div class="deepbox"><b id="houseStored">—</b><span>Ledger observations</span></div>
+    <div class="deepbox"><b id="houseSeq">—</b><span>Latest ledger sequence</span></div>
+    <div class="deepbox"><b id="houseHash">—</b><span>Latest record hash</span></div>
+    <div class="deepbox"><b id="houseCsprng">—</b><span>CSPRNG audit</span></div>
+  </div>
+  <div id="houseNote" class="audit">Waiting for the house research snapshot.</div>
+</div>
+
+<div class="card">
+  <div class="row"><h2>Autonomous Deep Analysis</h2><span id="autoMode" class="smalltxt">BOOTING…</span></div>
+  <div class="sub">The controller observes the full snapshot, builds relationships among digit / BIG-SMALL / parity / colour / streak states, tests competing hypotheses, then challenges its own conclusion before deciding.</div>
+  <div class="brain">
+    <div id="bs1" class="step">OBSERVE</div>
+    <div id="bs2" class="step">RELATE</div>
+    <div id="bs3" class="step">TEST</div>
+    <div id="bs4" class="step">CHALLENGE</div>
+    <div id="bs5" class="step">DECIDE</div>
+  </div>
+  <div class="brainbar"><i id="brainBar"></i></div>
+  <div id="autoSummary" class="audit">Waiting for a complete feed snapshot.</div>
+</div>
+
+<div class="card">
+  <h2>Last Result Intelligence</h2><div class="sub">The latest settled result is treated as a state, not a simple reversal signal.</div>
+  <div class="grid">
+    <div class="box"><b id="lastDigit">—</b><span>Last digit</span></div>
+    <div class="box"><b id="lastSide">—</b><span>Last BIG/SMALL</span></div>
+    <div class="box"><b id="lastParity">—</b><span>Parity</span></div>
+    <div class="box"><b id="lastStreak">—</b><span>Current streak</span></div>
+  </div>
+  <div id="lastAnalysis" class="reason" style="margin-top:10px">—</div>
+</div>
+
+<div class="card">
+  <h2>Pattern & Trend Analyzer</h2><div class="sub">Short, medium and long context are compared before the decision.</div>
+  <div class="grid">
+    <div class="box"><b id="trend5">—</b><span>5-result trend</span></div>
+    <div class="box"><b id="trend10">—</b><span>10-result trend</span></div>
+    <div class="box"><b id="trend20">—</b><span>20-result baseline</span></div>
+    <div class="box"><b id="regime">—</b><span>Regime shift</span></div>
+  </div>
+  <div id="patternAnalysis" class="reason" style="margin-top:10px">—</div>
+</div>
+<div class="card">
+  <h2>Relationship Matrix</h2>
+  <div class="sub">Observed relationships are separated from causal claims. A relationship can be real in the sample without being a mechanism that generates the next result.</div>
+  <div class="deepgrid">
+    <div class="deepbox"><b id="relSide">—</b><span>BIG/SMALL transition</span></div>
+    <div class="deepbox"><b id="relParity">—</b><span>Parity → BIG/SMALL</span></div>
+    <div class="deepbox"><b id="relColor">—</b><span>Colour → BIG/SMALL</span></div>
+    <div class="deepbox"><b id="relDigit">—</b><span>Digit → next BIG/SMALL</span></div>
+    <div class="deepbox"><b id="relStreak">—</b><span>Streak continuation / break</span></div>
+    <div class="deepbox"><b id="relJoint">—</b><span>Joint-state evidence</span></div>
+  </div>
+  <div id="relationshipAnalysis" class="reason" style="margin-top:10px">—</div>
+</div>
+
+
+<div class="card">
+  <h2>Model Council</h2><div class="sub">Independent evidence streams vote with reliability learned from walk-forward history.</div>
+  <table><thead><tr><th>Model</th><th>Signal</th><th class="center">Weight</th><th class="right">Support</th></tr></thead>
+  <tbody id="modelBody"></tbody></table>
+</div>
+
+<div class="card">
+  <h2>Randomness Diagnostics</h2><div class="sub">Diagnostics do not prove predictability; they measure whether the observed sequence departs from simple random behavior.</div>
+  <div class="grid">
+    <div class="box"><b id="runs">—</b><span>Runs Z</span></div>
+    <div class="box"><b id="acf">—</b><span>Lag-1 autocorrelation</span></div>
+    <div class="box"><b id="entropy">—</b><span>Binary entropy</span></div>
+    <div class="box"><b id="structure">—</b><span>Structure level</span></div>
+  </div>
+  <div id="randomNote" class="reason" style="margin-top:10px">—</div>
+</div>
+
+<div class="card">
+  <h2>Generation-Mechanism Audit</h2>
+  <div class="sub">The engine tests candidate explanations for how the observed BIG/SMALL sequence behaves. It does not claim to recover a hidden server algorithm from outputs alone.</div>
+  <div class="deepgrid">
+    <div class="deepbox"><b id="mechBase">—</b><span>Neutral baseline</span></div>
+    <div class="deepbox"><b id="mechBest">—</b><span>Best tested mechanism</span></div>
+    <div class="deepbox"><b id="mechSkill">—</b><span>Out-of-sample skill</span></div>
+    <div class="deepbox"><b id="mechStability">—</b><span>Stability</span></div>
+  </div>
+  <div id="mechanismAnalysis" class="reason" style="margin-top:10px">—</div>
+</div>
+<div class="card">
+  <h2>Recent Game Results</h2><div class="sub">The engine uses durable house history for context and only starts a fresh decision after a genuinely new observed issue.</div>
+  <div class="balls" id="balls"></div>
+</div>
+
+<div class="card">
+  <h2>Prediction History</h2>
+  <table><thead><tr><th>Period</th><th>Prediction</th><th>Actual</th><th class="center">No.</th><th class="right">Status</th></tr></thead>
+  <tbody id="historyBody"></tbody></table>
+</div>
+
+<div class="card">
+  <details>
+    <summary>Research / Engine Controls</summary>
+    <div class="sub" style="margin-top:8px">Local learning data is stored only in this browser. Clear it if you want a clean research run.</div>
+    <div class="btnrow"><button id="clearBtn">Reset Engine</button><button id="exportBtn">Export JSON</button></div>
+    <div id="engineMeta" class="smalltxt" style="margin-top:9px"></div>
+  </details>
+</div>
+
+<div class="foot">
+  Browser → Render → PostgreSQL house research bridge enabled. The browser is the live observer; PostgreSQL stores durable results and a tamper-evident ledger. Opening this page establishes a baseline and does not replay old predictions. Autonomous means the controller can inspect relationships, test competing hypotheses out-of-sample, adapt expert weights, discount redundant evidence, and challenge its own conclusion. It does not reveal a hidden server-side generation mechanism, and no outcome is guaranteed.
+</div>
+</div>
+
+<script>
+"use strict";
+
+const CFG={
+  endpoint:"https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json",
+  apiBase:"https://wingo-api-proxy.onrender.com",
+  refresh:1000, periodSec:30, requiredFeed:10, maxHistory:5000,
+  maxPredictions:500, orders:[1,2,3,4],
+  minLearn:40, evalWindow:220, minCell:8, learningRate:.12,
+  serverHistoryLimit:5000
+};
+
+const LS={
+  history:"wingo_autonomous_v9_history",
+  predictions:"wingo_autonomous_v9_predictions",
+  metrics:"wingo_autonomous_v9_metrics",
+  lastIssue:"wingo_autonomous_v9_last_issue",
+  learning:"wingo_autonomous_v9_learning"
+};
+const LEGACY={
+  history:"wingo_reasoning_v7.1_history",
+  metrics:"wingo_reasoning_v7.1_metrics"
+};
+
+const $=id=>document.getElementById(id);
+const side=n=>Number(n)>=5?"BIG":"SMALL";
+const parity=n=>Number(n)%2===0?"EVEN":"ODD";
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const pct=x=>Math.round(clamp(x,0,1)*100);
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+
+function load(k,d){try{const x=JSON.parse(localStorage.getItem(k));return x??d}catch{return d}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+
+let history=load(LS.history,null);
+if(!Array.isArray(history) || !history.length){
+  const old=load(LEGACY.history,[]);
+  history=Array.isArray(old)?old:[];
+  if(history.length)save(LS.history,history);
+}
+let predictions=load(LS.predictions,{});
+if(!predictions || typeof predictions!=="object" || Array.isArray(predictions)) predictions={};
+for(const k of Object.keys(predictions)){
+  const p=predictions[k];
+  if(!p || typeof p!=="object" || !p.pick) delete predictions[k];
+}
+save(LS.predictions,predictions);
+let metrics=load(LS.metrics,null);
+if(!metrics || typeof metrics!=="object"){
+  const old=load(LEGACY.metrics,{wins:0,losses:0,total:0});
+  metrics=old&&typeof old==="object"?old:{wins:0,losses:0,total:0};
+  save(LS.metrics,metrics);
+}
+let learning=load(LS.learning,{version:0,experts:{}});
+if(!learning || typeof learning!=="object" || !learning.experts) learning={version:0,experts:{}};
+let lastIssue=load(LS.lastIssue,null);
+let latestList=[];
+let analysisCache={key:"",value:null};
+const TIMING_KEY="wingo_autonomous_v9_arrival_timing";
+let timingHistory=load(TIMING_KEY,[]);
+if(!Array.isArray(timingHistory))timingHistory=[];
+timingHistory=timingHistory.filter(x=>x&&Number.isFinite(x.lead)&&x.lead>=0&&x.lead<=30).slice(-120);
+let lastArrivalIssue=timingHistory.length?timingHistory[timingHistory.length-1].issue:null;
+
+/* =========================
+   Render/PostgreSQL ingestion bridge
+   =========================
+   The browser remains the authorized feed observer because the Render-side
+   collector can receive HTTP 403 from the upstream source. The browser sends
+   observed results to /api/ingest; PostgreSQL is the durable source of truth.
+   A page opening never replays or recalculates old periods: it establishes a
+   baseline from the server state and only runs fresh analysis after a genuinely
+   new issue is observed. */
+let serverState=null;
+let serverHistory=[];
+let houseSnapshot=null;
+let bridgeReady=false;
+let bridgeBusy=false;
+let lastProcessedIssue=null;
+let lastObservedIssue=null;
+function apiUrl(path){return CFG.apiBase.replace(/\/$/,"")+path}
+async function fetchJson(url,options={}){
+  const r=await fetch(url,{cache:"no-store",...options});
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  return r.json();
+}
+async function loadServerState(){
+  const s=await fetchJson(apiUrl("/api/state"));
+  serverState=s;
+  return s;
+}
+async function loadServerHistory(){
+  const j=await fetchJson(apiUrl("/api/history?limit="+CFG.serverHistoryLimit));
+  const rows=Array.isArray(j?.results)?j.results:[];
+  serverHistory=rows.map(x=>({issue:String(x.issue),number:Number(x.number),side:x.side||side(x.number),parity:x.parity||parity(x.number),color:String(x.color||""),ts:Date.parse(x.firstSeenAt||x.fetchedAt||"")||Date.now()})).filter(x=>x.issue&&Number.isFinite(x.number));
+  return serverHistory;
+}
+async function ingestFeed(raw,observedAt=Date.now(),leadMs=null){
+  const valid=raw.map(normalize).filter(Boolean);
+  if(!valid.length)return {inserted:[]};
+  const payload={
+    observedAt,
+    leadMs,
+    data:{list:valid.map(x=>({issueNumber:x.issue,number:x.number,color:x.color}))}
+  };
+  return fetchJson(apiUrl("/api/ingest"),{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});
+}
+async function loadHouseSnapshot(){
+  const j=await fetchJson(apiUrl("/api/research-snapshot?limit="+CFG.serverHistoryLimit+"&ledgerLimit=20"));
+  houseSnapshot=j;
+  const rows=Array.isArray(j?.results)?j.results:[];
+  serverHistory=rows.map(x=>({issue:String(x.issue),number:Number(x.number),side:x.side||side(x.number),parity:x.parity||parity(x.number),color:String(x.color||""),ts:Date.parse(x.firstSeenAt||x.fetchedAt||"")||Date.now()})).filter(x=>x.issue&&Number.isFinite(x.number));
+  renderHouseSnapshot(j);
+  return j;
+}
+function renderHouseSnapshot(j){
+  const rows=Array.isArray(j?.results)?j.results:[];
+  const ledger=Array.isArray(j?.ledger)?j.ledger:[];
+  const latest=ledger[0]||null;
+  $("houseStored").textContent=String(rows.length);
+  $("houseSeq").textContent=latest?.ledgerSeq!=null?String(latest.ledgerSeq):"—";
+  $("houseHash").textContent=latest?.recordHash?String(latest.recordHash).slice(0,12)+"…":"—";
+  const audit=j?.csprngAudit;
+  $("houseCsprng").textContent=audit?.ready?`${audit.observations} obs`:`WAIT`;
+  $("houseStatus").innerHTML='<span class="ok">● ONLINE</span>';
+  $("houseNote").innerHTML=latest
+    ? `<strong>Ledger:</strong> latest record ${esc(latest.issue)} is chained to the previous record. <strong>CSPRNG:</strong> ${audit?.ready?"reference audit available":"building reference audit"}.`
+    : "House snapshot is online but no ledger records are available yet.";
+}
+function establishOpenBaseline(){
+  const latest=String(serverState?.latestIssue||serverState?.lastCollectedIssue||"");
+  if(latest){
+    lastProcessedIssue=latest;
+    lastObservedIssue=latest;
+    lastIssue=latest;
+    save(LS.lastIssue,lastIssue);
+  }
+}
+async function markAnalyzed(issue){
+  if(!issue)return;
+  try{
+    await fetchJson(apiUrl("/api/mark-analyzed"),{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({issue:String(issue)})});
+  }catch(e){console.warn("[BRIDGE] mark-analyzed failed",e.message)}
+}
+async function markPrediction(issue){
+  if(!issue)return;
+  try{
+    await fetchJson(apiUrl("/api/mark-prediction"),{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({issue:String(issue)})});
+  }catch(e){console.warn("[BRIDGE] mark-prediction failed",e.message)}
+}
+function setBridgeStatus(text,ok=false){
+  const el=$("feedStatus");
+  if(el)el.innerHTML=ok?`<span class="ok">● ${esc(text)}</span>`:`<span class="bad">● ${esc(text)}</span>`;
+}
+
+function cycleCountdownMs(){
+  const now=Date.now(),sec=Math.floor(now/1000),rem=30-(sec%30);
+  return (rem===30?0:rem*1000)-(now%1000);
+}
+function recordArrivalTiming(issue){
+  if(String(issue)===String(lastArrivalIssue))return;
+  lastArrivalIssue=String(issue);
+  const lead=Math.round(cycleCountdownMs()/100)/10;
+  if(lead>=0&&lead<=30){
+    timingHistory.push({issue:String(issue),detectedAt:new Date().toISOString(),lead});
+    timingHistory=timingHistory.slice(-120);
+    save(TIMING_KEY,timingHistory);
+  }
+}
+function timingStats(){
+  const clean=timingHistory.filter(x=>x.lead>=1&&x.lead<=6);
+  const use=clean.length?clean:timingHistory;
+  if(!use.length)return {latest:null,avg:null,min:null,max:null,count:0,clean:0};
+  const vals=use.map(x=>x.lead);
+  return {latest:timingHistory.at(-1)?.lead??null,avg:vals.reduce((a,b)=>a+b,0)/vals.length,min:Math.min(...vals),max:Math.max(...vals),count:vals.length,clean:clean.length};
+}
+function renderTiming(){
+  const s=timingStats();
+  if(s.latest===null){$("timingStatus").textContent="CALIBRATING…";$("timingAnalysis").textContent="Waiting for the next unique API issue.";return;}
+  $("arrivalLead").textContent=s.latest.toFixed(1)+"s";
+  $("arrivalAvg").textContent=s.avg.toFixed(1)+"s";
+  $("arrivalMinMax").textContent=`${s.min.toFixed(1)}s / ${s.max.toFixed(1)}s`;
+  $("arrivalSamples").textContent=String(s.count);
+  const near3=Math.abs(s.avg-3)<=.6;
+  $("timingStatus").innerHTML=near3?'<span class="ok">● ~3s OBSERVED</span>':'OBSERVING';
+  $("timingAnalysis").innerHTML=near3
+    ? `<strong>Measured behaviour:</strong> new feed data is arriving around 3 seconds before the 30-second boundary in the current browser sample (${s.clean} clean samples). The autonomous controller analyses it immediately when received.`
+    : `<strong>Measured behaviour:</strong> current clean average is ${s.avg.toFixed(1)}s before the boundary. The controller keeps measuring rather than assuming a fixed lead.`;
+}
+
+
+function normalize(r){
+  const n=Number(r?.number);
+  // Accept both the upstream shape (issueNumber) and the PostgreSQL
+  // API shape (issue). The bridge uses both intentionally.
+  const issue=String(r?.issueNumber??r?.issue??"");
+  if(!issue || !Number.isFinite(n) || n<0 || n>9)return null;
+  return {
+    issue,
+    number:n,
+    side:r?.side||side(n),
+    parity:r?.parity||parity(n),
+    color:String(r?.color??""),
+    ts:Number(r?.ts)||Date.parse(r?.firstSeenAt||r?.fetchedAt||"")||Date.now()
+  };
+}
+function mergeHistory(list){
+  const map=new Map(history.map(x=>[String(x.issue),x]));
+  for(const r of list){
+    const n=(r && r.issue!=null && r.number!=null)
+      ? {issue:String(r.issue),number:Number(r.number),side:r.side||side(r.number),
+         parity:r.parity||parity(r.number),color:String(r.color||""),ts:r.ts||Date.now()}
+      : normalize(r);
+    if(n && n.issue && Number.isFinite(n.number))
+      map.set(n.issue,{...map.get(n.issue),...n});
+  }
+  history=[...map.values()]
+    .filter(x=>x && x.issue && Number.isFinite(Number(x.number)))
+    .sort((a,b)=>String(a.issue).localeCompare(String(b.issue)));
+  if(history.length>CFG.maxHistory)history=history.slice(-CFG.maxHistory);
+  save(LS.history,history);
+}
+function chronological(list=history){return list.slice().sort((a,b)=>a.issue.localeCompare(b.issue))}
+function binarySeq(arr=history){return chronological(arr).map(x=>x.side)}
+function digitSeq(arr=history){return chronological(arr).map(x=>x.number)}
+
+function betaProb(success,total,prior=.5){
+  return (success+1)/(total+2)*prior + (success/Math.max(1,total))*(1-prior);
+}
+function conditionalProb(seq,ctx,target){
+  let hits=0,total=0;
+  for(let i=ctx.length;i<seq.length;i++){
+    if(seq.slice(i-ctx.length,i).join("|")===ctx.join("|")){
+      total++; if(seq[i]===target)hits++;
+    }
+  }
+  return {p:(hits+1)/(total+2),n:total};
+}
+function markov(arr,order){
+  const seq=binarySeq(arr); if(seq.length<=order)return {p:.5,n:0};
+  const ctx=seq.slice(-order);
+  let r=conditionalProb(seq,ctx,"BIG");
+  for(let k=order-1;k>=1;k--){
+    if(r.n>=3)break;
+    r=conditionalProb(seq,ctx.slice(-k),"BIG");
+  }
+  return r;
+}
+function digitMarkov(arr,order){
+  const seq=digitSeq(arr); if(seq.length<=order)return {dist:Array(10).fill(1/10),n:0};
+  const ctx=seq.slice(-order).join("|");
+  const counts=Array(10).fill(1), total=10;
+  let n=0;
+  for(let i=order;i<seq.length;i++){
+    if(seq.slice(i-order,i).join("|")===ctx){counts[seq[i]]++;n++}
+  }
+  const sum=counts.reduce((a,b)=>a+b,0);
+  return {dist:counts.map(x=>x/sum),n};
+}
+
+function weightedRecent(arr,window=20){
+  const seq=binarySeq(arr).slice(-window);
+  if(!seq.length)return .5;
+  let b=0,w=0;
+  seq.forEach((x,i)=>{const wt=Math.exp((i-seq.length+1)/Math.max(3,window*.45));w+=wt;if(x==="BIG")b+=wt});
+  return b/w;
+}
+
+function streakInfo(seq){
+  if(!seq.length)return {side:"—",len:0};
+  const s=seq[seq.length-1];let n=1;
+  for(let i=seq.length-2;i>=0&&seq[i]===s;i--)n++;
+  return {side:s,len:n};
+}
+function lastResultSignal(arr){
+  const seq=binarySeq(arr);if(seq.length<3)return {p:.5,n:0,label:"INSUFFICIENT"};
+  const last=seq[seq.length-1];
+  const r=conditionalProb(seq,[last],"BIG");
+  return {p:r.p,n:r.n,label:`After ${last}: ${pct(r.p)}% BIG (${r.n} cases)`};
+}
+function streakSignal(arr){
+  const seq=binarySeq(arr),st=streakInfo(seq);
+  if(st.len<2)return {p:.5,n:0,label:"No meaningful streak"};
+  let hits=0,total=0;
+  for(let i=st.len;i<seq.length;i++){
+    let k=1;
+    for(let j=i-1;j>0&&seq[j]===seq[i-1];j--)k++;
+    if(k===st.len && seq[i-1]===st.side){total++;if(seq[i]==="BIG")hits++}
+  }
+  return {p:total?(hits+1)/(total+2):.5,n:total,label:`${st.side}×${st.len} → ${total?pct((hits+1)/(total+2)):"—"}% BIG`};
+}
+function patternSignal(arr){
+  const seq=binarySeq(arr);
+  if(seq.length<6)return {p:.5,n:0,label:"Need more history"};
+  let best={p:.5,n:0,order:0};
+  for(const o of [5,4,3,2]){
+    const ctx=seq.slice(-o),r=conditionalProb(seq,ctx,"BIG");
+    if(r.n>best.n || (r.n===best.n&&o>best.order))best={...r,order:o};
+  }
+  return {...best,label:`${best.order}-step pattern · ${best.n} matches`};
+}
+function frequencySignal(arr){
+  const seq=binarySeq(arr);
+  const windows=[5,10,20,50].filter(n=>seq.length>=n);
+  if(!windows.length)return {p:.5,n:0,label:"Insufficient"};
+  let sum=0,w=0;
+  windows.forEach((n,i)=>{const q=seq.slice(-n);const p=q.filter(x=>x==="BIG").length/n;const wt=(i+1);sum+=p*wt;w+=wt});
+  const p=sum/w;return {p,n:Math.max(...windows),label:`Multi-window BIG rate ${pct(p)}%`};
+}
+function trendSignal(arr){
+  const seq=binarySeq(arr);if(seq.length<10)return {p:.5,label:"Insufficient trend history"};
+  const rates=[5,10,20].map(n=>seq.length>=n?seq.slice(-n).filter(x=>x==="BIG").length/n:null);
+  const r5=rates[0]??.5,r10=rates[1]??r5,r20=rates[2]??r10;
+  const accel=(r5-r10)*.55+(r10-r20)*.45;
+  const p=clamp(.5+(r5-.5)*.45+accel*.8,.08,.92);
+  return {p,label:`5/10/20 BIG: ${pct(r5)} / ${pct(r10)} / ${pct(r20)}`};
+}
+function regimeSignal(arr){
+  const seq=binarySeq(arr);if(seq.length<30)return {p:.5,label:"Baseline building"};
+  const a=seq.slice(-10),b=seq.slice(-30,-10);
+  const pa=a.filter(x=>x==="BIG").length/a.length,pb=b.filter(x=>x==="BIG").length/b.length;
+  return {p:clamp(.5+(pa-pb)*.65,.15,.85),label:`Recent ${pct(pa)}% vs baseline ${pct(pb)}%`};
+}
+function paritySignal(arr){
+  const seq=chronological(arr);if(seq.length<10)return {p:.5,n:0,label:"Insufficient"};
+  const last=seq[seq.length-1].parity;let b=0,t=0;
+  for(let i=1;i<seq.length;i++)if(seq[i-1].parity===last){t++;if(seq[i].side==="BIG")b++}
+  return {p:t?(b+1)/(t+2):.5,n:t,label:`After ${last}: ${t?pct((b+1)/(t+2)):"—"}% BIG`};
+}
+
+function runsTest(seq){
+  const x=seq.map(s=>s==="BIG"?1:0);const n1=x.filter(v=>v===1).length,n2=x.length-n1;
+  if(n1<2||n2<2)return null;
+  let R=1;for(let i=1;i<x.length;i++)if(x[i]!==x[i-1])R++;
+  const mean=2*n1*n2/(n1+n2)+1;
+  const variance=(2*n1*n2*(2*n1*n2-n1-n2))/(((n1+n2)**2)*(n1+n2-1));
+  return {z:(R-mean)/Math.sqrt(Math.max(variance,1e-9)),runs:R};
+}
+function autocorr(seq,lag=1){
+  const x=seq.map(s=>s==="BIG"?1:0);if(x.length<=lag+2)return 0;
+  const m=x.reduce((a,b)=>a+b,0)/x.length;
+  let num=0,den=0;
+  for(let i=0;i<x.length;i++)den+=(x[i]-m)**2;
+  for(let i=0;i<x.length-lag;i++)num+=(x[i]-m)*(x[i+lag]-m);
+  return den?num/den:0;
+}
+function entropy(seq){
+  if(!seq.length)return 0;const p=seq.filter(x=>x==="BIG").length/seq.length;
+  if(p===0||p===1)return 0;
+  return -(p*Math.log2(p)+(1-p)*Math.log2(1-p));
+}
+function diagnostics(arr){
+  const seq=binarySeq(arr).slice(-100);
+  const rt=runsTest(seq),ac=autocorr(seq,1),h=entropy(seq);
+  const structure=clamp(Math.abs((rt?.z||0))/3*.4+Math.abs(ac)*.6,0,1);
+  return {z:rt?.z??0,ac,h,structure};
+}
+
+function brierForPrediction(p,y){return (p-y)**2}
+
+function historicalModelAccuracy(modelName,arr){
+  const seq=chronological(arr);
+  if(seq.length<30)return .5;
+  let correct=0,total=0;
+  const start=Math.max(20,seq.length-250);
+  for(let i=start;i<seq.length;i++){
+    const train=seq.slice(0,i), y=seq[i].side==="BIG"?1:0;
+    let p=.5;
+    if(modelName==="markov1")p=markov(train,1).p;
+    if(modelName==="markov2")p=markov(train,2).p;
+    if(modelName==="markov3")p=markov(train,3).p;
+    if(modelName==="markov4")p=markov(train,4).p;
+    if(modelName==="pattern")p=patternSignal(train).p;
+    if(modelName==="last")p=lastResultSignal(train).p;
+    if(modelName==="streak")p=streakSignal(train).p;
+    if(modelName==="frequency")p=frequencySignal(train).p;
+    if(modelName==="trend")p=trendSignal(train).p;
+    if(modelName==="regime")p=regimeSignal(train).p;
+    if(modelName==="parity")p=paritySignal(train).p;
+    if(modelName==="digit"){
+      const d=digitMarkov(train,2);p=d.dist.reduce((s,q,n)=>s+(n>=5?q:0),0);
+    }
+    total++; if((p>=.5)===(y===1))correct++;
+  }
+  return total?correct/total:.5;
+}
+
+const MODEL_NAMES=[
+  ["markov1","Markov M1"],["markov2","Markov M2"],["markov3","Markov M3"],["markov4","Markov M4"],
+  ["digit","Digit transition"],["pattern","Pattern memory"],["last","Last-result state"],
+  ["streak","Dragon/streak"],["frequency","Frequency"],["trend","Trend"],["regime","Regime"],["parity","Parity"]
+];
+const BASE={
+  markov1:.13,markov2:.12,markov3:.10,markov4:.07,digit:.12,pattern:.12,last:.09,
+  streak:.06,frequency:.06,trend:.07,regime:.04,parity:.02
+};
+
+function modelSignal(name,arr){
+  if(name.startsWith("markov"))return markov(arr,Number(name.slice(-1))).p;
+  if(name==="digit"){const d=digitMarkov(arr,2);return d.dist.reduce((s,p,n)=>s+(n>=5?p:0),0)}
+  if(name==="pattern")return patternSignal(arr).p;
+  if(name==="last")return lastResultSignal(arr).p;
+  if(name==="streak")return streakSignal(arr).p;
+  if(name==="frequency")return frequencySignal(arr).p;
+  if(name==="trend")return trendSignal(arr).p;
+  if(name==="regime")return regimeSignal(arr).p;
+  if(name==="parity")return paritySignal(arr).p;
+  return .5;
+}
+function reliability(name,arr){
+  const a=historicalModelAccuracy(name,arr);
+  const n=arr.length;
+  const shrink=n<60?.35:n<120?.55:n<250?.75:.9;
+  return .5+(a-.5)*shrink;
+}
+
+
+function normColor(c){
+  const s=String(c||"").toLowerCase().replace(/\s+/g,"");
+  if(!s)return "UNKNOWN";
+  if(s.includes("violet")&&s.includes("red"))return "VIOLET+RED";
+  if(s.includes("violet")&&s.includes("green"))return "VIOLET+GREEN";
+  if(s.includes("violet"))return "VIOLET";
+  if(s.includes("red"))return "RED";
+  if(s.includes("green"))return "GREEN";
+  return s.toUpperCase();
+}
+function beta(success,total,prior=.5){
+  if(total<=0)return prior;
+  return (success+1)/(total+2);
+}
+function binConfidence(p,n){
+  if(n<=0)return 0;
+  return Math.sqrt(n/(n+20))*Math.min(1,Math.abs(p-.5)*2);
+}
+function conditionalSideByFeature(arr,key,value){
+  const rows=chronological(arr);
+  let b=0,t=0;
+  for(let i=1;i<rows.length;i++){
+    if(String(rows[i-1][key])===String(value)){
+      t++;
+      if(rows[i].side==="BIG")b++;
+    }
+  }
+  return {p:beta(b,t),n:t};
+}
+function transitionTable(arr,field,values){
+  const rows=chronological(arr);
+  const out={};
+  for(const v of values)out[String(v)]={BIG:0,SMALL:0,total:0};
+  for(let i=1;i<rows.length;i++){
+    const k=String(rows[i-1][field]);
+    if(!out[k])continue;
+    out[k].total++;
+    out[k][rows[i].side]++;
+  }
+  return out;
+}
+function digitRelationships(arr){
+  const rows=chronological(arr);
+  const byDigit={};
+  for(let d=0;d<=9;d++)byDigit[d]={BIG:0,SMALL:0,total:0,even:0,odd:0,colors:{}};
+  for(let i=0;i<rows.length;i++){
+    const d=Number(rows[i].number),r=byDigit[d];
+    r.total++;
+    r[rows[i].side]++;
+    r[rows[i].parity.toLowerCase()]++;
+    const c=normColor(rows[i].color);
+    r.colors[c]=(r.colors[c]||0)+1;
+  }
+  const next={};
+  for(let i=0;i<rows.length-1;i++){
+    const d=Number(rows[i].number);
+    if(!next[d])next[d]={BIG:0,SMALL:0,total:0};
+    next[d].total++;next[d][rows[i+1].side]++;
+  }
+  return {byDigit,next};
+}
+function mutualAssociation(arr){
+  const rows=chronological(arr);
+  if(rows.length<12)return {sideParity:0,sideColor:0,sideDigit:0};
+  const sideParity=association(rows.map(r=>[r.side,r.parity]));
+  const sideColor=association(rows.map(r=>[r.side,normColor(r.color)]));
+  const sideDigit=association(rows.map(r=>[r.side,String(r.number)]));
+  return {sideParity,sideColor,sideDigit};
+}
+function association(pairs){
+  const xs=[...new Set(pairs.map(p=>p[0]))],ys=[...new Set(pairs.map(p=>p[1]))];
+  const n=pairs.length;
+  if(xs.length<2||ys.length<2)return 0;
+  const table=xs.map(x=>ys.map(y=>pairs.filter(p=>p[0]===x&&p[1]===y).length));
+  const rows=table.map(r=>r.reduce((a,b)=>a+b,0));
+  const cols=ys.map((_,j)=>table.reduce((s,r)=>s+r[j],0));
+  let chi=0;
+  for(let i=0;i<xs.length;i++)for(let j=0;j<ys.length;j++){
+    const e=rows[i]*cols[j]/Math.max(1,n);
+    if(e>0)chi+=(table[i][j]-e)**2/e;
+  }
+  return Math.sqrt(Math.max(0,chi/n));
+}
+function streakContinuation(arr){
+  const seq=binarySeq(arr);
+  if(seq.length<10)return {p:.5,n:0,label:"Insufficient streak history"};
+  const st=streakInfo(seq), need=st.len;
+  let cont=0,total=0;
+  for(let i=1;i<seq.length;i++){
+    let k=1;
+    for(let j=i-1;j>0&&seq[j]===seq[i-1];j--)k++;
+    if(k===need){
+      total++;
+      if(seq[i]===seq[i-1])cont++;
+    }
+  }
+  const p=beta(cont,total);
+  return {p,n:total,label:`${st.side}×${need}: ${pct(p)}% continuation (${total} historical states)`};
+}
+function jointStateSignal(arr){
+  const rows=chronological(arr);
+  if(rows.length<CFG.minLearn)return {p:.5,n:0,label:"Need more joint-state history"};
+  const last=rows.at(-1),key=`${last.side}|${last.parity}|${normColor(last.color)}`;
+  let b=0,t=0;
+  for(let i=1;i<rows.length;i++){
+    const prev=rows[i-1],k=`${prev.side}|${prev.parity}|${normColor(prev.color)}`;
+    if(k===key){t++;if(rows[i].side==="BIG")b++;}
+  }
+  return {p:beta(b,t),n:t,label:`State ${key}: ${t} matches → ${pct(beta(b,t))}% BIG`};
+}
+function relationshipAnalysis(arr){
+  const rows=chronological(arr);
+  if(rows.length<CFG.minLearn)return {ready:false};
+  const colors=[...new Set(rows.map(r=>normColor(r.color)))];
+  const sideTrans=transitionTable(arr,"side",["BIG","SMALL"]);
+  const parityTrans=transitionTable(arr,"parity",["EVEN","ODD"]);
+  const colorTrans=transitionTable(arr,"color",colors);
+  // Rebuild color table using normalized color because source strings may vary.
+  const colorRows=rows.map(r=>({...r,color:normColor(r.color)}));
+  const colorT=transitionTable(colorRows,"color",colors);
+  const digits=digitRelationships(rows);
+  const streak=streakContinuation(rows);
+  const joint=jointStateSignal(rows);
+  const assoc=mutualAssociation(rows);
+
+  const sideP=beta(sideTrans.BIG.BIG,sideTrans.BIG.total);
+  const sideS=beta(sideTrans.SMALL.BIG,sideTrans.SMALL.total);
+  const parityE=beta(parityTrans.EVEN.BIG,parityTrans.EVEN.total);
+  const parityO=beta(parityTrans.ODD.BIG,parityTrans.ODD.total);
+
+  const last=rows.at(-1);
+  const c=normColor(last.color);
+  const ccell=colorT[c]||{BIG:0,SMALL:0,total:0};
+  const colorP=beta(ccell.BIG,ccell.total);
+
+  const d=Number(last.number),dc=digits.next[d]||{BIG:0,SMALL:0,total:0};
+  const digitP=beta(dc.BIG,dc.total);
+
+  const baseline=beta(rows.slice(-50).filter(r=>r.side==="BIG").length,Math.min(50,rows.length));
+  const candidates=[
+    {name:"SIDE_TRANSITION",p:sideP,n:sideTrans.BIG.total,label:`After BIG → ${pct(sideP)}% BIG`},
+    {name:"SIDE_REVERSAL",p:1-sideS,n:sideTrans.SMALL.total,label:`After SMALL → ${pct(sideS)}% BIG`},
+    {name:"PARITY",p:last.parity==="EVEN"?parityE:parityO,n:last.parity==="EVEN"?parityTrans.EVEN.total:parityTrans.ODD.total,label:`After ${last.parity} → ${pct(last.parity==="EVEN"?parityE:parityO)}% BIG`},
+    {name:"COLOR",p:colorP,n:ccell.total,label:`After ${c} → ${pct(colorP)}% BIG`},
+    {name:"DIGIT",p:digitP,n:dc.total,label:`After digit ${d} → ${pct(digitP)}% BIG`},
+    {name:"JOINT",p:joint.p,n:joint.n,label:joint.label}
+  ];
+  const ranked=candidates
+    .map(x=>({...x,evidence:(x.p-baseline)*binConfidence(x.p,x.n)}))
+    .sort((a,b)=>Math.abs(b.evidence)-Math.abs(a.evidence));
+
+  return {
+    ready:true,baseline,sideTrans,parityTrans,colorT,digits,streak,joint,assoc,ranked,
+    sideP,sideS,parityE,parityO,colorP,digitP
+  };
+}
+function modelNamesDeep(){
+  return [
+    ["markov1","Markov M1"],["markov2","Markov M2"],["markov3","Markov M3"],["markov4","Markov M4"],
+    ["digit","Digit transition"],["pattern","Pattern memory"],["last","Last-result state"],
+    ["streak","Dragon/streak"],["frequency","Frequency"],["trend","Trend"],["regime","Regime"],["parity","Parity"],
+    ["joint","Joint state"],["color","Colour relationship"],["digitRelation","Digit relationship"]
+  ];
+}
+function deepModelSignal(name,arr,rel){
+  if(name==="joint")return rel.joint.p;
+  if(name==="color")return rel.colorP;
+  if(name==="digitRelation")return rel.digitP;
+  return modelSignal(name,arr);
+}
+function evaluateDeepModel(name,arr){
+  const rows=chronological(arr);
+  const start=Math.max(25,rows.length-CFG.evalWindow);
+  let n=0,loss=0,correct=0;
+  for(let i=start;i<rows.length;i++){
+    const train=rows.slice(0,i);
+    if(train.length<25)continue;
+    const rel=relationshipAnalysis(train);
+    let p=.5;
+    if(name==="joint"&&rel.ready)p=rel.joint.p;
+    else if(name==="color"&&rel.ready)p=rel.colorP;
+    else if(name==="digitRelation"&&rel.ready)p=rel.digitP;
+    else p=clamp(modelSignal(name,train),.001,.999);
+    const y=rows[i].side==="BIG"?1:0;
+    loss+=(p-y)**2;
+    correct+=((p>=.5)===(y===1))?1:0;
+    n++;
+  }
+  if(!n)return {n:0,brier:.25,skill:0,accuracy:.5};
+  const brier=loss/n;
+  return {n,brier,skill:clamp(1-brier/.25,-1,1),accuracy:correct/n};
+}
+function autonomousDeep(arr){
+  const rows=chronological(arr);
+  const key=rows.length?`${rows.length}|${rows.at(-1).issue}`:"0";
+  if(analysisCache.key===key&&analysisCache.value)return analysisCache.value;
+
+  const rel=relationshipAnalysis(rows);
+  const mechanism=mechanismAudit(rows);
+  const redundancy=redundancyAudit(rows);
+  const names=modelNamesDeep();
+  const experts=[];
+  for(const [name,label] of names){
+    const p=clamp(deepModelSignal(name,rows,rel.ready?rel:{joint:{p:.5},colorP:.5,digitP:.5}),.001,.999);
+    const wf=evaluateDeepModel(name,rows);
+    const old=learning.experts[name]||{brier:.25,updates:0};
+    const recentSkill=clamp(1-old.brier/.25,-1,1);
+    const sampleTrust=wf.n?Math.sqrt(wf.n/(wf.n+60)):0;
+    const learnedSkill=clamp(.75*wf.skill+.25*recentSkill,-1,1);
+    let redundancyFactor=1;
+    if(name==="digitRelation" && redundancy.digitDerived)redundancyFactor=.35;
+    if(name==="parity" && redundancy.parityDerived)redundancyFactor=.45;
+    if(name==="color" && redundancy.colorDerived)redundancyFactor=.45;
+    const weight=Math.max(.001,Math.exp(CFG.learningRate*learnedSkill)*(.20+.80*sampleTrust)*redundancyFactor);
+    experts.push({name,label,p,wf,learnedSkill,weight,redundancyFactor});
+  }
+  const ws=experts.reduce((s,e)=>s+e.weight,0)||1;
+  experts.forEach(e=>e.weight/=ws);
+
+  const pBig=experts.reduce((s,e)=>s+e.p*e.weight,0);
+  const spread=experts.reduce((s,e)=>s+e.weight*Math.abs(e.p-pBig),0);
+  const positive=experts.filter(e=>e.wf.n>=CFG.minLearn&&e.learnedSkill>0).length;
+  const diagnostics=diagnosticsForDeep(rows);
+  const edge=Math.abs(pBig-.5);
+
+  let confidence=50+edge*115;
+  confidence+=Math.max(0,1-spread*3)*7;
+  if(rows.length<80)confidence-=9;
+  if(diagnostics.structure<.12)confidence-=10;
+  if(positive<4)confidence-=7;
+  if(edge<.04)confidence-=12;
+  confidence=clamp(confidence,50,94);
+
+  const challenge=[];
+  if(edge<.04)challenge.push("ensemble is near neutral");
+  if(diagnostics.structure<.12)challenge.push("little serial structure detected");
+  if(positive<4)challenge.push(`${positive}/${experts.length} experts have positive walk-forward skill`);
+  if(spread>.12)challenge.push("experts disagree materially");
+  if(!challenge.length)challenge.push("no major internal contradiction");
+
+  let evidence="WEAK";
+  if(edge>=.10&&spread<.10&&positive>=5&&challenge.length===1)evidence="STRONG";
+  else if(edge>=.055&&positive>=3)evidence="MIXED";
+
+  const result={key,rel,mechanism,redundancy,experts,pBig,pick:pBig>=.5?"BIG":"SMALL",confidence,evidence,challenge,spread,positive,diagnostics};
+  analysisCache={key,value:result};
+  return result;
+}
+function diagnosticsForDeep(rows){
+  const d=diagnostics(rows);
+  return {structure:d.structure,z:d.z,ac:d.ac,h:d.h};
+}
+function updateDeepLearning(pred,row){
+  if(!pred||!Array.isArray(pred.experts))return;
+  const y=side(row.number)==="BIG"?1:0;
+  for(const e of pred.experts){
+    const s=learning.experts[e.name]||{brier:.25,updates:0};
+    const b=(e.p-y)**2;
+    s.brier=.82*s.brier+.18*b;
+    s.updates=(s.updates||0)+1;
+    s.lastIssue=row.issue;
+    learning.experts[e.name]=s;
+  }
+  learning.version++;
+  save(LS.learning,learning);
+  analysisCache={key:"",value:null};
+}
+
+
+function mechanismAudit(arr){
+  const rows=chronological(arr);
+  const baseline={name:"Neutral 50/50",score:0,brier:.25,accuracy:.5,n:0};
+  if(rows.length<CFG.minLearn)return {ready:false,baseline,ranked:[]};
+  const candidates=[
+    ["iid","IID / neutral"],
+    ["markov1","First-order transition"],
+    ["markov2","Second-order transition"],
+    ["pattern","Pattern context"],
+    ["last","Last-result conditional"],
+    ["streak","Streak-state"],
+    ["trend","Short/medium trend"],
+    ["regime","Recent-regime"],
+    ["parity","Parity-conditioned"],
+    ["digit","Digit transition"]
+  ];
+  const ranked=[];
+  const start=Math.max(25,rows.length-CFG.evalWindow);
+  for(const [name,label] of candidates){
+    let n=0,b=0,correct=0;
+    for(let i=start;i<rows.length;i++){
+      const train=rows.slice(0,i);
+      let p=.5;
+      if(name!=="iid")p=clamp(modelSignal(name,train),.001,.999);
+      const y=rows[i].side==="BIG"?1:0;
+      b+=(p-y)**2;
+      correct+=((p>=.5)===(y===1))?1:0;
+      n++;
+    }
+    const brier=n?b/n:.25;
+    ranked.push({name,label,n,brier,skill:clamp(1-brier/.25,-1,1),accuracy:n?correct/n:.5});
+  }
+  ranked.sort((a,b)=>b.skill-a.skill);
+  const best=ranked[0]||baseline;
+  const recentStart=Math.max(25,rows.length-Math.min(70,CFG.evalWindow));
+  const recentRows=rows.slice(recentStart);
+  let stability=.5;
+  if(recentRows.length>=20){
+    const mid=Math.floor(recentRows.length/2),a=recentRows.slice(0,mid),b=recentRows.slice(mid);
+    const ea=ranked.find(x=>x.name===best.name), full=ea?ea.skill:0;
+    let ba=.25,bb=.25;
+    if(best.name!=="iid"){
+      let la=0,lb=0;
+      for(let i=25;i<a.length;i++){const tr=a.slice(0,i),p=clamp(modelSignal(best.name,tr),.001,.999),y=a[i].side==="BIG"?1:0;la+=(p-y)**2;}
+      for(let i=25;i<b.length;i++){const tr=b.slice(0,i),p=clamp(modelSignal(best.name,tr),.001,.999),y=b[i].side==="BIG"?1:0;lb+=(p-y)**2;}
+      ba=a.length>25?1-la/(a.length-25):.25; bb=b.length>25?1-lb/(b.length-25):.25;
+    }
+    stability=clamp(1-Math.abs(ba-bb),0,1);
+  }
+  return {ready:true,baseline,ranked, best,stability};
+}
+function redundancyAudit(arr){
+  const rows=chronological(arr);
+  if(rows.length<CFG.minLearn)return {digitDerived:false,colorDerived:false,parityDerived:true};
+  const parityDerived=rows.every(r=>parity(r.number)===r.parity);
+  // BIG/SMALL and parity are mathematically derived from the digit in this engine.
+  // Colour is treated as derived only when the observed API mapping is deterministic.
+  const map=new Map(); let colorDerived=true;
+  for(const r of rows){
+    const d=String(r.number),c=normColor(r.color);
+    if(!map.has(d))map.set(d,c);
+    else if(map.get(d)!==c){colorDerived=false;break;}
+  }
+  return {digitDerived:true,colorDerived,parityDerived};
+}
+
+function analyze(arr){
+  const deep=autonomousDeep(arr);
+  const d=deep.diagnostics;
+  const seq=binarySeq(arr),last=chronological(arr).at(-1),st=streakInfo(seq);
+  const pattern=patternSignal(arr),lastSig=lastResultSignal(arr),trend=trendSignal(arr),reg=regimeSignal(arr),freq=frequencySignal(arr),dig=digitMarkov(arr,2);
+  const candidateDigits=dig.dist.map((p,n)=>({n,p})).sort((a,b)=>b.p-a.p).slice(0,3);
+  const reasons=[];
+  reasons.push(`<strong>Observation:</strong> ${last?.number??"—"} (${last?.side??"—"}, ${last?.parity??"—"}, ${normColor(last?.color)}).`);
+  reasons.push(`<strong>Relationships:</strong> ${deep.rel.ready?`${deep.rel.ranked.slice(0,3).map(x=>`${x.name} ${pct(x.p)}% (${x.n} cases)`).join("; ")}.`:"building joint relationships."}`);
+  reasons.push(`<strong>Mechanism audit:</strong> ${deep.mechanism.ready?`${esc(deep.mechanism.best.label)} leads the tested hypotheses with ${(deep.mechanism.best.skill*100).toFixed(1)}% relative Brier skill; stability ${(deep.mechanism.stability*100).toFixed(0)}%.`:"building mechanism evidence."}`);
+  reasons.push(`<strong>Challenge:</strong> ${deep.challenge.join("; ")}.`);
+  reasons.push(`<strong>Decision:</strong> ${deep.pick} with ${deep.confidence.toFixed(0)}% evidence confidence; ${deep.evidence.toLowerCase()} evidence.`);
+  return {
+    pBig:deep.pBig,confidence:deep.confidence,pick:deep.pick,evidence:deep.evidence,
+    signals:deep.experts.map(e=>({name:e.name,label:e.label,p:e.p,rel:.5+e.learnedSkill*.5,w:e.weight,wf:e.wf})),
+    diag:d,last,st,pattern,lastSig,trend,reg,freq,digit:dig,candidateDigits,
+    reasons,agree:deep.experts.filter(e=>e.p>.54).length,disagree:deep.experts.filter(e=>e.p<.46).length,
+    auto:deep
+  };
+}
+function nextPeriod(issue){try{return(String(BigInt(issue)+1n))}catch{return issue+"+1"}}
+
+function makePrediction(arr){
+  if(arr.length<CFG.requiredFeed)return null;
+  const a=analyze(arr);
+  return {
+    pick:a.pick,confidence:a.confidence,pBig:a.pBig,created:Date.now(),
+    model:"autonomous.deep.v9",evidence:a.evidence,candidateDigits:a.candidateDigits,
+    experts:a.signals.map(s=>({name:s.name,p:s.p,weight:s.w})),arrivalLead:a.auto.timing?.latest??null
+  };
+}
+const ANIMATED_OUTCOMES_KEY="wingo_v12_animated_outcomes";
+function loadAnimatedOutcomes(){
+  try{const x=JSON.parse(sessionStorage.getItem(ANIMATED_OUTCOMES_KEY)||"[]");return Array.isArray(x)?x:[];}catch{return[]}
+}
+function markAnimatedOutcome(issue){
+  const a=loadAnimatedOutcomes();
+  if(a.includes(String(issue)))return;
+  a.push(String(issue));
+  while(a.length>100)a.shift();
+  try{sessionStorage.setItem(ANIMATED_OUTCOMES_KEY,JSON.stringify(a));}catch{}
+}
+function playOutcomeAnimation(p,row){
+  if(!p||!row||!p.scored)return;
+  const issue=String(row.issue||"");
+  if(!issue)return;
+  const seen=loadAnimatedOutcomes();
+  if(seen.includes(issue))return;
+  markAnimatedOutcome(issue);
+  const win=!!p.win;
+  const flash=$("resultFlash"),card=$("decisionCard"),pred=$("predValue");
+  if(!flash)return;
+  flash.classList.remove("show","win","loss");
+  void flash.offsetWidth;
+  flash.classList.add("show",win?"win":"loss");
+  $("flashIcon").textContent=win?"✓":"×";
+  $("flashTitle").textContent=win?"WIN":"LOSS";
+  $("flashMeta").textContent=`Prediction ${p.pick} · Actual ${p.actual||side(row.number)} · #${issue.slice(-8)}`;
+  if(card){card.classList.remove("outcome-win","outcome-loss");void card.offsetWidth;card.classList.add(win?"outcome-win":"outcome-loss");}
+  if(pred){pred.classList.remove("outcome-win","outcome-loss");void pred.offsetWidth;pred.classList.add(win?"outcome-win":"outcome-loss");}
+  const stat=$(win?"wins":"losses");
+  if(stat){const parent=stat.closest(".stat");if(parent){parent.classList.remove("flash-win","flash-loss");void parent.offsetWidth;parent.classList.add(win?"flash-win":"flash-loss");}}
+  setTimeout(()=>{
+    flash.classList.remove("show","win","loss");
+    if(card)card.classList.remove("outcome-win","outcome-loss");
+    if(pred)pred.classList.remove("outcome-win","outcome-loss");
+  },1200);
+}
+function scoreSettled(list){
+  const newlyScored=[];
+  const chrono=chronological(list);
+  for(const row of chrono){
+    const p=predictions[row.issue];
+    if(!p||p.scored)continue;
+    updateDeepLearning(p,row);
+    const actual=side(row.number);
+    p.actual=actual;p.actualNumber=row.number;p.scored=true;p.win=p.pick===actual;
+    save(LS.predictions,predictions);
+    newlyScored.push({p,row});
+  }
+  newlyScored.forEach(({p,row})=>setTimeout(()=>playOutcomeAnimation(p,row),30));
+  const scored=Object.values(predictions).filter(p=>p&&typeof p==="object"&&p.scored);
+  metrics.wins=scored.filter(p=>p.win).length;
+  metrics.losses=scored.filter(p=>!p.win).length;
+  metrics.total=scored.length;
+  save(LS.metrics,metrics);
+}
+function render(list,allowDecision=false){
+  if(!list.length)return;
+  latestList=list.map(normalize).filter(Boolean);
+  if(allowDecision){
+    mergeHistory(latestList);
+    scoreSettled(latestList);
+  }else{
+    // On page open / routine polling, server history is display state only.
+    // No analysis, prediction creation, or historical scoring occurs here.
+    latestList=list.map(normalize).filter(Boolean);
+  }
+
+  if(latestList.length>=CFG.requiredFeed){
+    const latest=latestList[0],next=nextPeriod(latest.issue);
+    $("nextPeriod").textContent=next;
+    if(allowDecision){
+      const fresh=makePrediction(history);
+      if(fresh&&(!predictions[next]||predictions[next].scored)){
+        predictions[next]=fresh;
+        save(LS.predictions,predictions);
+        markPrediction(next);
+      }
+    }
+    const p=predictions[next],a=allowDecision?analyze(history):null;
+    if(!p||!p.pick){
+      $("predValue").textContent="WAIT";$("conf").textContent="—";$("pbig").textContent="—";$("evidence").textContent="WAIT";
+      $("reason").textContent=allowDecision?`Building autonomous analysis from ${history.length} learned results…`:`Server synchronized. Waiting for the next genuinely new issue before making a fresh decision.`;
+    }else{
+      $("predValue").textContent=p.pick;$("predValue").className="pred "+p.pick.toLowerCase();
+      $("conf").textContent=Math.round(p.confidence)+"%";$("pbig").textContent=pct(p.pBig)+"%";$("evidence").textContent=p.evidence;
+      if(a){
+        $("reason").innerHTML=a.reasons.join(" ");
+        $("lastDigit").textContent=a.last?.number??"—";$("lastSide").textContent=a.last?.side??"—";
+        $("lastParity").textContent=a.last?.parity??"—";$("lastStreak").textContent=`${a.st.side} × ${a.st.len}`;
+        $("lastAnalysis").innerHTML=`<strong>Conditional state:</strong> ${esc(a.lastSig.label)}. The controller compares the last-result state with digit, parity, colour, streak and joint-state evidence before deciding.`;
+        const bs=binarySeq(history);
+        $("trend5").textContent=`${pct(bs.slice(-5).filter(x=>x==="BIG").length/Math.max(1,Math.min(5,bs.length)))}% BIG`;
+        $("trend10").textContent=`${pct(bs.slice(-10).filter(x=>x==="BIG").length/Math.max(1,Math.min(10,bs.length)))}% BIG`;
+        const q20=bs.slice(-20);$("trend20").textContent=`${pct(q20.filter(x=>x==="BIG").length/Math.max(1,q20.length))}% BIG`;
+        $("regime").textContent=a.reg.label;
+        $("patternAnalysis").innerHTML=`<strong>Pattern:</strong> ${esc(a.pattern.label)}. <strong>Trend:</strong> ${esc(a.trend.label)}. <strong>Regime:</strong> ${esc(a.reg.label)}. <strong>Autonomous challenge:</strong> ${esc(a.auto.challenge.join("; "))}.`;
+        const rel=a.auto.rel;
+        $("relSide").textContent=`B→B ${pct(rel.sideP)}% · S→B ${pct(rel.sideS)}%`;
+        $("relParity").textContent=`E→B ${pct(rel.parityE)}% · O→B ${pct(rel.parityO)}%`;
+        $("relColor").textContent=`${normColor(a.last?.color)} → ${pct(rel.colorP)}% BIG`;
+        $("relDigit").textContent=`${a.last?.number} → ${pct(rel.digitP)}% BIG`;
+        $("relStreak").textContent=rel.streak.label;
+        $("relJoint").textContent=rel.joint.label;
+        $("relationshipAnalysis").innerHTML=rel.ready
+          ? `<strong>Deep scan:</strong> baseline ${pct(rel.baseline)}% BIG. <strong>Top relationship evidence:</strong> ${rel.ranked.slice(0,4).map(x=>`${esc(x.name)} ${pct(x.p)}% BIG, ${x.n} cases`).join(" · ")}. <strong>Association diagnostics:</strong> side↔parity ${rel.assoc.sideParity.toFixed(2)}, side↔colour ${rel.assoc.sideColor.toFixed(2)}, side↔digit ${rel.assoc.sideDigit.toFixed(2)}.`
+          : "Need more learned observations for a stable relationship scan.";
+        const mech=a.auto.mechanism;
+        $("mechBase").textContent="50% BIG";$("mechBest").textContent=mech.ready?mech.best.label:"Building";
+        $("mechSkill").textContent=mech.ready?(mech.best.skill*100).toFixed(1)+"%":"—";$("mechStability").textContent=mech.ready?(mech.stability*100).toFixed(0)+"%":"—";
+        $("mechanismAnalysis").innerHTML=mech.ready
+          ? `<strong>Best tested explanation:</strong> ${esc(mech.best.label)}. <strong>Out-of-sample:</strong> ${mech.best.n} observations, ${pct(mech.best.accuracy)}% directional accuracy, Brier ${mech.best.brier.toFixed(3)}. <strong>Important:</strong> BIG/SMALL and parity are derived from the digit; colour may also be a deterministic mapping. The controller discounts such redundant evidence instead of counting it as independent proof.`
+          : "Need more history for a mechanism audit.";
+        $("runs").textContent=a.diag.z.toFixed(2);$("acf").textContent=a.diag.ac.toFixed(3);$("entropy").textContent=a.diag.h.toFixed(3);$("structure").textContent=(a.diag.structure*100).toFixed(0)+"%";
+        $("randomNote").textContent=a.diag.structure<.15?"Low detected structure: the controller reduces confidence rather than inventing a pattern.":"Some sequence structure is present, but structure is not proof of predictability.";
+        $("modelBody").innerHTML=a.signals.map(s=>`<tr><td>${esc(s.label)}</td><td><span class="pill ${s.p>=.5?"big":"small"}">${s.p>=.5?"BIG":"SMALL"} ${pct(s.p)}%</span></td><td class="center">${(s.w*100).toFixed(1)}</td><td class="right">${pct(s.rel)}%</td></tr>`).join("");
+        $("autoMode").innerHTML=`<span class="ok">● AUTONOMOUS</span>`;
+        $("autoSummary").innerHTML=`<strong>State:</strong> full relationship scan complete. <strong>Positive experts:</strong> ${a.auto.positive}/${a.auto.experts.length}. <strong>Lead:</strong> ${esc(a.auto.experts.slice().sort((x,y)=>y.weight-x.weight)[0]?.label||"none")}. <strong>Challenge:</strong> ${esc(a.auto.challenge.join("; "))}.`;
+        ["bs1","bs2","bs3","bs4","bs5"].forEach(id=>$(id).classList.add("on"));$("brainBar").style.width=Math.round(a.confidence)+"%";
+      }
+    }
+  }else{
+    $("predValue").textContent="WAIT";$("conf").textContent="—";$("pbig").textContent="—";$("evidence").textContent="WAIT";
+    $("reason").textContent=`Live snapshot has ${latestList.length} valid results. Durable history is used for context; a fresh decision is only triggered by a genuinely new issue.`;
+    $("autoMode").textContent="WARMING";$("autoSummary").textContent="Waiting for a complete feed snapshot.";
+  }
+
+  $("learned").textContent=history.length;$("wins").textContent=metrics.wins;$("losses").textContent=metrics.losses;$("winrate").textContent=metrics.total?Math.round(metrics.wins*100/metrics.total)+"%":"0%";
+  $("balls").innerHTML=latestList.slice(0,10).map(r=>`<span class="ball ${colorClass(r.color)}">${r.number}</span>`).join("");
+  const rows=Object.entries(predictions).filter(([,p])=>p&&typeof p==="object"&&p.scored).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,15);
+  $("historyBody").innerHTML=rows.length?rows.map(([issue,p])=>`<tr><td>#${esc(issue.slice(-6))}</td><td><span class="pill ${p.pick==="BIG"?"big":"small"}">${p.pick}</span></td><td>${p.actual}</td><td class="center">${p.actualNumber}</td><td class="right"><span class="pill ${p.win?"win":"loss"}">${p.win?"WIN":"LOSS"}</span></td></tr>`).join(""):`<tr><td colspan="5" class="center">${allowDecision?"Waiting for settled predictions…":"No fresh decision on page open; waiting for the next issue."}</td></tr>`;
+  $("engineMeta").textContent=`Server history ${serverHistory.length||history.length} · Feed gate ${CFG.requiredFeed} · Deep experts ${modelNamesDeep().length} · PostgreSQL source of truth · Fresh-issue processing only`;
+}
+
+function colorClass(c){
+  c=String(c||"").toLowerCase();
+  if(c.includes("red")&&c.includes("violet"))return"violetred";
+  if(c.includes("green")&&c.includes("violet"))return"violet";
+  return c.includes("red")?"red":"green";
+}
+
+function extractFeedList(j){
+  const candidates=[j?.data?.list,j?.data?.records,j?.data?.rows,j?.list,j?.records,j?.rows];
+  for(const c of candidates){if(Array.isArray(c))return c;}
+  return [];
+}
+async function fetchFeed(){
+  const url=CFG.endpoint+"?ts="+Date.now();
+  const r=await fetch(url,{cache:"no-store",headers:{accept:"application/json, text/plain, */*"}});
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  const j=await r.json();
+  return extractFeedList(j);
+}
+async function fetchFallbackFeed(){
+  try{
+    const j=await fetchJson(apiUrl("/api/wingo"));
+    const rows=extractFeedList(j);
+    if(rows.length)return {rows,source:"render-cache"};
+  }catch(e){}
+  try{
+    const j=await fetchJson(apiUrl("/api/history?limit="+Math.max(CFG.requiredFeed,50)));
+    const rows=Array.isArray(j?.results)?j.results.map(x=>({
+      issueNumber:x.issue,number:x.number,color:x.color,side:x.side,parity:x.parity,
+      ts:Date.parse(x.firstSeenAt||x.fetchedAt||"")||Date.now()
+    })):[];
+    if(rows.length)return {rows,source:"postgres"};
+  }catch(e){}
+  return {rows:[],source:"none"};
+}
+let busy=false;
+async function bootstrapBridge(){
+  if(bridgeBusy)return;
+  bridgeBusy=true;
+  try{
+    setBridgeStatus("Connecting to PostgreSQL API…",false);
+    await loadServerState();
+    await loadServerHistory();
+    try{ await loadHouseSnapshot(); }catch(e){ console.warn("[HOUSE] snapshot failed",e.message); }
+    bridgeReady=true;
+    establishOpenBaseline();
+    const display=serverHistory.slice().reverse().slice(0,10);
+    if(display.length){
+      latestList=display;
+      render(display,false);
+    }
+    setBridgeStatus(`PostgreSQL synchronized · ${serverHistory.length} stored`,true);
+    console.log("[BRIDGE] Open baseline",lastProcessedIssue);
+  }catch(e){
+    bridgeReady=false;
+    setBridgeStatus("Bridge unavailable · "+e.message,false);
+    $("reason").textContent="The durable API bridge could not be reached. No historical analysis was replayed.";
+    console.warn("[BRIDGE] bootstrap failed",e);
+  }finally{bridgeBusy=false}
+}
+async function processFreshIssue(rawList,issue){
+  if(!bridgeReady||!issue||String(issue)===String(lastProcessedIssue))return false;
+  const valid=rawList.map(normalize).filter(Boolean);
+  if(!valid.length)return false;
+
+  // 1) Persist the newly observed snapshot. The server deduplicates by issue.
+  let ing={inserted:[]};
+  const observedAt=Date.now();
+  const leadAtObservation=cycleCountdownMs();
+  try{ ing=await ingestFeed(rawList,observedAt,leadAtObservation); }catch(e){
+    console.warn("[BRIDGE] ingest failed",e.message);
+    setBridgeStatus("New issue observed · storage retry pending",false);
+  }
+
+  // 2) Refresh durable state, but never make analysis depend on a successful
+  //    status refresh. The browser-observed valid snapshot is the immediate
+  //    source for this one fresh decision; PostgreSQL remains the source of truth.
+  try{ await loadServerState(); }catch(e){console.warn("[BRIDGE] state refresh failed",e.message)}
+  try{ await loadHouseSnapshot(); }catch(e){console.warn("[HOUSE] snapshot refresh failed",e.message)}
+
+  const observedRows=valid.map(x=>({issue:String(x.issue),number:Number(x.number),side:x.side||side(x.number),parity:x.parity||parity(x.number),color:String(x.color||""),ts:Number(x.ts)||Date.now()}));
+  const byIssue=new Map();
+  for(const r of serverHistory)byIssue.set(String(r.issue),r);
+  for(const r of observedRows)byIssue.set(String(r.issue),r);
+  const rows=Array.from(byIssue.values()).filter(r=>r&&r.issue&&Number.isFinite(Number(r.number))).sort((a,b)=>a.issue.localeCompare(b.issue));
+  if(rows.length<CFG.requiredFeed){
+    // Durable house history is the primary context; local history is only a
+    // compatibility fallback for older sessions. This never replays an old issue.
+    const combined=new Map();
+    for(const r of history||[])if(r?.issue)combined.set(String(r.issue),r);
+    for(const r of rows)combined.set(String(r.issue),r);
+    const context=Array.from(combined.values()).map(normalize).filter(Boolean).sort((a,b)=>a.issue.localeCompare(b.issue));
+    if(context.length>=CFG.requiredFeed){
+      mergeHistory(context);
+      rows.splice(0,rows.length,...context);
+    }
+  }
+  if(rows.length<CFG.requiredFeed){
+    lastObservedIssue=String(issue);
+    setBridgeStatus(`New issue observed · ${rows.length}/${CFG.requiredFeed} analysis rows available`,false);
+    return false;
+  }
+
+  // 3) This is the ONLY point where a genuinely new issue can trigger a
+  //    fresh prediction. No page-open replay is possible here.
+  mergeHistory(rows);
+  const displayRows=rows.slice().sort((a,b)=>b.issue.localeCompare(a.issue));
+  latestList=displayRows.slice(0,Math.max(CFG.requiredFeed,10));
+  const actualRow=rows.find(r=>String(r.issue)===String(issue))||displayRows[0];
+  if(!actualRow)return false;
+
+  // Score any predictions that are now settled using durable + observed data.
+  scoreSettled(displayRows);
+
+  const next=nextPeriod(actualRow.issue);
+  const fresh=makePrediction(rows);
+  if(fresh){
+    predictions[next]=fresh;
+    save(LS.predictions,predictions);
+    // State writes are telemetry; they must never block the UI decision.
+    markPrediction(next).catch(e=>console.warn("[BRIDGE] mark-prediction failed",e.message));
+  }
+
+  lastProcessedIssue=String(actualRow.issue);
+  lastObservedIssue=String(actualRow.issue);
+  lastIssue=String(actualRow.issue);
+  save(LS.lastIssue,lastIssue);
+
+  // Render immediately from the fresh server/browser snapshot.
+  render(latestList,true);
+  recordArrivalTiming(actualRow.issue);renderTiming();
+  markAnalyzed(actualRow.issue).catch(e=>console.warn("[BRIDGE] mark-analyzed failed",e.message));
+  fetchJson(apiUrl("/api/csprng-audit?limit=1000")).then(a=>{ if(houseSnapshot)houseSnapshot.csprngAudit=a; renderHouseSnapshot(houseSnapshot||{}); }).catch(e=>console.warn("[HOUSE] CSPRNG audit failed",e.message));
+  setBridgeStatus(`Fresh analysis complete · ${latestList.length} live/context rows · next ${next}`,true);
+  if(ing?.inserted?.length)console.log("[BRIDGE] Persisted",ing.inserted.length,"new issue(s)",ing.inserted);
+  return true;
+}
+async function tick(){
+  if(busy)return;
+  busy=true;
+  try{
+    if(!bridgeReady){await bootstrapBridge();return;}
+    let list=[];
+    let source="upstream";
+    try{
+      list=await fetchFeed();
+    }catch(e){
+      const fb=await fetchFallbackFeed();
+      list=fb.rows;source=fb.source;
+      if(!list.length){setBridgeStatus("Live feed unavailable · waiting for next issue",false);return;}
+    }
+    let valid=list.map(normalize).filter(Boolean);
+    if(!valid.length){
+      const fb=await fetchFallbackFeed();
+      list=fb.rows;source=fb.source;
+      valid=list.map(normalize).filter(Boolean);
+    }
+    if(!valid.length){setBridgeStatus("No valid feed rows yet · PostgreSQL remains synchronized",false);return;}
+    const issue=String(valid[0].issue);
+    if(issue!==String(lastObservedIssue)){
+      recordArrivalTiming(issue);renderTiming();
+      setBridgeStatus(`New issue observed · syncing ${valid.length} results · ${source}`,true);
+      await processFreshIssue(list,issue);
+    }else{
+      // Routine polling is display/telemetry only. Never recalculate an old issue.
+      if(latestList.length)render(latestList,false);
+      setBridgeStatus(`Bridge online · ${serverHistory.length} stored · waiting for next issue`,true);
+    }
+    renderTiming();
+  }catch(e){
+    console.warn("[BRIDGE] tick error",e);
+    setBridgeStatus("Feed/bridge error · "+(e?.message||"request failed"),false);
+  }finally{busy=false}
+}
+
+function updateCountdown(){
+  const s=CFG.periodSec-(Math.floor(Date.now()/1000)%CFG.periodSec);
+  $("countdown").textContent=String(s).padStart(2,"0");
+}
+$("clearBtn").onclick=()=>{if(confirm("Reset LOCAL analysis state only? PostgreSQL history will NOT be deleted.")){localStorage.removeItem(LS.history);localStorage.removeItem(LS.predictions);localStorage.removeItem(LS.metrics);localStorage.removeItem(LS.lastIssue);localStorage.removeItem(LS.learning);location.reload()}};
+$("exportBtn").onclick=()=>{
+  const data={engine:"WinGo AI Autonomous Deep Analysis v12 · Robust Ingestion Bridge",exported:new Date().toISOString(),history,predictions,metrics};
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));a.download="wingo-autonomous-deep-v12-data.json";a.click();URL.revokeObjectURL(a.href);
+};
+
+bootstrapBridge().finally(()=>tick());setInterval(tick,CFG.refresh);setInterval(updateCountdown,250);updateCountdown();
+</script>
+
+<div class="card" id="houseResearchV12" style="margin-top:12px">
+  <div class="section-title">HOUSE BEHAVIOUR LAB v12</div>
+  <div style="font-size:12px;opacity:.78;margin-bottom:10px">Big/Small is the primary target. Windows are descriptive; hypotheses are challenged against chronological history.</div>
+  <div id="v12ResearchSummary" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;font-size:12px">
+    <div class="metric"><span>5m Big rate</span><b id="v12Big5">—</b></div>
+    <div class="metric"><span>5m Δ baseline</span><b id="v12Delta5">—</b></div>
+    <div class="metric"><span>5m runs Z</span><b id="v12Runs5">—</b></div>
+    <div class="metric"><span>Transition B→B</span><b id="v12BB">—</b></div>
+    <div class="metric"><span>Walk-forward</span><b id="v12WF">—</b></div>
+    <div class="metric"><span>Ledger</span><b id="v12Ledger">—</b></div>
+  </div>
+  <div id="v12Hypotheses" style="margin-top:10px;font-size:11px;line-height:1.5;opacity:.9">Loading House research…</div>
+</div>
+<script>
+(function(){
+  const API=(typeof CFG!=='undefined'&&CFG.apiBase)?CFG.apiBase:'https://wingo-api-proxy.onrender.com';
+  const $=id=>document.getElementById(id);
+  const fmt=(v,d=1)=>Number.isFinite(Number(v))?Number(v).toFixed(d):'—';
+  async function loadV12Research(){
+    try{
+      const r=await fetch(API+'/api/research?ts='+Date.now(),{cache:'no-store'}); if(!r.ok)throw new Error('HTTP '+r.status); const x=await r.json();
+      if(!x.ready){$('v12Hypotheses').textContent='Research needs more observations.';return;}
+      const w=x.windows||{}; const f=w[5]||{}; const t=f.transitions||{};
+      $('v12Big5').textContent=fmt((f.bigRate||0)*100)+'%';
+      $('v12Delta5').textContent=(f.bigRate!=null?(f.bigRate-(x.hypotheses?.baselineBigRate??f.bigRate))*100:0).toFixed(1)+' pp';
+      $('v12Runs5').textContent=fmt(f.runs?.z,2);
+      $('v12BB').textContent=fmt((t.B?.toBig||0)*100)+'%';
+      const wf=x.walkForward?.scores; const tr=wf?.transition; const base=wf?.baseline;
+      $('v12WF').textContent=tr&&base?'Brier '+fmt(tr.brier,3)+' / skill '+fmt((tr.brierSkill||0)*100,1)+'%':'Collecting';
+      $('v12Hypotheses').innerHTML=(x.hypotheses?.notablePatterns||[]).slice(0,5).map(p=>`<div>• <b>${p.pattern}</b> → Big ${(p.bigRate*100).toFixed(1)}% (n=${p.n}, Δ ${(p.deltaFromBaseline*100).toFixed(1)}pp)</div>`).join('') || '• No strongly supported pattern currently survives the minimum-support screen.';
+      try{const l=await fetch(API+'/api/ledger?limit=1',{cache:'no-store'}).then(r=>r.json());$('v12Ledger').textContent=l.records?.[0]?('#'+l.records[0].ledgerSeq):'—';}catch{}
+    }catch(e){$('v12Hypotheses').textContent='House research API unavailable; observer can continue locally.';}
+  }
+  loadV12Research(); setInterval(loadV12Research,15000);
+})();
+</script>
+</body>
+</html>
