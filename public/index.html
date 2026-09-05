@@ -1,0 +1,1292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WinGo PDF Knowledge Engine v25</title>
+<style>
+:root{--bg:#f6faf7;--card:#fff;--ink:#0f172a;--muted:#64748b;--green:#16a34a;--red:#dc2626;--blue:#2563eb;--violet:#6366f1;--line:#e5e7eb;--soft:#f1f5f9;--amber:#d97706}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:560px;margin:auto;padding:14px 12px 42px}.card{background:var(--card);border:1px solid #edf1f3;border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 8px 24px -20px #0005}
+header{display:flex;justify-content:space-between;align-items:center;padding:7px 4px 14px}.logo{font-weight:900;font-size:19px;color:var(--green);font-style:italic}.avatar{width:32px;height:32px;border-radius:50%;background:#bbf7d0;display:grid;place-items:center;font-weight:800;color:#166534}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.period{font-size:12px;color:var(--muted)}.period b{color:var(--ink)}.count{background:var(--soft);border-radius:99px;padding:6px 11px;font-size:12px;color:var(--muted)}.count b{color:var(--ink)}
+h2{font-size:16px;margin:0 0 4px}.sub{font-size:11.5px;color:var(--muted);margin-bottom:10px}.hero{text-align:center;padding:18px 0 12px}.label{font-size:11px;letter-spacing:.16em;color:var(--muted)}.pred{font-size:52px;font-weight:900;line-height:1;margin-top:5px}.big{color:var(--green)}.small{color:var(--violet)}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.metric{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:9px;text-align:center}.metric .k{font-size:9px;color:var(--muted);letter-spacing:.1em}.metric .v{font-weight:800;margin-top:3px;font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.stat{text-align:center;padding:7px 0}.stat .n{font-size:19px;font-weight:900}.stat .l{font-size:9px;color:var(--muted);letter-spacing:.1em}
+.g{color:var(--green)}.r{color:var(--red)}.b{color:var(--blue)}.a{color:var(--amber)}
+table{width:100%;border-collapse:collapse;font-size:11.5px}th{font-size:10px;color:var(--muted);text-align:left;padding:7px 4px;border-bottom:1px solid var(--line)}td{padding:7px 4px;border-bottom:1px solid #f1f5f9}.right{text-align:right}.center{text-align:center}
+.pill{display:inline-block;padding:3px 8px;border-radius:99px;font-size:10px;font-weight:800}.pill.big,.pill.win{background:#dcfce7;color:#166534}.pill.small{background:#e0e7ff;color:#3730a3}.pill.loss{background:#fee2e2;color:#991b1b}.pill.warn{background:#fef3c7;color:#92400e}
+.balls{display:flex;flex-wrap:wrap;gap:7px}.ball{width:29px;height:29px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:12px}.red{background:#ef4444}.green{background:#22c55e}.violet{background:linear-gradient(135deg,#22c55e,#7c3aed)}.violetred{background:linear-gradient(135deg,#ef4444,#7c3aed)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.box{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px}.box b{display:block;font-size:13px;margin-bottom:3px}.box span{font-size:10.5px;color:var(--muted);line-height:1.35}
+.reason{font-size:11.5px;line-height:1.5;color:#334155}.reason strong{color:var(--ink)}.bar{height:7px;border-radius:99px;background:#e5e7eb;overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;background:var(--green)}.bar.v i{background:var(--violet)}
+.smalltxt{font-size:10px;color:var(--muted)}.foot{font-size:10.5px;color:var(--muted);text-align:center;line-height:1.5;margin-top:8px}
+button{border:0;border-radius:10px;padding:8px 11px;background:#e2e8f0;color:#0f172a;font-weight:700;font-size:11px}button:active{transform:scale(.98)}.btnrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+details summary{cursor:pointer;font-weight:800;font-size:12px}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;word-break:break-all}
+.ok{color:var(--green)}.bad{color:var(--red)}
+
+/* House Research v20 */
+.hr-card{background:linear-gradient(180deg,#fff,#fbfdff)}
+.hr-badge{display:inline-block;padding:4px 8px;border-radius:99px;background:#eef2ff;color:#3730a3;font-size:9px;font-weight:800;letter-spacing:.05em}
+.hr-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.hr-box{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px}.hr-box b{display:block;font-size:14px;margin-bottom:3px}.hr-box span{font-size:10px;color:var(--muted)}
+.hr-challenge{font-size:36px;font-weight:900;text-align:center;margin:8px}.hr-challenge.big{color:var(--green)}.hr-challenge.small{color:var(--violet)}
+.hr-note{font-size:11px;line-height:1.5;color:#475569}.hr-table{width:100%;border-collapse:collapse;font-size:10.5px}.hr-table th{font-size:9px;color:var(--muted);padding:6px 4px;border-bottom:1px solid var(--line);text-align:left}.hr-table td{padding:6px 4px;border-bottom:1px solid #f1f5f9}.hr-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all;font-size:10px}
+.pdf-primary{border:1.5px solid #c7d2fe;background:linear-gradient(180deg,#ffffff,#f5f7ff)}.pdf-status{display:flex;align-items:center;justify-content:center;gap:7px;font-size:10px;font-weight:800;letter-spacing:.06em;color:#3730a3;margin-top:5px}.pdf-dot{width:7px;height:7px;border-radius:50%;background:#6366f1;box-shadow:0 0 0 4px #e0e7ff}.pdf-context{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:900;letter-spacing:.12em}.pdf-number{font-size:30px;font-weight:900}.pdf-green{color:var(--green)}.pdf-red{color:var(--red)}.pdf-wait{color:var(--muted)}.research-badge{display:inline-block;padding:4px 8px;border-radius:99px;background:#ecfeff;color:#155e75;font-size:9px;font-weight:800;letter-spacing:.05em}.mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px}.mini{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}.mini b{display:block;font-size:13px}.mini span{font-size:9px;color:var(--muted)}.decision-note{background:#f8fafc;border-left:3px solid #6366f1;padding:8px 9px;border-radius:8px;font-size:10.5px;line-height:1.45;color:#475569;margin-top:9px}.result-fx{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;pointer-events:none}.result-fx[hidden]{display:none}.result-fx .fx-card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px 30px;text-align:center;box-shadow:0 18px 55px -18px #0006;opacity:0;transform:scale(.82)}.result-fx.show .fx-card{animation:fxin .25s ease-out forwards,fxout .25s ease-in 1.25s forwards}.result-fx .fx-icon{font-size:46px;font-weight:900}.result-fx.win .fx-icon{color:var(--green);animation:pop .55s ease-out .08s}.result-fx.loss .fx-icon{color:var(--red);animation:shake .45s ease-in-out .08s}.result-fx .fx-title{font-weight:900;font-size:18px}.result-fx .fx-sub{font-size:11px;color:var(--muted);margin-top:4px}@keyframes fxin{to{opacity:1;transform:scale(1)}}@keyframes fxout{to{opacity:0;transform:scale(.96)}}@keyframes pop{0%{transform:scale(.5)}65%{transform:scale(1.2)}100%{transform:scale(1)}}@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+@media(prefers-reduced-motion:reduce){.result-fx.show .fx-card,.result-fx.win .fx-icon,.result-fx.loss .fx-icon{animation:none}.result-fx.show .fx-card{opacity:1;transform:none}}
+
+.pdf-council{border:1px solid #dbeafe;background:linear-gradient(180deg,#ffffff,#f8fbff)}
+.pdf-council .council-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:9px}
+.pdf-council .cbox{background:#f8fafc;border:1px solid #e5e7eb;border-radius:11px;padding:9px}.pdf-council .cbox b{display:block;font-size:12px}.pdf-council .cbox span{font-size:9.5px;color:#64748b}
+.audit-card{border:1.5px solid #c7d2fe;background:linear-gradient(180deg,#fff,#f8fbff)}
+.audit-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.audit-stat{text-align:center;background:#f8fafc;border:1px solid var(--line);border-radius:11px;padding:8px 4px}.audit-stat b{display:block;font-size:15px}.audit-stat span{font-size:8.5px;color:var(--muted);letter-spacing:.05em}.audit-good{color:var(--green)}.audit-bad{color:var(--red)}.audit-amber{color:var(--amber)}
+.audit-latest{margin-top:9px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:10px;font-size:10.5px;line-height:1.5}.audit-latest strong{color:var(--ink)}
+.audit-table{width:100%;border-collapse:collapse;margin-top:9px;font-size:9.5px}.audit-table th,.audit-table td{padding:6px 4px;border-bottom:1px solid #edf2f7;text-align:left;vertical-align:top}.audit-table th{font-size:8.5px;color:var(--muted)}
+.audit-chip{display:inline-block;padding:3px 6px;border-radius:999px;font-weight:800;font-size:8px}.chip-win{background:#dcfce7;color:#166534}.chip-reverse{background:#fee2e2;color:#991b1b}.chip-near{background:#fef3c7;color:#92400e}.chip-fail{background:#f1f5f9;color:#475569}.chip-skip{background:#e0e7ff;color:#3730a3}
+@media(max-width:390px){.audit-grid{grid-template-columns:repeat(2,1fr)}}
+.pdf-council table{width:100%;border-collapse:collapse;margin-top:9px;font-size:9.5px}.pdf-council th,.pdf-council td{padding:6px 4px;border-bottom:1px solid #edf2f7;text-align:left;vertical-align:top}.pdf-council th{font-size:9px;color:#64748b}.pdf-council .tag{display:inline-block;padding:2px 5px;border-radius:999px;background:#eef2ff;font-weight:800;font-size:8px}.pdf-council .good{color:#15803d;font-weight:800}.pdf-council .warn{color:#b45309;font-weight:800}.pdf-council .muted{color:#64748b}
+</style>
+
+<style id="v25-forensics-css">
+.forensics-hero{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
+.forensics-stat{padding:13px;border:1px solid #e2e8f0;border-radius:15px;background:#fbfdff}
+.forensics-stat b{display:block;font-size:24px;line-height:1.1}
+.forensics-stat span{display:block;margin-top:5px;color:#64748b;font-size:11px;letter-spacing:.08em}
+.forensics-note{padding:12px 14px;border-radius:14px;background:#f8fafc;border:1px solid #e2e8f0;color:#475569;line-height:1.5}
+.forensics-table{width:100%;border-collapse:collapse;font-size:12px}
+.forensics-table th,.forensics-table td{padding:9px 7px;border-bottom:1px solid #e2e8f0;text-align:left;vertical-align:top}
+.forensics-table th{font-size:10px;color:#64748b;letter-spacing:.06em}
+.fchip{display:inline-block;padding:4px 7px;border-radius:999px;font-size:10px;font-weight:800}
+.f-good{background:#dcfce7;color:#166534}.f-bad{background:#fee2e2;color:#991b1b}.f-warn{background:#fef3c7;color:#92400e}.f-muted{background:#e2e8f0;color:#475569}.f-blue{background:#dbeafe;color:#1d4ed8}
+.f-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+@media(max-width:760px){.forensics-hero{grid-template-columns:1fr 1fr}.f-grid2{grid-template-columns:1fr}}
+.v25-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+</style>
+</head>
+<body><div id="resultFx" class="result-fx" hidden><div class="fx-card"><div id="fxIcon" class="fx-icon">✓</div><div id="fxTitle" class="fx-title">WIN</div><div id="fxSub" class="fx-sub"></div></div></div>
+<div class="wrap">
+<header><div class="logo">● PDF KNOWLEDGE ENGINE</div><div class="avatar">P</div></header>
+
+<div class="card">
+  <div class="row">
+    <div class="period">Next period: <b id="nextPeriod">—</b></div>
+    <div class="count">Next in <b id="countdown">--</b>s</div>
+  </div>
+  <div class="hero">
+    <div class="label">PDF-FIRST DECISION</div>
+    <div id="predValue" class="pred">WAIT</div>
+    <div id="predDetail" class="smalltxt" style="margin-top:7px">Waiting for a valid 3-digit PDF context…</div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="k">PDF RULE</div><div class="v" id="conf">—</div></div>
+    <div class="metric"><div class="k">P(BIG)</div><div class="v" id="pbig">—</div></div>
+    <div class="metric"><div class="k">EVIDENCE</div><div class="v" id="evidence">WAIT</div></div>
+  </div>
+  <div class="reason" id="reason" style="margin-top:12px">Waiting for a complete 10-result API snapshot.</div>
+</div>
+
+<div class="card">
+  <div class="row"><h2>PDF ENGINE STATUS</h2><span id="feedStatus" class="smalltxt">Checking…</span></div>
+  <div class="stats">
+    <div class="stat"><div id="wins" class="n g">0</div><div class="l">PDF WINS</div></div>
+    <div class="stat"><div id="losses" class="n r">0</div><div class="l">PDF LOSSES</div></div>
+    <div class="stat"><div id="winrate" class="n b">0%</div><div class="l">PDF RATE</div></div>
+    <div class="stat"><div id="learned" class="n a">0</div><div class="l">OBSERVED</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Last Result Intelligence</h2><div class="sub">The latest settled result is treated as a state, not a simple reversal signal.</div>
+  <div class="grid">
+    <div class="box"><b id="lastDigit">—</b><span>Last digit</span></div>
+    <div class="box"><b id="lastSide">—</b><span>Last BIG/SMALL</span></div>
+    <div class="box"><b id="lastParity">—</b><span>Parity</span></div>
+    <div class="box"><b id="lastStreak">—</b><span>Current streak</span></div>
+  </div>
+  <div id="lastAnalysis" class="reason" style="margin-top:10px">—</div>
+</div>
+
+<div class="card">
+  <h2>Pattern & Trend Analyzer</h2><div class="sub">Short, medium and long context are compared before the decision.</div>
+  <div class="grid">
+    <div class="box"><b id="trend5">—</b><span>5-result trend</span></div>
+    <div class="box"><b id="trend10">—</b><span>10-result trend</span></div>
+    <div class="box"><b id="trend20">—</b><span>20-result baseline</span></div>
+    <div class="box"><b id="regime">—</b><span>Regime shift</span></div>
+  </div>
+  <div id="patternAnalysis" class="reason" style="margin-top:10px">—</div>
+</div>
+
+<div class="card">
+  <h2>Model Council</h2><div class="sub">Independent evidence streams vote with reliability learned from walk-forward history.</div>
+  <table><thead><tr><th>Model</th><th>Signal</th><th class="center">Weight</th><th class="right">Support</th></tr></thead>
+  <tbody id="modelBody"></tbody></table>
+</div>
+
+<div class="card">
+  <h2>Randomness Diagnostics</h2><div class="sub">Diagnostics do not prove predictability; they measure whether the observed sequence departs from simple random behavior.</div>
+  <div class="grid">
+    <div class="box"><b id="runs">—</b><span>Runs Z</span></div>
+    <div class="box"><b id="acf">—</b><span>Lag-1 autocorrelation</span></div>
+    <div class="box"><b id="entropy">—</b><span>Binary entropy</span></div>
+    <div class="box"><b id="structure">—</b><span>Structure level</span></div>
+  </div>
+  <div id="randomNote" class="reason" style="margin-top:10px">—</div>
+</div>
+
+<div class="card">
+  <h2>Recent Game Results</h2><div class="sub">The PDF-first engine records a prediction only when the latest three observed digits form an exact supplied-PDF context.</div>
+  <div class="balls" id="balls"></div>
+</div>
+
+
+<div class="card hr-card pdf-primary">
+ <div class="row"><h2>PDF COMBINATION ENGINE</h2><span class="hr-badge">PRIMARY ENGINE</span></div>
+ <div id="pdfStatus" class="pdf-status"><i class="pdf-dot"></i>WAITING FOR A VALID 3-DIGIT CONTEXT</div>
+ <div class="sub">The supplied PDF mapping is the primary decision source. Only a previous-three-digit context with three distinct digits is eligible for an exact PDF lookup; repeated-digit contexts abstain rather than invent a rule.</div>
+ <div class="hr-grid">
+  <div class="hr-box"><b id="pdfKey">—</b><span>3-DIGIT CONTEXT</span></div><div class="hr-box"><b id="pdfDigit">—</b><span>PREDICTED DIGIT</span></div>
+  <div class="hr-box"><b id="pdfColor">—</b><span>PREDICTED COLOUR</span></div><div class="hr-box"><b id="pdfSide">—</b><span>DERIVED BIG / SMALL</span></div>
+ </div>
+ <div class="mini-grid"><div class="mini"><b id="pdfCoverage">720/720</b><span>DISTINCT CONTEXTS</span></div><div class="mini"><b id="pdfClass">—</b><span>CONTEXT CLASS</span></div><div class="mini"><b id="pdfEligible">NO</b><span>ELIGIBLE NOW</span></div></div>
+ <div id="pdfFormula" class="hr-note" style="margin-top:9px">Formula audit: —</div>
+  <div id="pdfDecisionNote" class="decision-note">The PDF engine is waiting for three distinct observed digits.</div>
+ <div class="hr-grid" style="margin-top:8px">
+  <div class="hr-box"><b id="pdfEval">0</b><span>WALK-FORWARD EVAL</span></div><div class="hr-box"><b id="pdfBS">—</b><span>BIG / SMALL HIT</span></div>
+  <div class="hr-box"><b id="pdfNum">—</b><span>EXACT NUMBER HIT</span></div><div class="hr-box"><b id="pdfColorHit">—</b><span>COLOUR HIT</span></div>
+  <div class="hr-box"><b id="pdfVs">—</b><span>BS VS 50% BASELINE</span></div><div class="hr-box"><b id="pdfNumVs">—</b><span>NUMBER VS 10% BASELINE</span></div>
+ </div>
+ <div id="pdfReason" class="hr-note" style="margin-top:9px">Waiting for chronological observations.</div>
+</div>
+<div class="card hr-card">
+ <div class="row"><h2>CHAMPION BENCHMARK · v7.1</h2><span class="research-badge">BENCHMARK ONLY</span></div>
+ <div class="sub">The original v7.1 model council remains intact as a benchmark. It does not override the PDF-first decision.</div>
+ <div class="hr-grid"><div class="hr-box"><b id="champPick">—</b><span>v7.1 PICK</span></div><div class="hr-box"><b id="champConf">—</b><span>MODEL CONFIDENCE</span></div><div class="hr-box"><b id="champPbig">—</b><span>P(BIG)</span></div><div class="hr-box"><b id="champEvidence">—</b><span>EVIDENCE</span></div></div>
+ <div id="champReason" class="hr-note" style="margin-top:9px">Waiting for v7.1 analysis.</div>
+</div>
+<div class="card hr-card">
+ <div class="row"><h2>HOUSE RESEARCH COUNCIL</h2><span class="hr-badge">CHALLENGER</span></div>
+ <div class="sub">Independent statistical research. It never silently replaces the v7.1 Champion.</div>
+ <div id="hrPick" class="hr-challenge">WAIT</div>
+ <div class="metrics"><div class="metric"><div class="k">P(BIG)</div><div id="hrP" class="v">—</div></div><div class="metric"><div class="k">WALK-FORWARD</div><div id="hrAcc" class="v">—</div></div><div class="metric"><div class="k">BRIER</div><div id="hrBrier" class="v">—</div></div></div>
+ <div id="hrReason" class="hr-note" style="margin-top:9px">Building independent evidence.</div>
+</div>
+<div class="card hr-card">
+ <div class="row"><h2>HOUSE DAY · 05:30 IST</h2><span class="hr-badge">2,880 PERIODS</span></div>
+ <div class="hr-grid"><div class="hr-box"><b id="dayId">—</b><span>HOUSE DAY</span></div><div class="hr-box"><b id="dayN">0</b><span>OBSERVED</span></div><div class="hr-box"><b id="dayBig">0</b><span>BIG</span></div><div class="hr-box"><b id="daySmall">0</b><span>SMALL</span></div></div>
+</div>
+<div class="card hr-card">
+ <div class="row"><h2>3-SECOND TIMING LAB</h2><span class="hr-badge">OBSERVATION ONLY</span></div>
+ <div class="hr-grid"><div class="hr-box"><b id="timN">0</b><span>SAMPLES</span></div><div class="hr-box"><b id="timAvg">—</b><span>AVG OFFSET</span></div><div class="hr-box"><b id="timMin">—</b><span>MIN</span></div><div class="hr-box"><b id="timMax">—</b><span>MAX</span></div></div>
+ <div class="hr-note" style="margin-top:9px">Browser observation offset relative to the 30-second boundary; it is not evidence of a guaranteed predictive advantage.</div>
+</div>
+<div class="card hr-card">
+ <div class="row"><h2>EXPERIMENT RUN & LEDGER</h2><span class="hr-badge">ISOLATED RUN</span></div>
+ <div class="hr-grid"><div class="hr-box"><b id="runId" class="hr-mono">—</b><span>RUN ID</span></div><div class="hr-box"><b id="runCount">0</b><span>RUN HISTORY</span></div><div class="hr-box"><b id="runGaps">0</b><span>GAPS</span></div><div class="hr-box"><b id="runHash" class="hr-mono">—</b><span>CHAIN HEAD</span></div></div>
+ <div id="syncNote" class="hr-note" style="margin-top:9px">Local experiment run.</div>
+</div>
+<div class="card">
+  <h2>PDF Prediction History</h2>
+  <table><thead><tr><th>Period</th><th>Prediction</th><th>Actual</th><th class="center">No.</th><th class="right">Status</th></tr></thead>
+  <tbody id="historyBody"></tbody></table>
+</div>
+
+<div class="card audit-card">
+ <div class="row"><h2>PATTERN PASS / REVERSE / FAILURE AUDIT</h2><span class="research-badge">LIVE SESSION</span></div>
+ <div class="sub">Every settled PDF prediction is classified without future leakage: exact hit, BIG/SMALL reversal, near-number miss, or full failure. The audit also records which observable pattern states agreed or opposed the PDF decision.</div>
+ <div class="audit-grid">
+  <div class="audit-stat"><b id="auditTotal">0</b><span>AUDITED</span></div>
+  <div class="audit-stat"><b id="auditPass" class="audit-good">0</b><span>PDF SIDE PASS</span></div>
+  <div class="audit-stat"><b id="auditReverse" class="audit-bad">0</b><span>REVERSED</span></div>
+  <div class="audit-stat"><b id="auditNear" class="audit-amber">0</b><span>NEAR NUMBER</span></div>
+ </div>
+ <div id="auditLatest" class="audit-latest">Waiting for the first settled PDF prediction.</div>
+ <table class="audit-table"><thead><tr><th>Period</th><th>PDF</th><th>Actual</th><th>Classification</th><th>Why</th></tr></thead><tbody id="auditBody"><tr><td colspan="5" class="center">No settled audit events yet.</td></tr></tbody></table>
+ <div class="btnrow"><button id="downloadAuditBtn">DOWNLOAD PATTERN AUDIT</button></div>
+ <div class="smalltxt" style="margin-top:7px">Download contains the complete session audit, source context, expected/actual digit, absolute & circular distance, side reversal, colour comparison, and pattern-agreement evidence.</div>
+</div>
+
+
+
+<div class="card">
+ <div class="row"><h2>1,000-CONTEXT EMPIRICAL LAB</h2><span class="research-badge">PDF GAP RESEARCH</span></div>
+ <div class="sub">The supplied PDF defines 720 distinct triples. This laboratory separately learns the observed next-digit distribution for all 1,000 possible ordered triples, including the 280 repeated-digit contexts. It never silently replaces the supplied PDF rule.</div>
+ <div class="forensics-hero">
+  <div class="forensics-stat"><b id="ctxCovered">0/1000</b><span>3-DIGIT CONTEXTS SEEN</span></div>
+  <div class="forensics-stat"><b id="ctxRepeated">0/280</b><span>REPEATED CONTEXTS SEEN</span></div>
+  <div class="forensics-stat"><b id="ctxCurrent">—</b><span>CURRENT CONTEXT</span></div>
+  <div class="forensics-stat"><b id="ctxCurrentN">0</b><span>CURRENT CONTEXT N</span></div>
+ </div>
+ <div id="ctxCurrentNote" class="forensics-note" style="margin-top:12px">Waiting for enough history to evaluate the current three-digit context.</div>
+ <div style="margin-top:12px;overflow:auto">
+  <table class="forensics-table"><thead><tr><th>Context</th><th>N</th><th>Top next digits</th><th>Top digit rate</th><th>BIG rate</th><th>Exact supplied PDF?</th><th>Status</th></tr></thead>
+  <tbody id="ctxBody"><tr><td colspan="7">Building all-context empirical memory.</td></tr></tbody></table>
+ </div>
+</div>
+<div class="card" id="pdfForensicsCard">
+ <div class="row"><h2>PDF OUTCOME FORENSICS LAB</h2><span class="research-badge">V25 RESEARCH</span></div>
+ <div class="sub">The engine does not collapse every miss into LOSS. It separates exact-number failure, same-side pass, reversal, near-number behaviour, colour/parity agreement, and pre-result pattern conflict. Explanations are candidate evidence—not proof of causation.</div>
+ <div class="forensics-hero">
+  <div class="forensics-stat"><b id="fxExact">0%</b><span>EXACT NUMBER</span></div>
+  <div class="forensics-stat"><b id="fxSide">0%</b><span>SAME-SIDE PASS</span></div>
+  <div class="forensics-stat"><b id="fxReverse">0%</b><span>SIDE REVERSAL</span></div>
+  <div class="forensics-stat"><b id="fxNear">0%</b><span>NEAR-NUMBER</span></div>
+ </div>
+ <div class="f-grid2">
+  <div class="forensics-note" id="fxDiagnosis">Waiting for settled PDF events. The lab will build context-level evidence as the browser observes new periods.</div>
+  <div class="forensics-note" id="fxIntegrity">Data integrity: waiting.</div>
+ </div>
+ <div style="margin-top:12px;overflow:auto">
+  <table class="forensics-table"><thead><tr><th>Outcome</th><th>N</th><th>Rate</th><th>Digit distance</th><th>Pre-result evidence</th></tr></thead>
+  <tbody id="fxOutcomeBody"><tr><td colspan="5">No settled events yet.</td></tr></tbody></table>
+ </div>
+ <div style="margin-top:12px;overflow:auto">
+  <h3 style="margin:0 0 7px">CONTEXT MEMORY · WHAT DOES THE SAME PDF PATTERN DO?</h3>
+  <table class="forensics-table"><thead><tr><th>Context</th><th>N</th><th>Exact</th><th>Side</th><th>Reverse</th><th>Near</th><th>Avg Circ.</th><th>Status</th></tr></thead>
+  <tbody id="fxContextBody"><tr><td colspan="8">Context memory is building.</td></tr></tbody></table>
+ </div>
+ <div style="margin-top:12px;overflow:auto">
+  <h3 style="margin:0 0 7px">REVERSAL FORENSICS · WHAT WAS HAPPENING BEFORE THE MISS?</h3>
+  <table class="forensics-table"><thead><tr><th>Period</th><th>PDF → Actual</th><th>Distance</th><th>Pre-state</th><th>Candidate explanation</th></tr></thead>
+  <tbody id="fxReverseBody"><tr><td colspan="5">No reversals yet.</td></tr></tbody></table>
+ </div>
+ <div class="btnrow" style="margin-top:12px">
+  <button id="downloadResearchBundleBtn">DOWNLOAD FULL RESEARCH BUNDLE</button>
+  <button id="downloadForensicsCsvBtn">DOWNLOAD FORENSICS CSV</button>
+  <button id="downloadContextCsvBtn">DOWNLOAD CONTEXT MEMORY CSV</button>
+ </div>
+ <div class="smalltxt" style="margin-top:7px">The full bundle includes PDF source fingerprint, complete observed history, locked predictions, every forensic event, context memory, reversal evidence, data-integrity audit, and research-family summaries.</div>
+</div>
+<div class="card">
+  <details>
+    <summary>Research / Engine Controls</summary>
+    <div class="sub" style="margin-top:8px">RESET EVERYTHING starts a new isolated experiment run and clears the current browser/session research state. PostgreSQL reset is requested through the existing backend endpoint.</div>
+    <div class="btnrow"><button id="clearBtn">RESET EVERYTHING</button><button id="exportBtn">Export JSON</button></div>
+    <div id="engineMeta" class="smalltxt" style="margin-top:9px"></div>
+  </details>
+</div>
+
+<div class="foot">
+  PDF Knowledge Engine public-feed research tool. No outcome is guaranteed. The supplied PDF is treated as a rule source only where an exact eligible context exists; statistical validation cannot prove a hidden generator or future outcome.
+</div>
+</div>
+
+<script>
+"use strict";
+
+const CFG={
+  endpoint:"https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json",
+  refresh:1000, periodSec:30, requiredFeed:10, maxHistory:5000,
+  maxPredictions:500, orders:[1,2,3,4]
+};
+
+const LS={
+  history:"wingo_reasoning_v7.1_history",
+  predictions:"wingo_reasoning_v7.1_predictions",
+  metrics:"wingo_reasoning_v7.1_metrics",
+  lastIssue:"wingo_reasoning_v7.1_last_issue",
+  pdfPredictions:"wingo_pdf_first_predictions_v25",pdfMetrics:"wingo_pdf_first_metrics_v25",patternAudit:"wingo_pdf_pattern_audit_v25"
+};
+
+const $=id=>document.getElementById(id);
+const side=n=>Number(n)>=5?"BIG":"SMALL";
+const parity=n=>Number(n)%2===0?"EVEN":"ODD";
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const pct=x=>Math.round(clamp(x,0,1)*100);
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+
+function load(k,d){try{const x=JSON.parse(localStorage.getItem(k));return x??d}catch{return d}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+
+let history=load(LS.history,[]);
+let predictions=load(LS.predictions,{});
+if(!predictions || typeof predictions!=="object" || Array.isArray(predictions)) predictions={};
+for(const k of Object.keys(predictions)){
+  const p=predictions[k];
+  if(!p || typeof p!=="object" || !p.pick) delete predictions[k];
+}
+save(LS.predictions,predictions);
+let metrics=load(LS.metrics,{wins:0,losses:0,total:0});
+let pdfPredictions=load(LS.pdfPredictions,{});
+if(!pdfPredictions||typeof pdfPredictions!=="object"||Array.isArray(pdfPredictions))pdfPredictions={};
+let pdfMetrics=load(LS.pdfMetrics,{wins:0,losses:0,total:0});
+let lastIssue=load(LS.lastIssue,null);
+let latestList=[];
+let latestPdf=null;
+let patternAudit=load(LS.patternAudit,[]); if(!Array.isArray(patternAudit))patternAudit=[];
+
+// v21 continuous DB sync: browser observes the authorized public feed; PostgreSQL is the source of truth.
+const SYNC={queue:"house_v21_sync_queue",lastAck:"house_v21_last_ack"};
+let syncQueue=load(SYNC.queue,[]); if(!Array.isArray(syncQueue))syncQueue=[];
+let syncBusy=false,lastSyncAt=0,syncFailures=0;
+function saveSync(){save(SYNC.queue,syncQueue)}
+function enqueueRows(rows){
+  const seen=new Set(syncQueue.map(x=>String(x.issue)));
+  for(const row of rows){
+    if(!row?.issue||seen.has(String(row.issue)))continue;
+    syncQueue.push({issue:String(row.issue),number:Number(row.number),color:String(row.color||""),ts:Number(row.ts||Date.now()),raw:row,queuedAt:Date.now()});
+    seen.add(String(row.issue));
+  }
+  syncQueue.sort((a,b)=>a.issue.localeCompare(b.issue));
+  if(syncQueue.length>500)syncQueue=syncQueue.slice(-500);
+  saveSync();
+}
+function clearClientRun(){
+  localStorage.removeItem(LS.history);localStorage.removeItem(LS.predictions);localStorage.removeItem(LS.metrics);localStorage.removeItem(LS.pdfPredictions);localStorage.removeItem(LS.pdfMetrics);localStorage.removeItem(LS.patternAudit);localStorage.removeItem(LS.lastIssue);
+  localStorage.removeItem(HRLS.timing);localStorage.removeItem(HRLS.ledger);localStorage.removeItem(SYNC.queue);localStorage.removeItem(SYNC.lastAck);
+  syncQueue=[];metrics={wins:0,losses:0,total:0};pdfMetrics={wins:0,losses:0,total:0};pdfPredictions={};predictions={};patternAudit=[];history=[];lastIssue=null;
+}
+
+
+function normalize(r){
+  const rawNumber=r?.number??r?.code??r?.result??r?.num;
+  const digits=String(rawNumber??"").match(/\d/g);
+  const n=digits?.length?Number(digits.at(-1)):NaN;
+  const issue=String(r?.issueNumber??r?.issue??r?.period??r?.issueNo??"");
+  if(!issue || !Number.isFinite(n) || n<0 || n>9)return null;
+  return {issue,number:n,side:side(n),parity:parity(n),color:String(r?.color??r?.colour??""),ts:Number(r?.ts||Date.now())};
+}
+function mergeHistory(list){
+  const map=new Map(history.map(x=>[String(x.issue),x]));
+  for(const r of list){
+    const n=(r && r.issue!=null && r.number!=null)
+      ? {issue:String(r.issue),number:Number(r.number),side:r.side||side(r.number),
+         parity:r.parity||parity(r.number),color:String(r.color||""),ts:r.ts||Date.now()}
+      : normalize(r);
+    if(n && n.issue && Number.isFinite(n.number))
+      map.set(n.issue,{...map.get(n.issue),...n});
+  }
+  history=[...map.values()]
+    .filter(x=>x && x.issue && Number.isFinite(Number(x.number)))
+    .sort((a,b)=>String(a.issue).localeCompare(String(b.issue)));
+  if(history.length>CFG.maxHistory)history=history.slice(-CFG.maxHistory);
+  save(LS.history,history);
+}
+function chronological(list=history){return list.slice().sort((a,b)=>a.issue.localeCompare(b.issue))}
+function binarySeq(arr=history){return chronological(arr).map(x=>x.side)}
+function digitSeq(arr=history){return chronological(arr).map(x=>x.number)}
+
+function betaProb(success,total,prior=.5){
+  return (success+1)/(total+2)*prior + (success/Math.max(1,total))*(1-prior);
+}
+function conditionalProb(seq,ctx,target){
+  let hits=0,total=0;
+  for(let i=ctx.length;i<seq.length;i++){
+    if(seq.slice(i-ctx.length,i).join("|")===ctx.join("|")){
+      total++; if(seq[i]===target)hits++;
+    }
+  }
+  return {p:(hits+1)/(total+2),n:total};
+}
+function markov(arr,order){
+  const seq=binarySeq(arr); if(seq.length<=order)return {p:.5,n:0};
+  const ctx=seq.slice(-order);
+  let r=conditionalProb(seq,ctx,"BIG");
+  for(let k=order-1;k>=1;k--){
+    if(r.n>=3)break;
+    r=conditionalProb(seq,ctx.slice(-k),"BIG");
+  }
+  return r;
+}
+function digitMarkov(arr,order){
+  const seq=digitSeq(arr); if(seq.length<=order)return {dist:Array(10).fill(1/10),n:0};
+  const ctx=seq.slice(-order).join("|");
+  const counts=Array(10).fill(1), total=10;
+  let n=0;
+  for(let i=order;i<seq.length;i++){
+    if(seq.slice(i-order,i).join("|")===ctx){counts[seq[i]]++;n++}
+  }
+  const sum=counts.reduce((a,b)=>a+b,0);
+  return {dist:counts.map(x=>x/sum),n};
+}
+
+function weightedRecent(arr,window=20){
+  const seq=binarySeq(arr).slice(-window);
+  if(!seq.length)return .5;
+  let b=0,w=0;
+  seq.forEach((x,i)=>{const wt=Math.exp((i-seq.length+1)/Math.max(3,window*.45));w+=wt;if(x==="BIG")b+=wt});
+  return b/w;
+}
+
+function streakInfo(seq){
+  if(!seq.length)return {side:"—",len:0};
+  const s=seq[seq.length-1];let n=1;
+  for(let i=seq.length-2;i>=0&&seq[i]===s;i--)n++;
+  return {side:s,len:n};
+}
+function lastResultSignal(arr){
+  const seq=binarySeq(arr);if(seq.length<3)return {p:.5,n:0,label:"INSUFFICIENT"};
+  const last=seq[seq.length-1];
+  const r=conditionalProb(seq,[last],"BIG");
+  return {p:r.p,n:r.n,label:`After ${last}: ${pct(r.p)}% BIG (${r.n} cases)`};
+}
+function streakSignal(arr){
+  const seq=binarySeq(arr),st=streakInfo(seq);
+  if(st.len<2)return {p:.5,n:0,label:"No meaningful streak"};
+  let hits=0,total=0;
+  for(let i=st.len;i<seq.length;i++){
+    let k=1;
+    for(let j=i-1;j>0&&seq[j]===seq[i-1];j--)k++;
+    if(k===st.len && seq[i-1]===st.side){total++;if(seq[i]==="BIG")hits++}
+  }
+  return {p:total?(hits+1)/(total+2):.5,n:total,label:`${st.side}×${st.len} → ${total?pct((hits+1)/(total+2)):"—"}% BIG`};
+}
+function patternSignal(arr){
+  const seq=binarySeq(arr);
+  if(seq.length<6)return {p:.5,n:0,label:"Need more history"};
+  let best={p:.5,n:0,order:0};
+  for(const o of [5,4,3,2]){
+    const ctx=seq.slice(-o),r=conditionalProb(seq,ctx,"BIG");
+    if(r.n>best.n || (r.n===best.n&&o>best.order))best={...r,order:o};
+  }
+  return {...best,label:`${best.order}-step pattern · ${best.n} matches`};
+}
+function frequencySignal(arr){
+  const seq=binarySeq(arr);
+  const windows=[5,10,20,50].filter(n=>seq.length>=n);
+  if(!windows.length)return {p:.5,n:0,label:"Insufficient"};
+  let sum=0,w=0;
+  windows.forEach((n,i)=>{const q=seq.slice(-n);const p=q.filter(x=>x==="BIG").length/n;const wt=(i+1);sum+=p*wt;w+=wt});
+  const p=sum/w;return {p,n:Math.max(...windows),label:`Multi-window BIG rate ${pct(p)}%`};
+}
+function trendSignal(arr){
+  const seq=binarySeq(arr);if(seq.length<10)return {p:.5,label:"Insufficient trend history"};
+  const rates=[5,10,20].map(n=>seq.length>=n?seq.slice(-n).filter(x=>x==="BIG").length/n:null);
+  const r5=rates[0]??.5,r10=rates[1]??r5,r20=rates[2]??r10;
+  const accel=(r5-r10)*.55+(r10-r20)*.45;
+  const p=clamp(.5+(r5-.5)*.45+accel*.8,.08,.92);
+  return {p,label:`5/10/20 BIG: ${pct(r5)} / ${pct(r10)} / ${pct(r20)}`};
+}
+function regimeSignal(arr){
+  const seq=binarySeq(arr);if(seq.length<30)return {p:.5,label:"Baseline building"};
+  const a=seq.slice(-10),b=seq.slice(-30,-10);
+  const pa=a.filter(x=>x==="BIG").length/a.length,pb=b.filter(x=>x==="BIG").length/b.length;
+  return {p:clamp(.5+(pa-pb)*.65,.15,.85),label:`Recent ${pct(pa)}% vs baseline ${pct(pb)}%`};
+}
+function paritySignal(arr){
+  const seq=chronological(arr);if(seq.length<10)return {p:.5,n:0,label:"Insufficient"};
+  const last=seq[seq.length-1].parity;let b=0,t=0;
+  for(let i=1;i<seq.length;i++)if(seq[i-1].parity===last){t++;if(seq[i].side==="BIG")b++}
+  return {p:t?(b+1)/(t+2):.5,n:t,label:`After ${last}: ${t?pct((b+1)/(t+2)):"—"}% BIG`};
+}
+
+function runsTest(seq){
+  const x=seq.map(s=>s==="BIG"?1:0);const n1=x.filter(v=>v===1).length,n2=x.length-n1;
+  if(n1<2||n2<2)return null;
+  let R=1;for(let i=1;i<x.length;i++)if(x[i]!==x[i-1])R++;
+  const mean=2*n1*n2/(n1+n2)+1;
+  const variance=(2*n1*n2*(2*n1*n2-n1-n2))/(((n1+n2)**2)*(n1+n2-1));
+  return {z:(R-mean)/Math.sqrt(Math.max(variance,1e-9)),runs:R};
+}
+function autocorr(seq,lag=1){
+  const x=seq.map(s=>s==="BIG"?1:0);if(x.length<=lag+2)return 0;
+  const m=x.reduce((a,b)=>a+b,0)/x.length;
+  let num=0,den=0;
+  for(let i=0;i<x.length;i++)den+=(x[i]-m)**2;
+  for(let i=0;i<x.length-lag;i++)num+=(x[i]-m)*(x[i+lag]-m);
+  return den?num/den:0;
+}
+function entropy(seq){
+  if(!seq.length)return 0;const p=seq.filter(x=>x==="BIG").length/seq.length;
+  if(p===0||p===1)return 0;
+  return -(p*Math.log2(p)+(1-p)*Math.log2(1-p));
+}
+function diagnostics(arr){
+  const seq=binarySeq(arr).slice(-100);
+  const rt=runsTest(seq),ac=autocorr(seq,1),h=entropy(seq);
+  const structure=clamp(Math.abs((rt?.z||0))/3*.4+Math.abs(ac)*.6,0,1);
+  return {z:rt?.z??0,ac,h,structure};
+}
+
+function brierForPrediction(p,y){return (p-y)**2}
+
+function historicalModelAccuracy(modelName,arr){
+  const seq=chronological(arr);
+  if(seq.length<30)return .5;
+  let correct=0,total=0;
+  const start=Math.max(20,seq.length-250);
+  for(let i=start;i<seq.length;i++){
+    const train=seq.slice(0,i), y=seq[i].side==="BIG"?1:0;
+    let p=.5;
+    if(modelName==="markov1")p=markov(train,1).p;
+    if(modelName==="markov2")p=markov(train,2).p;
+    if(modelName==="markov3")p=markov(train,3).p;
+    if(modelName==="markov4")p=markov(train,4).p;
+    if(modelName==="pattern")p=patternSignal(train).p;
+    if(modelName==="last")p=lastResultSignal(train).p;
+    if(modelName==="streak")p=streakSignal(train).p;
+    if(modelName==="frequency")p=frequencySignal(train).p;
+    if(modelName==="trend")p=trendSignal(train).p;
+    if(modelName==="regime")p=regimeSignal(train).p;
+    if(modelName==="parity")p=paritySignal(train).p;
+    if(modelName==="digit"){
+      const d=digitMarkov(train,2);p=d.dist.reduce((s,q,n)=>s+(n>=5?q:0),0);
+    }
+    total++; if((p>=.5)===(y===1))correct++;
+  }
+  return total?correct/total:.5;
+}
+
+const MODEL_NAMES=[
+  ["markov1","Markov M1"],["markov2","Markov M2"],["markov3","Markov M3"],["markov4","Markov M4"],
+  ["digit","Digit transition"],["pattern","Pattern memory"],["last","Last-result state"],
+  ["streak","Dragon/streak"],["frequency","Frequency"],["trend","Trend"],["regime","Regime"],["parity","Parity"]
+];
+const BASE={
+  markov1:.13,markov2:.12,markov3:.10,markov4:.07,digit:.12,pattern:.12,last:.09,
+  streak:.06,frequency:.06,trend:.07,regime:.04,parity:.02
+};
+
+function modelSignal(name,arr){
+  if(name.startsWith("markov"))return markov(arr,Number(name.slice(-1))).p;
+  if(name==="digit"){const d=digitMarkov(arr,2);return d.dist.reduce((s,p,n)=>s+(n>=5?p:0),0)}
+  if(name==="pattern")return patternSignal(arr).p;
+  if(name==="last")return lastResultSignal(arr).p;
+  if(name==="streak")return streakSignal(arr).p;
+  if(name==="frequency")return frequencySignal(arr).p;
+  if(name==="trend")return trendSignal(arr).p;
+  if(name==="regime")return regimeSignal(arr).p;
+  if(name==="parity")return paritySignal(arr).p;
+  return .5;
+}
+function reliability(name,arr){
+  const a=historicalModelAccuracy(name,arr);
+  const n=arr.length;
+  const shrink=n<60?.35:n<120?.55:n<250?.75:.9;
+  return .5+(a-.5)*shrink;
+}
+
+function analyze(arr){
+  const d=diagnostics(arr);
+  const signals=[];
+  let sum=0,ws=0;
+  for(const [name,label] of MODEL_NAMES){
+    const p=modelSignal(name,arr);
+    const rel=reliability(name,arr);
+    const w=BASE[name]*(.55+Math.abs(rel-.5)*3);
+    signals.push({name,label,p,rel,w});
+    sum+=p*w;ws+=w;
+  }
+  let pBig=ws?sum/ws:.5;
+  const agree=signals.filter(s=>s.p>.55).length,disagree=signals.filter(s=>s.p<.45).length;
+  const consensus=Math.abs(agree-disagree)/Math.max(1,signals.length);
+  const n=arr.length;
+  let confidence=50+Math.abs(pBig-.5)*75;
+  confidence += consensus*10;
+  confidence += Math.min(.08,d.structure)*12;
+  if(n<50)confidence-=8;
+  if(d.structure<.12)confidence-=7;
+  if(Math.abs(pBig-.5)<.07)confidence-=10;
+  confidence=clamp(confidence,50,94);
+
+  const last=chronological(arr).at(-1),seq=binarySeq(arr),st=streakInfo(seq);
+  const pattern=patternSignal(arr),lastSig=lastResultSignal(arr),trend=trendSignal(arr),reg=regimeSignal(arr),freq=frequencySignal(arr),dig=digitMarkov(arr,2);
+  const candidateDigits=dig.dist.map((p,n)=>({n,p})).sort((a,b)=>b.p-a.p).slice(0,3);
+  const pick=pBig>=.5?"BIG":"SMALL";
+  const evidence=Math.abs(pBig-.5)>=.12&&consensus>=.16?"STRONG":Math.abs(pBig-.5)>=.07?"MIXED":"WEAK";
+  const reasons=[];
+  reasons.push(`<strong>Last result:</strong> ${last?.number??"—"} (${last?.side??"—"}). ${lastSig.label}.`);
+  reasons.push(`<strong>Pattern:</strong> ${pattern.label}, ${pct(pattern.p)}% BIG estimate.`);
+  reasons.push(`<strong>Trend:</strong> ${trend.label}.`);
+  reasons.push(`<strong>Streak:</strong> ${st.side} × ${st.len}; ${streakSignal(arr).label}.`);
+  reasons.push(`<strong>Decision:</strong> ${pick} with ${confidence.toFixed(0)}% model confidence; evidence is ${evidence.toLowerCase()}.`);
+
+  return {pBig,confidence,pick,evidence,signals,diag:d,last,st,pattern,lastSig,trend,reg,freq,digit:dig,candidateDigits,reasons,agree,disagree};
+}
+
+function nextPeriod(issue){try{return(String(BigInt(issue)+1n))}catch{return issue+"+1"}}
+
+function makePrediction(arr){
+  if(arr.length<CFG.requiredFeed)return null;
+  const a=analyze(arr);
+  return {pick:a.pick,confidence:a.confidence,pBig:a.pBig,created:Date.now(),model:"reasoning.v7.1",evidence:a.evidence,candidateDigits:a.candidateDigits};
+}
+
+function distinct3(a,b,c){return Number.isFinite(Number(a))&&Number.isFinite(Number(b))&&Number.isFinite(Number(c))&&new Set([Number(a),Number(b),Number(c)]).size===3}
+function pdfContext(arr){const a=hrChrono(arr);if(a.length<3)return {ready:false,key:"",reason:"Need 3 observed results."};const last=a.slice(-3),key=last.map(x=>x.number).join("");const eligible=distinct3(last[0].number,last[1].number,last[2].number);if(!eligible)return {ready:false,key,contextClass:"REPEATED",reason:"PDF source table covers distinct-digit triples only; repeated context is an explicit abstention."};const rule=pdfLookup(last[0].number,last[1].number,last[2].number);if(!rule)return {ready:false,key,contextClass:"DISTINCT / UNMAPPED",reason:"No exact supplied-PDF mapping found for this context."};return {ready:true,key,contextClass:"3 DISTINCT",rule,side:side(rule.number),color:rule.color,last};}
+function pdfFirstDecision(arr){const p=pdfContext(arr);if(!p.ready)return {ready:false,pdf:p};const digit=p.rule.number;const big=digit>=5;return {ready:true,pick:big?"BIG":"SMALL",digit,color:p.rule.color,confidence:null,pBig:big?1:0,pdf:p,model:"pdf-720"};}
+function championBenchmark(arr){return arr.length>=CFG.requiredFeed?analyze(arr):null;}
+function pdfContextClass(a,b,c){if(!Number.isFinite(a)||!Number.isFinite(b)||!Number.isFinite(c))return "—";return distinct3(a,b,c)?"3 DISTINCT":(a===b&&b===c?"AAA":(a===b||b===c||a===c?"EXACTLY TWO EQUAL":"REPEATED"));}
+
+function scoreSettled(list){
+  const chrono=chronological(list);
+  for(const row of chrono){
+    const p=predictions[row.issue];
+    if(!p || p.scored)continue;
+    const actual=side(row.number);
+    p.actual=actual;p.actualNumber=row.number;p.scored=true;p.win=p.pick===actual;
+    save(LS.predictions,predictions);playFx(row.issue,p);
+  }
+  const scored=Object.values(predictions).filter(p=>p && typeof p==="object" && p.scored);
+  metrics.wins=scored.filter(p=>p.win).length;
+  metrics.losses=scored.filter(p=>!p.win).length;
+  metrics.total=scored.length;
+  save(LS.metrics,metrics);
+}
+
+function auditFindPreHistory(issue){const a=chronological(history);const idx=a.findIndex(x=>String(x.issue)===String(issue));return idx<0?[]:a.slice(0,idx)}
+function auditDistance(expected,actual){const abs=Math.abs(Number(expected)-Number(actual));const circ=Math.min(abs,10-abs);return {abs,circular:circ,relation:abs===0?"EXACT":(circ===1?"ADJACENT":(circ===2?"NEAR-2":"FAR"))}}
+function auditState(pre){const q=pre.map(x=>side(x.number));const last=pre.at(-1);let run=1;if(last)for(let i=pre.length-2;i>=0&&q[i]===q[q.length-1];i--)run++;const six=q.length>=6?q.slice(-6).join(""):null;let transition=null;if(last){let b=0,n=0;for(let i=1;i<pre.length;i++)if(side(pre[i-1].number)===last.side){n++;if(side(pre[i].number)==="BIG")b++}transition=n?{pBig:(b+1)/(n+2),n}:null}return {lastDigit:last?.number??null,lastSide:last?.side??null,lastParity:last?.parity??null,runSide:last?.side??null,runLength:run,six,transition}}
+function auditPatternReasons(pre,expectedSide){const st=auditState(pre),reasons=[];if(st.lastSide){reasons.push(`last-side=${st.lastSide}`);if(st.lastSide!==expectedSide)reasons.push(`last-side opposes PDF`)}if(st.transition){const p=st.transition.pBig;reasons.push(`transition P(BIG)=${(p*100).toFixed(1)}% (n=${st.transition.n})`);if((p>=.5?"BIG":"SMALL")!==expectedSide)reasons.push(`transition opposes PDF`)}if(st.runLength>=2)reasons.push(`run=${st.runSide}×${st.runLength}`);if(st.six)reasons.push(`BS6=${st.six}`);return {state:st,reasons}}
+function buildAuditEvent(issue,p){const pre=auditFindPreHistory(issue),actual=p.actualNumber,expected=p.digit,d=auditDistance(expected,actual),sideExpected=p.pick,sideActual=side(actual);let classification,why=[];if(actual===expected){classification="EXACT WIN";why.push("actual digit matched PDF digit")}else if(sideActual!==sideExpected){classification="SIDE REVERSED";why.push(`PDF expected ${sideExpected}, actual was ${sideActual}`)}else if(d.circular<=2){classification="SIDE WIN · NEAR NUMBER";why.push(`same BIG/SMALL side, but digit distance was ${d.abs} (circular ${d.circular})`)}else{classification="SIDE WIN · FAR NUMBER";why.push(`same BIG/SMALL side, but digit distance was ${d.abs}`)}const pat=auditPatternReasons(pre,sideExpected);const opposed=pat.reasons.filter(x=>x.includes("opposes PDF"));if(opposed.length)why.push(...opposed);if(!opposed.length&&pat.state.lastSide)why.push("observable side-state did not directly oppose PDF");const colorExpected=String(p.color||"").toLowerCase(),colorActual=String((history.find(x=>String(x.issue)===String(issue))?.color)||"").toLowerCase();const colorHit=!!colorExpected&&!!colorActual&&colorExpected===colorActual;return {issue:String(issue),createdAt:new Date().toISOString(),context:p.context||pre.slice(-3).map(x=>x.number).join(""),expectedDigit:expected,expectedSide:sideExpected,expectedColor:p.color||null,actualDigit:actual,actualSide:sideActual,actualColor:colorActual||null,sideWin:sideActual===sideExpected,exactNumberWin:actual===expected,colorHit,distanceAbs:d.abs,distanceCircular:d.circular,distanceRelation:d.relation,classification,why,patternState:pat.state,patternReasons:pat.reasons}}
+function recordPatternAudit(issue,p){if(!p||!p.scored)return;const exists=patternAudit.some(x=>String(x.issue)===String(issue));if(exists)return;const ev=buildAuditEvent(issue,p);patternAudit.push(ev);patternAudit=patternAudit.slice(-5000);save(LS.patternAudit,patternAudit)}
+function renderPatternAudit(){const rows=patternAudit.slice().reverse();setText("auditTotal",rows.length);setText("auditPass",rows.filter(x=>x.sideWin).length);setText("auditReverse",rows.filter(x=>x.classification==="SIDE REVERSED").length);setText("auditNear",rows.filter(x=>x.classification.includes("NEAR NUMBER")).length);const last=rows[0];if(last){setText("auditLatest",`${last.issue}: ${last.context} → PDF ${last.expectedDigit} ${last.expectedSide} → actual ${last.actualDigit} ${last.actualSide}. ${last.classification}. ${last.why.join(" · ")}`)}const body=$("auditBody");if(body)body.innerHTML=rows.slice(0,12).map(x=>`<tr><td>#${esc(String(x.issue).slice(-6))}</td><td>${esc(String(x.context))} → ${x.expectedDigit}</td><td>${x.actualDigit} ${esc(x.actualSide)}</td><td><span class="audit-chip ${x.classification.includes("EXACT")?"chip-win":x.classification.includes("REVERSED")?"chip-reverse":x.classification.includes("NEAR")?"chip-near":"chip-fail"}">${esc(x.classification)}</span></td><td>${esc(x.why.join(" · "))}</td></tr>`).join("")||'<tr><td colspan="5" class="center">No settled audit events yet.</td></tr>'}
+function downloadPatternAudit(){const payload={engine:"WinGo PDF Knowledge Engine v25",sessionStarted:patternAudit[0]?.createdAt||null,exportedAt:new Date().toISOString(),total:patternAudit.length,summary:{sideWins:patternAudit.filter(x=>x.sideWin).length,exactNumberWins:patternAudit.filter(x=>x.exactNumberWin).length,reversals:patternAudit.filter(x=>x.classification==="SIDE REVERSED").length,nearNumber:patternAudit.filter(x=>x.classification.includes("NEAR NUMBER")).length,colourHits:patternAudit.filter(x=>x.colorHit).length},events:patternAudit};const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));a.download=`wingo-pdf-pattern-audit-${new Date().toISOString().replace(/[:.]/g,"-")}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+
+function scorePdfSettled(list){const chrono=chronological(list);for(const row of chrono){const p=pdfPredictions[row.issue];if(!p||p.scored)continue;p.actual=side(row.number);p.actualNumber=row.number;p.scored=true;p.win=p.pick===p.actual;recordPatternAudit(row.issue,p);save(LS.pdfPredictions,pdfPredictions);playFx(row.issue,p)}const scored=Object.values(pdfPredictions).filter(p=>p&&typeof p==="object"&&p.scored);pdfMetrics.wins=scored.filter(p=>p.win).length;pdfMetrics.losses=scored.filter(p=>!p.win).length;pdfMetrics.total=scored.length;save(LS.pdfMetrics,pdfMetrics)}
+
+
+/* =========================
+   V25 PDF FORENSICS ENGINE
+   ========================= */
+const PDF_SOURCE_META={
+  fileName:"dlstudocu.com_wingo-game-refined-combination-analysis.pdf",
+  sha256:"b7a5676cb404fcbcd3b46280f2716da09dfd79feb2698fd5da159c2950ea4099",
+  pages:27,
+  declaredScope:"3-number combinations (0-9)",
+  verifiedRows:720,
+  verifiedDistinctContexts:720,
+  note:"The supplied table contains 720 distinct ordered triples; repeated-digit triples are not treated as supplied PDF mappings."
+};
+
+const FXLS={
+  memory:"wingo_pdf_context_memory_v25",
+  integrity:"wingo_pdf_integrity_v25",
+  started:"wingo_pdf_session_started_v25"
+};
+let fxMemory=load(FXLS.memory,{});
+if(!fxMemory||typeof fxMemory!=="object"||Array.isArray(fxMemory))fxMemory={};
+let fxIntegrity=load(FXLS.integrity,{observedIssues:[],gaps:[],duplicates:[],outOfOrder:[],lastProcessedIssue:null,visibility:"visible",hiddenAt:null,visibleAt:null});
+if(!fxIntegrity||typeof fxIntegrity!=="object")fxIntegrity={observedIssues:[],gaps:[],duplicates:[],outOfOrder:[],lastProcessedIssue:null,visibility:"visible"};
+if(!Array.isArray(fxIntegrity.observedIssues))fxIntegrity.observedIssues=[];
+if(!Array.isArray(fxIntegrity.gaps))fxIntegrity.gaps=[];
+if(!Array.isArray(fxIntegrity.duplicates))fxIntegrity.duplicates=[];
+if(!Array.isArray(fxIntegrity.outOfOrder))fxIntegrity.outOfOrder=[];
+if(!fxIntegrity.startedAt)fxIntegrity.startedAt=load(FXLS.started,new Date().toISOString());
+save(FXLS.started,fxIntegrity.startedAt);
+
+function fxPct(n,d){return d?((n/d)*100).toFixed(1)+"%":"—"}
+function fxCandidateStatus(n,sideRate,reverseRate){
+  if(n<20)return ["BUILDING","f-muted"];
+  if(sideRate>=.55 && reverseRate<.45)return ["PROMISING","f-good"];
+  if(reverseRate>=.45)return ["REVERSAL-PRONE","f-warn"];
+  return ["OBSERVE","f-blue"];
+}
+function fxDistanceLabel(d){
+  if(!d)return "—";
+  return d.relation+" · abs "+d.abs+" · circ "+d.circular;
+}
+function fxSignedDirection(expected,actual){
+  const e=Number(expected),a=Number(actual);
+  const cw=(a-e+10)%10,ccw=(e-a+10)%10;
+  if(cw===0)return "EXACT";
+  if(cw<ccw)return "CW +"+cw;
+  if(ccw<cw)return "CCW -"+ccw;
+  return "TIE ±"+cw;
+}
+function fxSignalSummary(ev){
+  const st=ev.patternState||{};
+  const arr=[];
+  if(st.lastSide)arr.push(`last-side=${st.lastSide}${st.lastSide!==ev.expectedSide?" [OPPOSE]":" [SUPPORT]"}`);
+  if(st.transition){
+    const p=Number(st.transition.pBig);
+    const s=p>=.5?"BIG":"SMALL";
+    arr.push(`transition=${s} ${Math.round(p*1000)/10}% n=${st.transition.n}${s!==ev.expectedSide?" [OPPOSE]":" [SUPPORT]"}`);
+  }
+  if(st.runSide)arr.push(`run=${st.runSide}×${st.runLength}`);
+  if(st.six)arr.push(`BS6=${st.six}`);
+  return arr.join(" · ")||"No pre-result state available";
+}
+function fxBuildExplanation(ev){
+  const st=ev.patternState||{}, out=[];
+  const expected=ev.expectedSide, actual=ev.actualSide;
+  if(actual!==expected)out.push(`REVERSAL: PDF expected ${expected}, actual ${actual}.`);
+  else out.push(`SIDE HELD: actual remained ${actual}.`);
+  if(ev.exactNumberWin)out.push("EXACT digit matched.");
+  else out.push(`Exact digit missed; circular distance ${ev.distanceCircular}.`);
+  if(ev.distanceCircular<=2 && !ev.exactNumberWin)out.push("Near-number behaviour is present.");
+  if(st.lastSide)out.push(st.lastSide===expected?"Previous side supported PDF.":"Previous side opposed PDF.");
+  if(st.transition){
+    const s=Number(st.transition.pBig)>=.5?"BIG":"SMALL";
+    out.push(`Transition model pointed ${s} using n=${st.transition.n}; treat as weak if n is small.`);
+  }
+  if(st.runLength>=2)out.push(`A ${st.runSide} run of ${st.runLength} was active.`);
+  return out.join(" ");
+}
+function fxClass(ev){
+  if(ev.exactNumberWin)return "EXACT";
+  if(!ev.sideWin)return ev.distanceCircular<=2?"REVERSAL · NEAR":"REVERSAL · FAR";
+  return ev.distanceCircular<=2?"SIDE PASS · NEAR":"SIDE PASS · FAR";
+}
+function fxUpsertMemory(ev){
+  const k=String(ev.context);
+  if(!k)return;
+  const m=fxMemory[k]||{context:k,n:0,exact:0,side:0,reversal:0,near:0,far:0,circSum:0,absSum:0,colour:0,support:0,oppose:0,lastIssues:[]};
+  m.n++;
+  if(ev.exactNumberWin)m.exact++;
+  if(ev.sideWin)m.side++;
+  if(!ev.sideWin)m.reversal++;
+  if(ev.distanceCircular<=2 && !ev.exactNumberWin)m.near++;
+  if(ev.distanceCircular>2)m.far++;
+  m.circSum+=Number(ev.distanceCircular)||0;
+  m.absSum+=Number(ev.distanceAbs)||0;
+  if(ev.colorHit)m.colour++;
+  const rs=(ev.patternReasons||[]).join(" ");
+  if(rs.includes("opposes PDF"))m.oppose++; else m.support++;
+  m.lastIssues=[...(m.lastIssues||[]),String(ev.issue)].slice(-10);
+  fxMemory[k]=m;
+}
+
+function buildTripleContextMemory(list){
+  const seq=chronological(list).map(x=>Number(x.number)).filter(Number.isFinite);
+  const mem={};
+  for(let i=3;i<seq.length;i++){
+    const k=`${seq[i-3]}${seq[i-2]}${seq[i-1]}`,d=seq[i];
+    const m=mem[k]||{context:k,n:0,digits:Array(10).fill(0),big:0,small:0};
+    m.n++;m.digits[d]++;if(d>=5)m.big++;else m.small++;mem[k]=m;
+  }
+  return mem;
+}
+function renderTripleContextLab(){
+  const mem=buildTripleContextMemory(history),keys=Object.keys(mem);
+  const repeatedKeys=keys.filter(k=>new Set(k.split("")).size<3);
+  setText("ctxCovered",`${keys.length}/1000`);
+  setText("ctxRepeated",`${repeatedKeys.length}/280`);
+  const chrono=chronological(history),cur=chrono.length>=3?chrono.slice(-3).map(x=>x.number).join(""):"";
+  setText("ctxCurrent",cur||"—");
+  const cm=cur?mem[cur]:null;setText("ctxCurrentN",cm?cm.n:0);
+  if(cm){
+    const ranked=cm.digits.map((n,d)=>({d,n})).filter(x=>x.n).sort((a,b)=>b.n-a.n);
+    const top=ranked.slice(0,4).map(x=>`${x.d} (${x.n})`).join(" · ");
+    const pdf=PDF_TABLE[cur];
+    const note=pdf
+      ?`Current supplied-PDF mapping: ${cur} → ${pdf.number} ${pdf.color}. Empirical next-digit memory: ${top||"none"}. The empirical layer is a challenger only.`
+      :`Current context ${cur} is outside the supplied 720 distinct mappings (repeated digits). Empirical next-digit memory: ${top||"none"}. PDF remains ABSTAIN.`;
+    setText("ctxCurrentNote",note);
+  }else setText("ctxCurrentNote","No prior occurrence of the current context yet; this is a BUILDING state.");
+  const rows=keys.map(k=>mem[k]).sort((a,b)=>b.n-a.n).slice(0,40);
+  const body=$("ctxBody");
+  if(body)body.innerHTML=rows.length?rows.map(m=>{
+    const ranked=m.digits.map((n,d)=>({d,n})).filter(x=>x.n).sort((a,b)=>b.n-a.n);
+    const top=ranked.slice(0,4).map(x=>`${x.d} (${x.n})`).join(" · ");
+    const rate=ranked[0]?ranked[0].n/m.n:0;
+    const pdf=PDF_TABLE[m.context];
+    const repeated=new Set(m.context.split("")).size<3;
+    const status=m.n<20?"BUILDING":rate>.5?"CONCENTRATED":"OBSERVE";
+    const cls=m.n<20?"f-muted":rate>.5?"f-warn":"f-blue";
+    return `<tr><td class="v25-mono">${m.context}</td><td>${m.n}</td><td>${esc(top)}</td><td>${fxPct(ranked[0]?.n||0,m.n)}</td><td>${fxPct(m.big,m.n)}</td><td>${pdf?`${pdf.number} ${pdf.color}`:(repeated?"REPEATED / NONE":"NONE")}</td><td><span class="fchip ${cls}">${status}</span></td></tr>`;
+  }).join(""):'<tr><td colspan="7">Building all-context empirical memory.</td></tr>';
+  return mem;
+}
+function fxRecordIntegrity(list){
+  const chrono=chronological(list);
+  const seen=new Set(fxIntegrity.observedIssues.map(String));
+  for(const row of chrono){
+    const id=String(row.issue);
+    if(seen.has(id)){
+      if(!fxIntegrity.duplicates.includes(id))fxIntegrity.duplicates.push(id);
+      continue;
+    }
+    if(fxIntegrity.lastProcessedIssue){
+      try{
+        const prev=BigInt(fxIntegrity.lastProcessedIssue),cur=BigInt(id);
+        const delta=cur-prev;
+        if(delta>1n){
+          const gap={from:String(prev),to:String(cur),missing:Number(delta-1n)};
+          fxIntegrity.gaps.push(gap);
+        }else if(delta<0n){
+          fxIntegrity.outOfOrder.push({previous:String(prev),current:id});
+        }
+      }catch{}
+    }
+    fxIntegrity.observedIssues.push(id);
+    fxIntegrity.lastProcessedIssue=id;
+    seen.add(id);
+  }
+  fxIntegrity.observedIssues=fxIntegrity.observedIssues.slice(-10000);
+  fxIntegrity.gaps=fxIntegrity.gaps.slice(-1000);
+  fxIntegrity.duplicates=fxIntegrity.duplicates.slice(-1000);
+  fxIntegrity.outOfOrder=fxIntegrity.outOfOrder.slice(-1000);
+  save(FXLS.integrity,fxIntegrity);
+}
+function fxContextRows(){
+  return Object.values(fxMemory).sort((a,b)=>b.n-a.n || String(a.context).localeCompare(String(b.context)));
+}
+function fxOutcomeRows(){
+  const n=patternAudit.length;
+  const exact=patternAudit.filter(x=>x.exactNumberWin).length;
+  const side=patternAudit.filter(x=>x.sideWin).length;
+  const rev=n-side;
+  const near=patternAudit.filter(x=>x.distanceCircular<=2 && !x.exactNumberWin).length;
+  const far=patternAudit.filter(x=>x.distanceCircular>2).length;
+  const avg=n?patternAudit.reduce((s,x)=>s+(Number(x.distanceCircular)||0),0)/n:0;
+  return [
+    ["EXACT",exact,fxPct(exact,n),exact?"0":"—","Exact PDF digit matched."],
+    ["SIDE PASS",side,fxPct(side,n),n?avg.toFixed(2):"—",`Same BIG/SMALL side; average circular distance ${n?avg.toFixed(2):"—"}.`],
+    ["REVERSAL",rev,fxPct(rev,n),n?(patternAudit.filter(x=>!x.sideWin).reduce((s,x)=>s+x.distanceCircular,0)/Math.max(1,rev)).toFixed(2):"—","PDF side and actual side disagreed."],
+    ["NEAR-NUMBER",near,fxPct(near,n),n?(patternAudit.filter(x=>x.distanceCircular<=2&&!x.exactNumberWin).reduce((s,x)=>s+x.distanceCircular,0)/Math.max(1,near)).toFixed(2):"—","Non-exact outcome within circular distance 1–2."],
+    ["FAR",far,fxPct(far,n),n?(patternAudit.filter(x=>x.distanceCircular>2).reduce((s,x)=>s+x.distanceCircular,0)/Math.max(1,far)).toFixed(2):"—","Circular distance greater than 2."]
+  ];
+}
+function renderForensics(){
+  const tripleMemory=renderTripleContextLab();
+  const n=patternAudit.length;
+  const exact=patternAudit.filter(x=>x.exactNumberWin).length;
+  const side=patternAudit.filter(x=>x.sideWin).length;
+  const rev=n-side;
+  const near=patternAudit.filter(x=>x.distanceCircular<=2&&!x.exactNumberWin).length;
+  setText("fxExact",fxPct(exact,n));setText("fxSide",fxPct(side,n));setText("fxReverse",fxPct(rev,n));setText("fxNear",fxPct(near,n));
+  const avg=n?patternAudit.reduce((s,x)=>s+x.distanceCircular,0)/n:0;
+  const reversalNear=patternAudit.filter(x=>!x.sideWin&&x.distanceCircular<=2).length;
+  const reversalFar=patternAudit.filter(x=>!x.sideWin&&x.distanceCircular>2).length;
+  setText("fxDiagnosis",n
+    ? `Observed ${n} settled PDF events. Exact-number=${exact}/${n}; same-side=${side}/${n}; reversals=${rev}/${n}; near-number=${near}/${n}; average circular distance=${avg.toFixed(2)}. Among reversals: ${reversalNear} near and ${reversalFar} far. These are descriptive sample statistics, not proof of a generator rule.`
+    :"Waiting for settled PDF events. The lab will build context-level evidence as the browser observes new periods.");
+  const gap=fxIntegrity.gaps.reduce((s,x)=>s+Number(x.missing||0),0);
+  setText("fxIntegrity",`Data integrity: ${fxIntegrity.observedIssues.length} unique issues tracked · ${gap} inferred missing sequence slots · ${fxIntegrity.duplicates.length} duplicates · ${fxIntegrity.outOfOrder.length} out-of-order events · browser ${fxIntegrity.visibility}.`);
+  const ob=$("fxOutcomeBody");
+  if(ob)ob.innerHTML=fxOutcomeRows().map(r=>`<tr><td><span class="fchip ${r[0]==="EXACT"?"f-good":r[0]==="REVERSAL"?"f-bad":r[0]==="NEAR-NUMBER"?"f-warn":"f-blue"}">${r[0]}</span></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${esc(r[4])}</td></tr>`).join("");
+  const cb=$("fxContextBody");
+  if(cb){
+    const rows=fxContextRows().slice(0,30);
+    cb.innerHTML=rows.length?rows.map(m=>{
+      const sideRate=m.side/m.n,revRate=m.reversal/m.n;const [st,cl]=fxCandidateStatus(m.n,sideRate,revRate);
+      return `<tr><td class="v25-mono">${esc(m.context)}</td><td>${m.n}</td><td>${fxPct(m.exact,m.n)}</td><td>${fxPct(m.side,m.n)}</td><td>${fxPct(m.reversal,m.n)}</td><td>${fxPct(m.near,m.n)}</td><td>${(m.circSum/m.n).toFixed(2)}</td><td><span class="fchip ${cl}">${st}</span></td></tr>`;
+    }).join(""):'<tr><td colspan="8">Context memory is building.</td></tr>';
+  }
+  const rb=$("fxReverseBody");
+  if(rb){
+    const rows=patternAudit.filter(x=>!x.sideWin).slice(-20).reverse();
+    rb.innerHTML=rows.length?rows.map(x=>`<tr><td class="v25-mono">#${esc(String(x.issue).slice(-7))}</td><td>${x.expectedDigit} ${esc(x.expectedSide)} → ${x.actualDigit} ${esc(x.actualSide)}</td><td>${fxDistanceLabel({abs:x.distanceAbs,circular:x.distanceCircular,relation:x.distanceRelation})}<br>${fxSignedDirection(x.expectedDigit,x.actualDigit)}</td><td>${esc(fxSignalSummary(x))}</td><td>${esc(fxBuildExplanation(x))}</td></tr>`).join(""):'<tr><td colspan="5">No reversals yet.</td></tr>';
+  }
+}
+function csvCell(v){const s=String(v??"");return `"${s.replace(/"/g,'""')}"`}
+function downloadText(name,text,type="text/plain"){
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+function downloadForensicsCsv(){
+  const head=["issue","context","expectedDigit","expectedSide","actualDigit","actualSide","expectedColor","actualColor","exactNumber","sidePass","reversal","colorHit","distanceAbs","distanceCircular","distanceRelation","direction","classification","patternReasons","patternState"];
+  const lines=[head.map(csvCell).join(",")];
+  patternAudit.forEach(x=>lines.push([x.issue,x.context,x.expectedDigit,x.expectedSide,x.actualDigit,x.actualSide,x.expectedColor,x.actualColor,x.exactNumberWin,x.sideWin,!x.sideWin,x.colorHit,x.distanceAbs,x.distanceCircular,x.distanceRelation,fxSignedDirection(x.expectedDigit,x.actualDigit),fxClass(x),(x.patternReasons||[]).join(" | "),JSON.stringify(x.patternState||{})].map(csvCell).join(",")));
+  downloadText(`wingo-pdf-forensics-${new Date().toISOString().replace(/[:.]/g,"-")}.csv`,lines.join("\n"),"text/csv");
+}
+function downloadContextCsv(){
+  const head=["context","n","exactRate","sideRate","reversalRate","nearRate","avgCircularDistance","avgAbsoluteDistance","colourRate","supportCount","opposeCount","status"];
+  const lines=[head.map(csvCell).join(",")];
+  fxContextRows().forEach(m=>{const [st]=fxCandidateStatus(m.n,m.side/m.n,m.reversal/m.n);lines.push([m.context,m.n,m.exact/m.n,m.side/m.n,m.reversal/m.n,m.near/m.n,m.circSum/m.n,m.absSum/m.n,m.colour/m.n,m.support,m.oppose,st].map(csvCell).join(","))});
+  downloadText(`wingo-pdf-context-memory-${new Date().toISOString().replace(/[:.]/g,"-")}.csv`,lines.join("\n"),"text/csv");
+}
+function downloadResearchBundle(){
+  const contextMemory=fxContextRows().map(m=>({...m,exactRate:m.exact/m.n,sideRate:m.side/m.n,reversalRate:m.reversal/m.n,nearRate:m.near/m.n,avgCircularDistance:m.circSum/m.n,avgAbsoluteDistance:m.absSum/m.n,colourRate:m.colour/m.n,status:fxCandidateStatus(m.n,m.side/m.n,m.reversal/m.n)[0]}));
+  const allTripleContextMemory=buildTripleContextMemory(history);
+  const bundle={
+    engine:"WinGo PDF Knowledge Engine v25",
+    source:PDF_SOURCE_META,
+    sessionStarted:fxIntegrity.startedAt,
+    exportedAt:new Date().toISOString(),
+    methodology:{
+      predictionLockedBeforeResult:true,
+      futureLeakageGuard:true,
+      exactNumberBaseline:0.10,
+      binarySideBaseline:0.50,
+      colourIndependenceWarning:"PDF colour is derived from the predicted digit in the supplied table; colour agreement must not be counted as independent predictive evidence.",
+      causalWarning:"Forensics describe observed relationships and candidate pre-result conflicts; they do not prove why a hidden generator produced an outcome."
+    },
+    summary:{
+      audited:n,
+      exactNumberWins:exact,
+      sidePasses:side,
+      reversals:rev,
+      nearNumber:near,
+      farNumber:patternAudit.filter(x=>x.distanceCircular>2).length,
+      colourHits:patternAudit.filter(x=>x.colorHit).length,
+      averageCircularDistance:n?patternAudit.reduce((s,x)=>s+x.distanceCircular,0)/n:null
+    },
+    dataIntegrity:fxIntegrity,
+    history:chronological(history),
+    lockedPdfPredictions:pdfPredictions,
+    patternAudit,
+    contextMemory,
+    allTripleContextMemory,
+    patternFamilies:{
+      pdf720:"Supplied PDF exact lookup for distinct triples",
+      repeatedContexts:"Research only unless empirical evidence is accumulated",
+      twoDigit:"Empirical challenger",
+      threeDigit:"Empirical challenger",
+      bigSmall6:"Empirical challenger",
+      run:"Empirical challenger",
+      alternation:"Empirical challenger",
+      block:"Empirical challenger",
+      break:"Empirical challenger",
+      direction:"Empirical challenger",
+      parity:"Derived-state challenger",
+      colour:"Derived-state challenger",
+      mirror:"Empirical challenger",
+      hotCold:"Empirical challenger"
+    }
+  };
+  downloadText(`wingo-pdf-research-bundle-${new Date().toISOString().replace(/[:.]/g,"-")}.json`,JSON.stringify(bundle,null,2),"application/json");
+}
+document.addEventListener("visibilitychange",()=>{
+  fxIntegrity.visibility=document.visibilityState;
+  if(document.visibilityState==="hidden")fxIntegrity.hiddenAt=new Date().toISOString();
+  else fxIntegrity.visibleAt=new Date().toISOString();
+  save(FXLS.integrity,fxIntegrity);
+});
+function fxHook(){
+  const dbtn=$("downloadResearchBundleBtn");if(dbtn)dbtn.onclick=downloadResearchBundle;
+  const cbtn=$("downloadForensicsCsvBtn");if(cbtn)cbtn.onclick=downloadForensicsCsv;
+  const xbtn=$("downloadContextCsvBtn");if(xbtn)xbtn.onclick=downloadContextCsv;
+  renderForensics();
+}
+function fxLearnFromAudit(){
+  // Rebuild memory idempotently from the immutable audit log.
+  fxMemory={};
+  for(const ev of patternAudit)fxUpsertMemory(ev);
+  save(FXLS.memory,fxMemory);
+  renderForensics();
+}
+const _v25RecordPatternAudit=recordPatternAudit;
+recordPatternAudit=function(issue,p){
+  const before=patternAudit.length;
+  _v25RecordPatternAudit(issue,p);
+  if(patternAudit.length!==before){
+    fxRecordIntegrity(latestList.length?latestList:history);
+    fxUpsertMemory(patternAudit[patternAudit.length-1]);
+    save(FXLS.memory,fxMemory);
+    renderForensics();
+  }
+};
+setTimeout(fxHook,0);
+fxLearnFromAudit();
+
+function render(list){
+  if(!list.length)return;
+  fxRecordIntegrity(list);
+  latestList=list.map(normalize).filter(Boolean);
+  mergeHistory(latestList);
+  scorePdfSettled(latestList);
+  scoreSettled(latestList);
+
+  if(latestList.length>=CFG.requiredFeed){
+    const latest=latestList[0],next=nextPeriod(latest.issue);
+    $("nextPeriod").textContent=next;
+    const champion=championBenchmark(history);
+    if(champion){const existing=predictions[next];if(!existing||existing.scored){predictions[next]={pick:champion.pick,confidence:champion.confidence,pBig:champion.pBig,created:Date.now(),model:"reasoning.v7.1-benchmark",evidence:champion.evidence,candidateDigits:champion.candidateDigits};save(LS.predictions,predictions)}}
+    const pdf=pdfFirstDecision(history);
+    latestPdf=pdf;
+    if(pdf.ready){const existing=pdfPredictions[next];if(!existing||existing.scored){pdfPredictions[next]={pick:pdf.pick,digit:pdf.digit,color:pdf.color,created:Date.now(),model:"pdf-720-primary",context:pdf.pdf.key};save(LS.pdfPredictions,pdfPredictions)}}
+
+    // PDF is the primary decision source. v7.1 remains visible as a benchmark.
+    if(pdf.ready){
+      $("predValue").textContent=pdf.digit;
+      $("predValue").className="pred "+(pdf.pick==="BIG"?"big":"small");
+      $("predDetail").textContent=`${pdf.pick} · ${pdf.color} · context ${pdf.pdf.key} · supplied PDF exact lookup`;
+      $("conf").textContent="READY";
+      $("pbig").textContent=pdf.pick==="BIG"?"100%":"0%";
+      $("evidence").textContent="PDF RULE";
+      $("reason").innerHTML=`<strong>Primary decision:</strong> PDF rule ${esc(pdf.pdf.key)} → ${pdf.digit} ${esc(pdf.color)} → ${pdf.pick}. <strong>Benchmark:</strong> v7.1 says ${champion?.pick||"—"}. The benchmark is shown for comparison and does not override the supplied PDF rule.`;
+    }else{
+      $("predValue").textContent="WAIT";
+      $("predValue").className="pred";
+      $("predDetail").textContent=pdf.pdf.key?`Context ${pdf.pdf.key} · ${pdf.pdf.contextClass} · PDF abstains`:`${pdf.pdf.reason}`;
+      $("conf").textContent="—";
+      $("pbig").textContent="—";
+      $("evidence").textContent="ABSTAIN";
+      $("reason").innerHTML=`<strong>PDF-first abstention:</strong> ${esc(pdf.pdf.reason)} ${champion?`v7.1 benchmark would say <strong>${champion.pick}</strong>, but it is not used as a silent fallback.`:""}`;
+    }
+
+    // Original v7.1 analysis/rendering is preserved below as research benchmark data.
+    const a=analyze(history);
+    $("lastDigit").textContent=a.last?.number??"—";$("lastSide").textContent=a.last?.side??"—";
+    $("lastParity").textContent=a.last?.parity??"—";$("lastStreak").textContent=`${a.st.side} × ${a.st.len}`;
+    $("lastAnalysis").innerHTML=`<strong>Conditional state:</strong> ${esc(a.lastSig.label)}. The original v7.1 Champion remains intact for benchmark comparison.`;
+    $("trend5").textContent=`${pct(binarySeq(history).slice(-5).filter(x=>x==="BIG").length/5||.5)}% BIG`;
+    $("trend10").textContent=`${pct(binarySeq(history).slice(-10).filter(x=>x==="BIG").length/Math.max(1,Math.min(10,history.length)))}% BIG`;
+    const q20=binarySeq(history).slice(-20);$("trend20").textContent=`${pct(q20.filter(x=>x==="BIG").length/Math.max(1,q20.length))}% BIG`;
+    $("regime").textContent=a.reg.label;
+    $("patternAnalysis").innerHTML=`<strong>Pattern search:</strong> ${esc(a.pattern.label)}. <strong>Trend:</strong> ${esc(a.trend.label)}. <strong>Regime:</strong> ${esc(a.reg.label)}.`;
+    $("runs").textContent=a.diag.z.toFixed(2);$("acf").textContent=a.diag.ac.toFixed(3);
+    $("entropy").textContent=a.diag.h.toFixed(3);$("structure").textContent=(a.diag.structure*100).toFixed(0)+"%";
+    $("randomNote").textContent=a.diag.structure<.15?"Low detected structure: benchmark confidence is intentionally conservative.":"Some sequence structure is present, but that is not proof that future outcomes are predictable.";
+    $("modelBody").innerHTML=a.signals.map(s=>`<tr><td>${esc(s.label)}</td><td><span class="pill ${s.p>=.5?"big":"small"}">${s.p>=.5?"BIG":"SMALL"} ${pct(s.p)}%</span></td><td class="center">${(s.w*100).toFixed(1)}</td><td class="right">${pct(s.rel)}%</td></tr>`).join("");
+
+    if(champion){
+      $("champPick").textContent=champion.pick;$("champPick").className=champion.pick==="BIG"?"big":"small";
+      $("champConf").textContent=Math.round(champion.confidence)+"%";$("champPbig").textContent=pct(champion.pBig)+"%";$("champEvidence").textContent=champion.evidence;
+      const cScored=Object.values(predictions).filter(p=>p&&p.scored);const cWins=cScored.filter(p=>p.win).length;const cRate=cScored.length?(cWins/cScored.length*100).toFixed(1)+"%":"—";$("champReason").textContent=`Original v7.1 benchmark: ${champion.pick} at ${Math.round(champion.confidence)}% model confidence · settled benchmark rate ${cRate}. Comparison only; PDF remains primary.`;
+    }
+  }else{
+    $("predValue").textContent="WAIT";$("predDetail").textContent="Waiting for a valid 3-digit PDF context…";$("conf").textContent="—";$("pbig").textContent="—";$("evidence").textContent="WAIT";
+    $("reason").textContent=`API returned ${latestList.length} valid results. The engine requires ${CFG.requiredFeed} before making a fresh decision.`;
+  }
+
+  $("learned").textContent=history.length;
+  $("wins").textContent=pdfMetrics.wins;$("losses").textContent=pdfMetrics.losses;
+  $("winrate").textContent=pdfMetrics.total?Math.round(pdfMetrics.wins*100/pdfMetrics.total)+"%":"0%";
+
+  $("balls").innerHTML=latestList.slice(0,10).map(r=>`<span class="ball ${colorClass(r.color)}">${r.number}</span>`).join("");
+  const rows=Object.entries(pdfPredictions).filter(([,p])=>p && typeof p==="object" && p.scored).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,15);
+  $("historyBody").innerHTML=rows.length?rows.map(([issue,p])=>`<tr><td>#${esc(issue.slice(-6))}</td><td><span class="pill ${p.pick==="BIG"?"big":"small"}">${p.pick}</span></td><td>${p.actual}</td><td class="center">${p.actualNumber}</td><td class="right"><span class="pill ${p.win?"win":"loss"}">${p.win?"WIN":"LOSS"}</span></td></tr>`).join(""):`<tr><td colspan="5" class="center">Waiting for settled predictions…</td></tr>`;
+  $("engineMeta").textContent=`Run ${hrRun.slice(0,8)} · Observed ${history.length} · PDF Knowledge Engine · v7.1 benchmark preserved`;
+  hrRenderAll();
+}
+
+function colorClass(c){
+  c=String(c||"").toLowerCase();
+  if(c.includes("red")&&c.includes("violet"))return"violetred";
+  if(c.includes("green")&&c.includes("violet"))return"violet";
+  return c.includes("red")?"red":"green";
+}
+
+
+/* ================= HOUSE RESEARCH v20 ================= */
+const PDF_TABLE={"012":{"number":3,"color":"Green"},"013":{"number":4,"color":"Red"},"014":{"number":5,"color":"Green"},"015":{"number":6,"color":"Red"},"016":{"number":7,"color":"Green"},"017":{"number":8,"color":"Red"},"018":{"number":0,"color":"Red"},"019":{"number":1,"color":"Green"},"021":{"number":3,"color":"Green"},"023":{"number":5,"color":"Green"},"024":{"number":6,"color":"Red"},"025":{"number":7,"color":"Green"},"026":{"number":8,"color":"Red"},"027":{"number":0,"color":"Red"},"028":{"number":1,"color":"Green"},"029":{"number":2,"color":"Red"},"031":{"number":4,"color":"Red"},"032":{"number":5,"color":"Green"},"034":{"number":7,"color":"Green"},"035":{"number":8,"color":"Red"},"036":{"number":0,"color":"Red"},"037":{"number":1,"color":"Green"},"038":{"number":2,"color":"Red"},"039":{"number":3,"color":"Green"},"041":{"number":5,"color":"Green"},"042":{"number":6,"color":"Red"},"043":{"number":7,"color":"Green"},"045":{"number":0,"color":"Red"},"046":{"number":1,"color":"Green"},"047":{"number":2,"color":"Red"},"048":{"number":3,"color":"Green"},"049":{"number":4,"color":"Red"},"051":{"number":6,"color":"Red"},"052":{"number":7,"color":"Green"},"053":{"number":8,"color":"Red"},"054":{"number":0,"color":"Red"},"056":{"number":2,"color":"Red"},"057":{"number":3,"color":"Green"},"058":{"number":4,"color":"Red"},"059":{"number":5,"color":"Green"},"061":{"number":7,"color":"Green"},"062":{"number":8,"color":"Red"},"063":{"number":0,"color":"Red"},"064":{"number":1,"color":"Green"},"065":{"number":2,"color":"Red"},"067":{"number":4,"color":"Red"},"068":{"number":5,"color":"Green"},"069":{"number":6,"color":"Red"},"071":{"number":8,"color":"Red"},"072":{"number":0,"color":"Red"},"073":{"number":1,"color":"Green"},"074":{"number":2,"color":"Red"},"075":{"number":3,"color":"Green"},"076":{"number":4,"color":"Red"},"078":{"number":6,"color":"Red"},"079":{"number":7,"color":"Green"},"081":{"number":0,"color":"Red"},"082":{"number":1,"color":"Green"},"083":{"number":2,"color":"Red"},"084":{"number":3,"color":"Green"},"085":{"number":4,"color":"Red"},"086":{"number":5,"color":"Green"},"087":{"number":6,"color":"Red"},"089":{"number":8,"color":"Red"},"091":{"number":1,"color":"Green"},"092":{"number":2,"color":"Red"},"093":{"number":3,"color":"Green"},"094":{"number":4,"color":"Red"},"095":{"number":5,"color":"Green"},"096":{"number":6,"color":"Red"},"097":{"number":7,"color":"Green"},"098":{"number":8,"color":"Red"},"102":{"number":3,"color":"Green"},"103":{"number":4,"color":"Red"},"104":{"number":5,"color":"Green"},"105":{"number":6,"color":"Red"},"106":{"number":7,"color":"Green"},"107":{"number":8,"color":"Red"},"108":{"number":0,"color":"Red"},"109":{"number":1,"color":"Green"},"120":{"number":3,"color":"Green"},"123":{"number":6,"color":"Red"},"124":{"number":7,"color":"Green"},"125":{"number":8,"color":"Red"},"126":{"number":0,"color":"Red"},"127":{"number":1,"color":"Green"},"128":{"number":2,"color":"Red"},"129":{"number":3,"color":"Green"},"130":{"number":4,"color":"Red"},"132":{"number":6,"color":"Red"},"134":{"number":8,"color":"Red"},"135":{"number":0,"color":"Red"},"136":{"number":1,"color":"Green"},"137":{"number":2,"color":"Red"},"138":{"number":3,"color":"Green"},"139":{"number":4,"color":"Red"},"140":{"number":5,"color":"Green"},"142":{"number":7,"color":"Green"},"143":{"number":8,"color":"Red"},"145":{"number":1,"color":"Green"},"146":{"number":2,"color":"Red"},"147":{"number":3,"color":"Green"},"148":{"number":4,"color":"Red"},"149":{"number":5,"color":"Green"},"150":{"number":6,"color":"Red"},"152":{"number":8,"color":"Red"},"153":{"number":0,"color":"Red"},"154":{"number":1,"color":"Green"},"156":{"number":3,"color":"Green"},"157":{"number":4,"color":"Red"},"158":{"number":5,"color":"Green"},"159":{"number":6,"color":"Red"},"160":{"number":7,"color":"Green"},"162":{"number":0,"color":"Red"},"163":{"number":1,"color":"Green"},"164":{"number":2,"color":"Red"},"165":{"number":3,"color":"Green"},"167":{"number":5,"color":"Green"},"168":{"number":6,"color":"Red"},"169":{"number":7,"color":"Green"},"170":{"number":8,"color":"Red"},"172":{"number":1,"color":"Green"},"173":{"number":2,"color":"Red"},"174":{"number":3,"color":"Green"},"175":{"number":4,"color":"Red"},"176":{"number":5,"color":"Green"},"178":{"number":7,"color":"Green"},"179":{"number":8,"color":"Red"},"180":{"number":0,"color":"Red"},"182":{"number":2,"color":"Red"},"183":{"number":3,"color":"Green"},"184":{"number":4,"color":"Red"},"185":{"number":5,"color":"Green"},"186":{"number":6,"color":"Red"},"187":{"number":7,"color":"Green"},"189":{"number":0,"color":"Red"},"190":{"number":1,"color":"Green"},"192":{"number":3,"color":"Green"},"193":{"number":4,"color":"Red"},"194":{"number":5,"color":"Green"},"195":{"number":6,"color":"Red"},"196":{"number":7,"color":"Green"},"197":{"number":8,"color":"Red"},"198":{"number":0,"color":"Red"},"201":{"number":3,"color":"Green"},"203":{"number":5,"color":"Green"},"204":{"number":6,"color":"Red"},"205":{"number":7,"color":"Green"},"206":{"number":8,"color":"Red"},"207":{"number":0,"color":"Red"},"208":{"number":1,"color":"Green"},"209":{"number":2,"color":"Red"},"210":{"number":3,"color":"Green"},"213":{"number":6,"color":"Red"},"214":{"number":7,"color":"Green"},"215":{"number":8,"color":"Red"},"216":{"number":0,"color":"Red"},"217":{"number":1,"color":"Green"},"218":{"number":2,"color":"Red"},"219":{"number":3,"color":"Green"},"230":{"number":5,"color":"Green"},"231":{"number":6,"color":"Red"},"234":{"number":0,"color":"Red"},"235":{"number":1,"color":"Green"},"236":{"number":2,"color":"Red"},"237":{"number":3,"color":"Green"},"238":{"number":4,"color":"Red"},"239":{"number":5,"color":"Green"},"240":{"number":6,"color":"Red"},"241":{"number":7,"color":"Green"},"243":{"number":0,"color":"Red"},"245":{"number":2,"color":"Red"},"246":{"number":3,"color":"Green"},"247":{"number":4,"color":"Red"},"248":{"number":5,"color":"Green"},"249":{"number":6,"color":"Red"},"250":{"number":7,"color":"Green"},"251":{"number":8,"color":"Red"},"253":{"number":1,"color":"Green"},"254":{"number":2,"color":"Red"},"256":{"number":4,"color":"Red"},"257":{"number":5,"color":"Green"},"258":{"number":6,"color":"Red"},"259":{"number":7,"color":"Green"},"260":{"number":8,"color":"Red"},"261":{"number":0,"color":"Red"},"263":{"number":2,"color":"Red"},"264":{"number":3,"color":"Green"},"265":{"number":4,"color":"Red"},"267":{"number":6,"color":"Red"},"268":{"number":7,"color":"Green"},"269":{"number":8,"color":"Red"},"270":{"number":0,"color":"Red"},"271":{"number":1,"color":"Green"},"273":{"number":3,"color":"Green"},"274":{"number":4,"color":"Red"},"275":{"number":5,"color":"Green"},"276":{"number":6,"color":"Red"},"278":{"number":8,"color":"Red"},"279":{"number":0,"color":"Red"},"280":{"number":1,"color":"Green"},"281":{"number":2,"color":"Red"},"283":{"number":4,"color":"Red"},"284":{"number":5,"color":"Green"},"285":{"number":6,"color":"Red"},"286":{"number":7,"color":"Green"},"287":{"number":8,"color":"Red"},"289":{"number":1,"color":"Green"},"290":{"number":2,"color":"Red"},"291":{"number":3,"color":"Green"},"293":{"number":5,"color":"Green"},"294":{"number":6,"color":"Red"},"295":{"number":7,"color":"Green"},"296":{"number":8,"color":"Red"},"297":{"number":0,"color":"Red"},"298":{"number":1,"color":"Green"},"301":{"number":4,"color":"Red"},"302":{"number":5,"color":"Green"},"304":{"number":7,"color":"Green"},"305":{"number":8,"color":"Red"},"306":{"number":0,"color":"Red"},"307":{"number":1,"color":"Green"},"308":{"number":2,"color":"Red"},"309":{"number":3,"color":"Green"},"310":{"number":4,"color":"Red"},"312":{"number":6,"color":"Red"},"314":{"number":8,"color":"Red"},"315":{"number":0,"color":"Red"},"316":{"number":1,"color":"Green"},"317":{"number":2,"color":"Red"},"318":{"number":3,"color":"Green"},"319":{"number":4,"color":"Red"},"320":{"number":5,"color":"Green"},"321":{"number":6,"color":"Red"},"324":{"number":0,"color":"Red"},"325":{"number":1,"color":"Green"},"326":{"number":2,"color":"Red"},"327":{"number":3,"color":"Green"},"328":{"number":4,"color":"Red"},"329":{"number":5,"color":"Green"},"340":{"number":7,"color":"Green"},"341":{"number":8,"color":"Red"},"342":{"number":0,"color":"Red"},"345":{"number":3,"color":"Green"},"346":{"number":4,"color":"Red"},"347":{"number":5,"color":"Green"},"348":{"number":6,"color":"Red"},"349":{"number":7,"color":"Green"},"350":{"number":8,"color":"Red"},"351":{"number":0,"color":"Red"},"352":{"number":1,"color":"Green"},"354":{"number":3,"color":"Green"},"356":{"number":5,"color":"Green"},"357":{"number":6,"color":"Red"},"358":{"number":7,"color":"Green"},"359":{"number":8,"color":"Red"},"360":{"number":0,"color":"Red"},"361":{"number":1,"color":"Green"},"362":{"number":2,"color":"Red"},"364":{"number":4,"color":"Red"},"365":{"number":5,"color":"Green"},"367":{"number":7,"color":"Green"},"368":{"number":8,"color":"Red"},"369":{"number":0,"color":"Red"},"370":{"number":1,"color":"Green"},"371":{"number":2,"color":"Red"},"372":{"number":3,"color":"Green"},"374":{"number":5,"color":"Green"},"375":{"number":6,"color":"Red"},"376":{"number":7,"color":"Green"},"378":{"number":0,"color":"Red"},"379":{"number":1,"color":"Green"},"380":{"number":2,"color":"Red"},"381":{"number":3,"color":"Green"},"382":{"number":4,"color":"Red"},"384":{"number":6,"color":"Red"},"385":{"number":7,"color":"Green"},"386":{"number":8,"color":"Red"},"387":{"number":0,"color":"Red"},"389":{"number":2,"color":"Red"},"390":{"number":3,"color":"Green"},"391":{"number":4,"color":"Red"},"392":{"number":5,"color":"Green"},"394":{"number":7,"color":"Green"},"395":{"number":8,"color":"Red"},"396":{"number":0,"color":"Red"},"397":{"number":1,"color":"Green"},"398":{"number":2,"color":"Red"},"401":{"number":5,"color":"Green"},"402":{"number":6,"color":"Red"},"403":{"number":7,"color":"Green"},"405":{"number":0,"color":"Red"},"406":{"number":1,"color":"Green"},"407":{"number":2,"color":"Red"},"408":{"number":3,"color":"Green"},"409":{"number":4,"color":"Red"},"410":{"number":5,"color":"Green"},"412":{"number":7,"color":"Green"},"413":{"number":8,"color":"Red"},"415":{"number":1,"color":"Green"},"416":{"number":2,"color":"Red"},"417":{"number":3,"color":"Green"},"418":{"number":4,"color":"Red"},"419":{"number":5,"color":"Green"},"420":{"number":6,"color":"Red"},"421":{"number":7,"color":"Green"},"423":{"number":0,"color":"Red"},"425":{"number":2,"color":"Red"},"426":{"number":3,"color":"Green"},"427":{"number":4,"color":"Red"},"428":{"number":5,"color":"Green"},"429":{"number":6,"color":"Red"},"430":{"number":7,"color":"Green"},"431":{"number":8,"color":"Red"},"432":{"number":0,"color":"Red"},"435":{"number":3,"color":"Green"},"436":{"number":4,"color":"Red"},"437":{"number":5,"color":"Green"},"438":{"number":6,"color":"Red"},"439":{"number":7,"color":"Green"},"450":{"number":0,"color":"Red"},"451":{"number":1,"color":"Green"},"452":{"number":2,"color":"Red"},"453":{"number":3,"color":"Green"},"456":{"number":6,"color":"Red"},"457":{"number":7,"color":"Green"},"458":{"number":8,"color":"Red"},"459":{"number":0,"color":"Red"},"460":{"number":1,"color":"Green"},"461":{"number":2,"color":"Red"},"462":{"number":3,"color":"Green"},"463":{"number":4,"color":"Red"},"465":{"number":6,"color":"Red"},"467":{"number":8,"color":"Red"},"468":{"number":0,"color":"Red"},"469":{"number":1,"color":"Green"},"470":{"number":2,"color":"Red"},"471":{"number":3,"color":"Green"},"472":{"number":4,"color":"Red"},"473":{"number":5,"color":"Green"},"475":{"number":7,"color":"Green"},"476":{"number":8,"color":"Red"},"478":{"number":1,"color":"Green"},"479":{"number":2,"color":"Red"},"480":{"number":3,"color":"Green"},"481":{"number":4,"color":"Red"},"482":{"number":5,"color":"Green"},"483":{"number":6,"color":"Red"},"485":{"number":8,"color":"Red"},"486":{"number":0,"color":"Red"},"487":{"number":1,"color":"Green"},"489":{"number":3,"color":"Green"},"490":{"number":4,"color":"Red"},"491":{"number":5,"color":"Green"},"492":{"number":6,"color":"Red"},"493":{"number":7,"color":"Green"},"495":{"number":0,"color":"Red"},"496":{"number":1,"color":"Green"},"497":{"number":2,"color":"Red"},"498":{"number":3,"color":"Green"},"501":{"number":6,"color":"Red"},"502":{"number":7,"color":"Green"},"503":{"number":8,"color":"Red"},"504":{"number":0,"color":"Red"},"506":{"number":2,"color":"Red"},"507":{"number":3,"color":"Green"},"508":{"number":4,"color":"Red"},"509":{"number":5,"color":"Green"},"510":{"number":6,"color":"Red"},"512":{"number":8,"color":"Red"},"513":{"number":0,"color":"Red"},"514":{"number":1,"color":"Green"},"516":{"number":3,"color":"Green"},"517":{"number":4,"color":"Red"},"518":{"number":5,"color":"Green"},"519":{"number":6,"color":"Red"},"520":{"number":7,"color":"Green"},"521":{"number":8,"color":"Red"},"523":{"number":1,"color":"Green"},"524":{"number":2,"color":"Red"},"526":{"number":4,"color":"Red"},"527":{"number":5,"color":"Green"},"528":{"number":6,"color":"Red"},"529":{"number":7,"color":"Green"},"530":{"number":8,"color":"Red"},"531":{"number":0,"color":"Red"},"532":{"number":1,"color":"Green"},"534":{"number":3,"color":"Green"},"536":{"number":5,"color":"Green"},"537":{"number":6,"color":"Red"},"538":{"number":7,"color":"Green"},"539":{"number":8,"color":"Red"},"540":{"number":0,"color":"Red"},"541":{"number":1,"color":"Green"},"542":{"number":2,"color":"Red"},"543":{"number":3,"color":"Green"},"546":{"number":6,"color":"Red"},"547":{"number":7,"color":"Green"},"548":{"number":8,"color":"Red"},"549":{"number":0,"color":"Red"},"560":{"number":2,"color":"Red"},"561":{"number":3,"color":"Green"},"562":{"number":4,"color":"Red"},"563":{"number":5,"color":"Green"},"564":{"number":6,"color":"Red"},"567":{"number":0,"color":"Red"},"568":{"number":1,"color":"Green"},"569":{"number":2,"color":"Red"},"570":{"number":3,"color":"Green"},"571":{"number":4,"color":"Red"},"572":{"number":5,"color":"Green"},"573":{"number":6,"color":"Red"},"574":{"number":7,"color":"Green"},"576":{"number":0,"color":"Red"},"578":{"number":2,"color":"Red"},"579":{"number":3,"color":"Green"},"580":{"number":4,"color":"Red"},"581":{"number":5,"color":"Green"},"582":{"number":6,"color":"Red"},"583":{"number":7,"color":"Green"},"584":{"number":8,"color":"Red"},"586":{"number":1,"color":"Green"},"587":{"number":2,"color":"Red"},"589":{"number":4,"color":"Red"},"590":{"number":5,"color":"Green"},"591":{"number":6,"color":"Red"},"592":{"number":7,"color":"Green"},"593":{"number":8,"color":"Red"},"594":{"number":0,"color":"Red"},"596":{"number":2,"color":"Red"},"597":{"number":3,"color":"Green"},"598":{"number":4,"color":"Red"},"601":{"number":7,"color":"Green"},"602":{"number":8,"color":"Red"},"603":{"number":0,"color":"Red"},"604":{"number":1,"color":"Green"},"605":{"number":2,"color":"Red"},"607":{"number":4,"color":"Red"},"608":{"number":5,"color":"Green"},"609":{"number":6,"color":"Red"},"610":{"number":7,"color":"Green"},"612":{"number":0,"color":"Red"},"613":{"number":1,"color":"Green"},"614":{"number":2,"color":"Red"},"615":{"number":3,"color":"Green"},"617":{"number":5,"color":"Green"},"618":{"number":6,"color":"Red"},"619":{"number":7,"color":"Green"},"620":{"number":8,"color":"Red"},"621":{"number":0,"color":"Red"},"623":{"number":2,"color":"Red"},"624":{"number":3,"color":"Green"},"625":{"number":4,"color":"Red"},"627":{"number":6,"color":"Red"},"628":{"number":7,"color":"Green"},"629":{"number":8,"color":"Red"},"630":{"number":0,"color":"Red"},"631":{"number":1,"color":"Green"},"632":{"number":2,"color":"Red"},"634":{"number":4,"color":"Red"},"635":{"number":5,"color":"Green"},"637":{"number":7,"color":"Green"},"638":{"number":8,"color":"Red"},"639":{"number":0,"color":"Red"},"640":{"number":1,"color":"Green"},"641":{"number":2,"color":"Red"},"642":{"number":3,"color":"Green"},"643":{"number":4,"color":"Red"},"645":{"number":6,"color":"Red"},"647":{"number":8,"color":"Red"},"648":{"number":0,"color":"Red"},"649":{"number":1,"color":"Green"},"650":{"number":2,"color":"Red"},"651":{"number":3,"color":"Green"},"652":{"number":4,"color":"Red"},"653":{"number":5,"color":"Green"},"654":{"number":6,"color":"Red"},"657":{"number":0,"color":"Red"},"658":{"number":1,"color":"Green"},"659":{"number":2,"color":"Red"},"670":{"number":4,"color":"Red"},"671":{"number":5,"color":"Green"},"672":{"number":6,"color":"Red"},"673":{"number":7,"color":"Green"},"674":{"number":8,"color":"Red"},"675":{"number":0,"color":"Red"},"678":{"number":3,"color":"Green"},"679":{"number":4,"color":"Red"},"680":{"number":5,"color":"Green"},"681":{"number":6,"color":"Red"},"682":{"number":7,"color":"Green"},"683":{"number":8,"color":"Red"},"684":{"number":0,"color":"Red"},"685":{"number":1,"color":"Green"},"687":{"number":3,"color":"Green"},"689":{"number":5,"color":"Green"},"690":{"number":6,"color":"Red"},"691":{"number":7,"color":"Green"},"692":{"number":8,"color":"Red"},"693":{"number":0,"color":"Red"},"694":{"number":1,"color":"Green"},"695":{"number":2,"color":"Red"},"697":{"number":4,"color":"Red"},"698":{"number":5,"color":"Green"},"701":{"number":8,"color":"Red"},"702":{"number":0,"color":"Red"},"703":{"number":1,"color":"Green"},"704":{"number":2,"color":"Red"},"705":{"number":3,"color":"Green"},"706":{"number":4,"color":"Red"},"708":{"number":6,"color":"Red"},"709":{"number":7,"color":"Green"},"710":{"number":8,"color":"Red"},"712":{"number":1,"color":"Green"},"713":{"number":2,"color":"Red"},"714":{"number":3,"color":"Green"},"715":{"number":4,"color":"Red"},"716":{"number":5,"color":"Green"},"718":{"number":7,"color":"Green"},"719":{"number":8,"color":"Red"},"720":{"number":0,"color":"Red"},"721":{"number":1,"color":"Green"},"723":{"number":3,"color":"Green"},"724":{"number":4,"color":"Red"},"725":{"number":5,"color":"Green"},"726":{"number":6,"color":"Red"},"728":{"number":8,"color":"Red"},"729":{"number":0,"color":"Red"},"730":{"number":1,"color":"Green"},"731":{"number":2,"color":"Red"},"732":{"number":3,"color":"Green"},"734":{"number":5,"color":"Green"},"735":{"number":6,"color":"Red"},"736":{"number":7,"color":"Green"},"738":{"number":0,"color":"Red"},"739":{"number":1,"color":"Green"},"740":{"number":2,"color":"Red"},"741":{"number":3,"color":"Green"},"742":{"number":4,"color":"Red"},"743":{"number":5,"color":"Green"},"745":{"number":7,"color":"Green"},"746":{"number":8,"color":"Red"},"748":{"number":1,"color":"Green"},"749":{"number":2,"color":"Red"},"750":{"number":3,"color":"Green"},"751":{"number":4,"color":"Red"},"752":{"number":5,"color":"Green"},"753":{"number":6,"color":"Red"},"754":{"number":7,"color":"Green"},"756":{"number":0,"color":"Red"},"758":{"number":2,"color":"Red"},"759":{"number":3,"color":"Green"},"760":{"number":4,"color":"Red"},"761":{"number":5,"color":"Green"},"762":{"number":6,"color":"Red"},"763":{"number":7,"color":"Green"},"764":{"number":8,"color":"Red"},"765":{"number":0,"color":"Red"},"768":{"number":3,"color":"Green"},"769":{"number":4,"color":"Red"},"780":{"number":6,"color":"Red"},"781":{"number":7,"color":"Green"},"782":{"number":8,"color":"Red"},"783":{"number":0,"color":"Red"},"784":{"number":1,"color":"Green"},"785":{"number":2,"color":"Red"},"786":{"number":3,"color":"Green"},"789":{"number":6,"color":"Red"},"790":{"number":7,"color":"Green"},"791":{"number":8,"color":"Red"},"792":{"number":0,"color":"Red"},"793":{"number":1,"color":"Green"},"794":{"number":2,"color":"Red"},"795":{"number":3,"color":"Green"},"796":{"number":4,"color":"Red"},"798":{"number":6,"color":"Red"},"801":{"number":0,"color":"Red"},"802":{"number":1,"color":"Green"},"803":{"number":2,"color":"Red"},"804":{"number":3,"color":"Green"},"805":{"number":4,"color":"Red"},"806":{"number":5,"color":"Green"},"807":{"number":6,"color":"Red"},"809":{"number":8,"color":"Red"},"810":{"number":0,"color":"Red"},"812":{"number":2,"color":"Red"},"813":{"number":3,"color":"Green"},"814":{"number":4,"color":"Red"},"815":{"number":5,"color":"Green"},"816":{"number":6,"color":"Red"},"817":{"number":7,"color":"Green"},"819":{"number":0,"color":"Red"},"820":{"number":1,"color":"Green"},"821":{"number":2,"color":"Red"},"823":{"number":4,"color":"Red"},"824":{"number":5,"color":"Green"},"825":{"number":6,"color":"Red"},"826":{"number":7,"color":"Green"},"827":{"number":8,"color":"Red"},"829":{"number":1,"color":"Green"},"830":{"number":2,"color":"Red"},"831":{"number":3,"color":"Green"},"832":{"number":4,"color":"Red"},"834":{"number":6,"color":"Red"},"835":{"number":7,"color":"Green"},"836":{"number":8,"color":"Red"},"837":{"number":0,"color":"Red"},"839":{"number":2,"color":"Red"},"840":{"number":3,"color":"Green"},"841":{"number":4,"color":"Red"},"842":{"number":5,"color":"Green"},"843":{"number":6,"color":"Red"},"845":{"number":8,"color":"Red"},"846":{"number":0,"color":"Red"},"847":{"number":1,"color":"Green"},"849":{"number":3,"color":"Green"},"850":{"number":4,"color":"Red"},"851":{"number":5,"color":"Green"},"852":{"number":6,"color":"Red"},"853":{"number":7,"color":"Green"},"854":{"number":8,"color":"Red"},"856":{"number":1,"color":"Green"},"857":{"number":2,"color":"Red"},"859":{"number":4,"color":"Red"},"860":{"number":5,"color":"Green"},"861":{"number":6,"color":"Red"},"862":{"number":7,"color":"Green"},"863":{"number":8,"color":"Red"},"864":{"number":0,"color":"Red"},"865":{"number":1,"color":"Green"},"867":{"number":3,"color":"Green"},"869":{"number":5,"color":"Green"},"870":{"number":6,"color":"Red"},"871":{"number":7,"color":"Green"},"872":{"number":8,"color":"Red"},"873":{"number":0,"color":"Red"},"874":{"number":1,"color":"Green"},"875":{"number":2,"color":"Red"},"876":{"number":3,"color":"Green"},"879":{"number":6,"color":"Red"},"890":{"number":8,"color":"Red"},"891":{"number":0,"color":"Red"},"892":{"number":1,"color":"Green"},"893":{"number":2,"color":"Red"},"894":{"number":3,"color":"Green"},"895":{"number":4,"color":"Red"},"896":{"number":5,"color":"Green"},"897":{"number":6,"color":"Red"},"901":{"number":1,"color":"Green"},"902":{"number":2,"color":"Red"},"903":{"number":3,"color":"Green"},"904":{"number":4,"color":"Red"},"905":{"number":5,"color":"Green"},"906":{"number":6,"color":"Red"},"907":{"number":7,"color":"Green"},"908":{"number":8,"color":"Red"},"910":{"number":1,"color":"Green"},"912":{"number":3,"color":"Green"},"913":{"number":4,"color":"Red"},"914":{"number":5,"color":"Green"},"915":{"number":6,"color":"Red"},"916":{"number":7,"color":"Green"},"917":{"number":8,"color":"Red"},"918":{"number":0,"color":"Red"},"920":{"number":2,"color":"Red"},"921":{"number":3,"color":"Green"},"923":{"number":5,"color":"Green"},"924":{"number":6,"color":"Red"},"925":{"number":7,"color":"Green"},"926":{"number":8,"color":"Red"},"927":{"number":0,"color":"Red"},"928":{"number":1,"color":"Green"},"930":{"number":3,"color":"Green"},"931":{"number":4,"color":"Red"},"932":{"number":5,"color":"Green"},"934":{"number":7,"color":"Green"},"935":{"number":8,"color":"Red"},"936":{"number":0,"color":"Red"},"937":{"number":1,"color":"Green"},"938":{"number":2,"color":"Red"},"940":{"number":4,"color":"Red"},"941":{"number":5,"color":"Green"},"942":{"number":6,"color":"Red"},"943":{"number":7,"color":"Green"},"945":{"number":0,"color":"Red"},"946":{"number":1,"color":"Green"},"947":{"number":2,"color":"Red"},"948":{"number":3,"color":"Green"},"950":{"number":5,"color":"Green"},"951":{"number":6,"color":"Red"},"952":{"number":7,"color":"Green"},"953":{"number":8,"color":"Red"},"954":{"number":0,"color":"Red"},"956":{"number":2,"color":"Red"},"957":{"number":3,"color":"Green"},"958":{"number":4,"color":"Red"},"960":{"number":6,"color":"Red"},"961":{"number":7,"color":"Green"},"962":{"number":8,"color":"Red"},"963":{"number":0,"color":"Red"},"964":{"number":1,"color":"Green"},"965":{"number":2,"color":"Red"},"967":{"number":4,"color":"Red"},"968":{"number":5,"color":"Green"},"970":{"number":7,"color":"Green"},"971":{"number":8,"color":"Red"},"972":{"number":0,"color":"Red"},"973":{"number":1,"color":"Green"},"974":{"number":2,"color":"Red"},"975":{"number":3,"color":"Green"},"976":{"number":4,"color":"Red"},"978":{"number":6,"color":"Red"},"980":{"number":8,"color":"Red"},"981":{"number":0,"color":"Red"},"982":{"number":1,"color":"Green"},"983":{"number":2,"color":"Red"},"984":{"number":3,"color":"Green"},"985":{"number":4,"color":"Red"},"986":{"number":5,"color":"Green"},"987":{"number":6,"color":"Red"}};
+const HRLS={run:"house_v20_run",timing:"house_v20_timing",ledger:"house_v20_ledger"};
+const SERVER_API=(location.protocol==="http:"||location.protocol==="https:")?location.origin:"";
+async function serverJson(path,options={}){if(!SERVER_API)return null;try{const r=await fetch(SERVER_API+path,{cache:"no-store",...options,headers:{"content-type":"application/json",...(options.headers||{})}});if(!r.ok)throw Error("HTTP "+r.status);return await r.json()}catch(e){console.warn("[HOUSE SERVER]",e.message);return null}}
+let hrRun=localStorage.getItem(HRLS.run)||((crypto.randomUUID)?crypto.randomUUID():String(Date.now())+Math.random());localStorage.setItem(HRLS.run,hrRun);
+async function houseBootstrap(){const r=await serverJson("/api/run");if(r?.runId){hrRun=r.runId;localStorage.setItem(HRLS.run,hrRun);const h=await serverJson("/api/history");if(Array.isArray(h?.rows)&&h.rows.length){mergeHistory(h.rows);}}hrRenderAll();}
+async function houseIngest(row){return serverJson("/api/ingest",{method:"POST",body:JSON.stringify({issue:row.issue,number:row.number,color:row.color,observedAt:new Date(row.ts||Date.now()).toISOString(),raw:row})})}
+async function flushSyncQueue(){
+  if(syncBusy||!SERVER_API||!syncQueue.length)return;
+  syncBusy=true;
+  try{
+    while(syncQueue.length){
+      const row=syncQueue[0],r=await houseIngest(row);
+      if(!r?.ok)throw Error("DB ingest failed");
+      syncQueue.shift();localStorage.setItem(SYNC.lastAck,row.issue);saveSync();lastSyncAt=Date.now();syncFailures=0;
+    }
+  }catch(e){syncFailures++;console.warn("[HOUSE SYNC]",e.message)}
+  finally{syncBusy=false;updateSyncUI()}
+}
+function updateSyncUI(){setText("syncNote",`DB sync ${syncQueue.length?"pending "+syncQueue.length:"up to date"} · ${lastSyncAt?new Date(lastSyncAt).toLocaleTimeString():"starting"}${syncFailures?` · retries ${syncFailures}`:""}`)}
+let hrTiming=load(HRLS.timing,[]),hrLedger=load(HRLS.ledger,[]);if(!Array.isArray(hrTiming))hrTiming=[];if(!Array.isArray(hrLedger))hrLedger=[];
+function hrChrono(a){return a.slice().sort((x,y)=>{try{const A=BigInt(x.issue),B=BigInt(y.issue);return A<B?-1:A>B?1:0}catch{return String(x.issue).localeCompare(String(y.issue))}})}
+function pdfLookup(a,b,c){return PDF_TABLE[String(a)+String(b)+String(c)]||null}
+function pdfWalkForward(arr){const a=hrChrono(arr);let bs=0,num=0,color=0,n=0;for(let i=3;i<a.length;i++){const r=pdfLookup(a[i-3].number,a[i-2].number,a[i-1].number);if(!r)continue;n++;if((r.number>=5)===(a[i].number>=5))bs++;if(r.number===a[i].number)num++;if(String(r.color).toLowerCase()===String(a[i].color||"").toLowerCase())color++;}return {n,bs,number:num,color}}
+function pdfRender(arr){const a=hrChrono(arr),last=a.slice(-3),r=last.length===3?pdfLookup(last[0].number,last[1].number,last[2].number):null,eligible=last.length===3&&distinct3(last[0].number,last[1].number,last[2].number);setText("pdfKey",last.length===3?last.map(x=>x.number).join(""):"—");setText("pdfDigit",r?r.number:"—");setText("pdfColor",r?r.color:"—");setText("pdfSide",r?(r.number>=5?"BIG":"SMALL"):"—");setText("pdfCoverage",Object.keys(PDF_TABLE).length+"/720");setText("pdfClass",last.length===3?pdfContextClass(last[0].number,last[1].number,last[2].number):"—");setText("pdfEligible",eligible?"YES":"NO");const st=$("pdfStatus");if(st)st.innerHTML=eligible&&r?'<i class="pdf-dot"></i>EXACT SUPPLIED-PDF LOOKUP READY':'<i class="pdf-dot"></i>PDF ABSTAIN / BUILDING CONTEXT';setText("pdfFormula",r?`Internal consistency check: (${last[0].number} + ${last[1].number} + ${last[2].number}) mod 9 = ${r.number}; the lookup table remains the decision source.`:"Formula audit: waiting for three distinct digits.");setText("pdfDecisionNote",r?`Primary PDF decision is ${r.number} ${r.color} → ${r.number>=5?"BIG":"SMALL"}. No v7.1 fallback is used when the PDF context is unavailable.`:"The primary PDF engine abstains here because the supplied table is limited to distinct-digit triples.");const w=pdfWalkForward(a);setText("pdfEval",w.n);setText("pdfBS",w.n?(w.bs/w.n*100).toFixed(1)+"%":"—");setText("pdfNum",w.n?(w.number/w.n*100).toFixed(1)+"%":"—");setText("pdfColorHit",w.n?(w.color/w.n*100).toFixed(1)+"%":"—");setText("pdfVs",w.n?((w.bs/w.n-.5)*100).toFixed(1)+" pts":"—");setText("pdfNumVs",w.n?((w.number/w.n-.10)*100).toFixed(1)+" pts":"—");setText("pdfReason",w.n?`Chronological walk-forward: ${w.n} eligible distinct contexts tested. Exact-number baseline is 10%; BIG/SMALL and colour baselines are 50%.`:`Need more chronological observations.`)}
+function hrPredict(arr){const a=hrChrono(arr);if(a.length<40)return {ready:false,p:.5};const last=a.at(-1);function cond(fn){let b=0,n=0;for(let i=1;i<a.length;i++)if(fn(a[i-1])===fn(last)){n++;if(a[i].side==="BIG")b++}return n?(b+1)/(n+2):.5}const p1=cond(x=>x.side),p2=cond(x=>x.parity),p3=cond(x=>x.number),recent=a.slice(-20).filter(x=>x.side==="BIG").length/20;const p=clamp(.5+(p1-.5)*.30+(p2-.5)*.12+(p3-.5)*.12+(recent-.5)*.26,.18,.82);return {ready:true,p,p1,p2,p3,recent}}
+function hrWF(arr){const a=hrChrono(arr);if(a.length<50)return null;let n=0,c=0,b=0;for(let i=40;i<a.length;i++){const q=hrPredict(a.slice(0,i));if(!q.ready)continue;const y=a[i].side==="BIG"?1:0;n++;if((q.p>=.5)===(y===1))c++;b+=(q.p-y)**2}return n?{n,acc:c/n,brier:b/n}:null}
+function setText(id,v){const e=$(id);if(e)e.textContent=v}
+function hrRender(arr){
+  const p=hrPredict(arr),wf=hrWF(arr);
+  if(!p.ready){
+    setText("hrPick","WAIT");
+    setText("hrP","—");
+    setText("hrAcc","—");
+    setText("hrBrier","—");
+    setText("hrReason",`Independent challenger needs at least 40 chronological observations; currently ${hrChrono(arr).length}.`);
+    return;
+  }
+  const pick=p.p>=.5?"BIG":"SMALL";
+  setText("hrPick",pick);
+  const pickEl=$("hrPick");
+  if(pickEl)pickEl.className="hr-challenge "+pick.toLowerCase();
+  setText("hrP",pct(p.p)+"%");
+  setText("hrAcc",wf?((wf.acc*100).toFixed(1)+"%"):"—");
+  setText("hrBrier",wf?wf.brier.toFixed(4):"—");
+  const parts=[
+    `side-state: ${pct(p.p1)}% BIG`,
+    `parity-state: ${pct(p.p2)}% BIG`,
+    `same-digit state: ${pct(p.p3)}% BIG`,
+    `recent-20: ${pct(p.recent)}% BIG`
+  ];
+  setText("hrReason",`Challenger pick ${pick} at P(BIG) ${pct(p.p)}%. ${parts.join(" · ")}. ${wf?`Walk-forward accuracy ${(wf.acc*100).toFixed(1)}% over ${wf.n} tests; Brier ${wf.brier.toFixed(4)}.`:"Walk-forward evaluation is still building."}`);
+}
+function hrHouseDay(a){const d=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Kolkata"}));if(d.getHours()<5||(d.getHours()===5&&d.getMinutes()<30))d.setDate(d.getDate()-1);const id=d.toISOString().slice(0,10);const rows=a.filter(x=>{const z=new Date(new Date(x.ts||Date.now()).toLocaleString("en-US",{timeZone:"Asia/Kolkata"}));if(z.getHours()<5||(z.getHours()===5&&z.getMinutes()<30))z.setDate(z.getDate()-1);return z.toISOString().slice(0,10)===id});setText("dayId",id);setText("dayN",rows.length);setText("dayBig",rows.filter(x=>x.side==="BIG").length);setText("daySmall",rows.filter(x=>x.side==="SMALL").length)}
+function hrRecord(a){for(const r of hrChrono(a)){if(hrLedger.some(x=>x.issue===r.issue))continue;const prev=hrLedger.at(-1)?.hash||"GENESIS";const payload={run:hrRun,issue:r.issue,number:r.number,side:r.side,parity:r.parity,color:r.color,prev,observedAt:new Date().toISOString()};let h=2166136261;for(const ch of JSON.stringify(payload)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}payload.hash=(h>>>0).toString(16).padStart(8,"0");hrLedger.push(payload)}hrLedger=hrLedger.slice(-5000);save(HRLS.ledger,hrLedger)}
+function hrRecordTiming(issue){if(!issue||hrTiming.some(x=>x.issue===issue))return;const now=Date.now(),boundary=Math.ceil(now/30000)*30000,offset=boundary-now,at=new Date(now).toISOString();hrTiming.push({issue,offsetMs:offset,at});hrTiming=hrTiming.slice(-500);save(HRLS.timing,hrTiming);serverJson("/api/timing",{method:"POST",body:JSON.stringify({issue,observedAt:at,offsetMs:offset})})}
+function hrRenderAll(){
+  const safe=(label,fn)=>{try{fn()}catch(e){console.warn("[HOUSE RESEARCH] "+label,e)}};
+  safe("PDF renderer",()=>pdfRender(history));
+  safe("challenger renderer",()=>hrRender(history));
+  safe("house-day renderer",()=>hrHouseDay(history));
+  safe("ledger recorder",()=>hrRecord(history));
+  safe("timing recorder",()=>hrRecordTiming(hrChrono(history).at(-1)?.issue));
+  safe("pattern audit renderer",()=>renderPatternAudit());
+  const t=hrTiming.map(x=>Number(x.offsetMs)).filter(Number.isFinite);
+  setText("timN",t.length);
+  if(t.length){
+    setText("timAvg",(t.reduce((a,b)=>a+b,0)/t.length/1000).toFixed(2)+"s");
+    setText("timMin",(Math.min(...t)/1000).toFixed(2)+"s");
+    setText("timMax",(Math.max(...t)/1000).toFixed(2)+"s");
+  }
+  setText("runId",hrRun.slice(0,8));
+  setText("runCount",history.length);
+  let gaps=0;
+  for(let i=1;i<hrLedger.length;i++){
+    try{if(BigInt(hrLedger[i].issue)!==BigInt(hrLedger[i-1].issue)+1n)gaps++}catch{}
+  }
+  setText("runGaps",gaps);
+  setText("runHash",hrLedger.at(-1)?.hash||"—");
+  setText("syncNote",`Isolated run ${hrRun.slice(0,8)} · permanent records are not used after RESET.`);
+}
+function playFx(issue,p){if(!p||!p.scored)return;const key="house_v20_fx_"+issue;if(sessionStorage.getItem(key))return;sessionStorage.setItem(key,"1");const r=$("resultFx");r.className="result-fx "+(p.win?"win":"loss");$("fxIcon").textContent=p.win?"✓":"×";$("fxTitle").textContent=p.win?"PREDICTION WON":"PREDICTION LOST";$("fxSub").textContent=`${p.pick} · Result ${p.actualNumber}`;r.hidden=false;void r.offsetWidth;r.classList.add("show");setTimeout(()=>{r.hidden=true;r.classList.remove("show")},1600)}
+
+async function fetchWithTimeout(url,ms=7000,options={}){
+  const ctl=new AbortController();
+  const timer=setTimeout(()=>ctl.abort(),ms);
+  try{return await fetch(url,{cache:"no-store",...options,signal:ctl.signal})}
+  catch(e){if(e?.name==="AbortError")throw new Error("REQUEST TIMEOUT (7s): "+url);throw e}
+  finally{clearTimeout(timer)}
+}
+function extractFeedList(j){
+  const candidates=[j?.data?.list,j?.list,j?.data?.data,j?.data];
+  for(const x of candidates)if(Array.isArray(x))return x;
+  return [];
+}
+async function fetchFeed(){
+  const url=CFG.endpoint+"?ts="+Date.now();
+  const r=await fetchWithTimeout(url,7000,{headers:{accept:"application/json, text/plain, */*"}});
+  if(!r.ok)throw new Error("UPSTREAM HTTP "+r.status);
+  const j=await r.json();
+  const list=extractFeedList(j);
+  if(!list.length)throw new Error("UPSTREAM returned no result list");
+  return list;
+}
+async function fetchServerHistoryFallback(){
+  if(!SERVER_API)return [];
+  const j=await serverJson("/api/history");
+  return Array.isArray(j?.rows)?j.rows:[];
+}
+let busy=false;
+async function tick(){
+  if(busy)return;
+  busy=true;
+  try{
+    const list=await fetchFeed();
+    const valid=list.map(normalize).filter(Boolean);
+    $("feedStatus").innerHTML=`<span class="ok">🟢 API connected · ${valid.length}/${CFG.requiredFeed} valid results</span>`;
+    if(valid.length){
+      enqueueRows(valid);
+      const issue=valid[0].issue;
+      if(issue!==lastIssue){lastIssue=issue;save(LS.lastIssue,lastIssue);console.log("[REASONING v7.1] New issue",issue,new Date().toISOString())}
+      await flushSyncQueue();
+    }
+    render(list);
+    if(valid.length<CFG.requiredFeed){
+      $("reason").textContent=`The API returned ${valid.length} valid result(s). The engine intentionally waits for ${CFG.requiredFeed} valid results before making a fresh decision.`;
+    }
+  }catch(e){
+    console.warn("[PDF ENGINE] feed error",e);
+    // Do not leave the UI frozen at “Checking…”. Try the already-authorized server history as a recovery path.
+    try{
+      const cached=await fetchServerHistoryFallback();
+      if(cached.length){
+        mergeHistory(cached);
+        const valid=cached.map(normalize).filter(Boolean);
+        $("feedStatus").innerHTML=`<span class="warn">🟠 LIVE FEED UNAVAILABLE · recovered ${valid.length} stored results</span>`;
+        render(cached);
+        $("reason").textContent=`Live feed unavailable: ${esc(e?.message||"Unknown error")}. Recovered stored observations from the research server; no new period is claimed.`;
+      }else{
+        $("feedStatus").innerHTML=`<span class="bad">🔴 FEED ERROR · ${esc(e?.message||"Unknown error")}</span>`;
+        $("reason").textContent=`Live feed did not respond. The engine stopped waiting after 7 seconds. Nothing is being fabricated. Open/reload the page when the feed is reachable.`;
+      }
+    }catch(recovery){
+      $("feedStatus").innerHTML=`<span class="bad">🔴 FEED ERROR · ${esc(e?.message||"Unknown error")}</span>`;
+      $("reason").textContent=`Live feed failed and server recovery was unavailable: ${esc(recovery?.message||"Unknown recovery error")}`;
+    }
+  }finally{busy=false}
+}
+function updateCountdown(){
+  const s=CFG.periodSec-(Math.floor(Date.now()/1000)%CFG.periodSec);
+  $("countdown").textContent=String(s).padStart(2,"0");
+}
+$("clearBtn").onclick=async()=>{if(!confirm("DELETE ALL PostgreSQL research data and clear this browser run? This permanently removes the current run ledger. Continue?"))return;const r=await serverJson("/api/reset",{method:"POST",body:"{}"});if(SERVER_API&&(!r?.ok||r?.cleared!==true)){alert("PostgreSQL reset failed. Browser data was not cleared.");return}clearClientRun();hrRun=r?.runId||((crypto.randomUUID)?crypto.randomUUID():String(Date.now())+Math.random());localStorage.setItem(HRLS.run,hrRun);sessionStorage.clear();location.reload()};
+$("downloadAuditBtn").onclick=downloadPatternAudit;
+$("exportBtn").onclick=()=>{
+  const data={engine:"WinGo PDF Knowledge Engine v25",champion:"v7.1 benchmark only",pdfEngine:"720-rule supplied PDF mapping · distinct-context exact lookup",runId:hrRun,exported:new Date().toISOString(),history,predictions,metrics,pdfPredictions,pdfMetrics,pdfEvaluation:pdfWalkForward(history),patternAudit,timing:hrTiming,ledger:hrLedger};
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));a.download="wingo-pdf-knowledge-engine-v26-data.json";a.click();URL.revokeObjectURL(a.href);
+};
+
+houseBootstrap();tick();setInterval(tick,CFG.refresh);setInterval(()=>{flushSyncQueue();updateSyncUI()},5000);window.addEventListener("online",()=>flushSyncQueue());document.addEventListener("visibilitychange",()=>{if(!document.hidden){tick();flushSyncQueue()}});setInterval(updateCountdown,250);updateCountdown();
+</script>
+\n<script>
+(function(){
+  "use strict";
+  const pc$=id=>document.getElementById(id);
+  const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const pcSide=n=>Number(n)>=5?"BIG":"SMALL";
+  const pcDigits=()=>typeof history!=="undefined"&&Array.isArray(history)?history.slice().sort((a,b)=>String(a.issue).localeCompare(String(b.issue),undefined,{numeric:true})):[];
+  const pcSeq=()=>pcDigits().map(r=>Number(r.number));
+  const bs=()=>pcSeq().map(pcSide);
+  const pct=x=>Number.isFinite(x)?(x*100).toFixed(1)+"%":"—";
+  const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+
+  // 30-state Trends Connection: hypothesis library only, never source truth.
+  const trend30=["BBBBBB","SSSSSS","BSBSBS","SBSBSB","BBSBBS","SSBSSB","BBBSSS","SSSBBB","BSSBSS","SBBSBB","BBSSBB","SSBBSS","BSBBSB","SBSBSB","BBBBSS","SSSSBB","BSBSSB","SBSBBS","BSSSBB","SB BSS".replace(/ /g,""),"BBSSSB","SBBBSB","BSBBBS","SSBSBS","BSSSSB","SBBBB S".replace(/ /g,""),"BBBSBS","SSSBSB","BSBSSS","SBSBBB"];
+  const trendNext={}; for(let i=0;i<30;i++) trendNext[trend30[i]]=i<29?trend30[i+1]:null;
+
+  function contextStats(seq,keyFn,targetFn,ruleFn){
+    const buckets=new Map(), hits=[];
+    for(let i=0;i<seq.length-1;i++){
+      const key=keyFn(seq,i); if(key==null)continue;
+      const actual=targetFn(seq,i+1);
+      const prior=buckets.get(key)||{b:0,s:0,n:0};
+      let pred=ruleFn(key,prior,i,seq);
+      if(pred){ const win=pred===actual; hits.push({i,key,pred,actual,win}); }
+      if(actual==="BIG")prior.b++;else if(actual==="SMALL")prior.s++;prior.n++;buckets.set(key,prior);
+    }
+    return {buckets,hits};
+  }
+  function empiricalBS(seq,keyFn,minN=5){
+    const z=contextStats(seq,keyFn,pcSide,(key,st)=>st.n>=minN?(st.b>=st.s?"BIG":"SMALL"):null);
+    const eligible=z.hits.filter(x=>x.pred); if(!eligible.length)return {n:0,acc:null,base:.5,delta:null};
+    const acc=eligible.filter(x=>x.win).length/eligible.length; return {n:eligible.length,acc,base:.5,delta:acc-.5};
+  }
+  function currentKeyBS(seq,len){ const q=bs(); return q.length>=len?q.slice(-len).join(""):null; }
+  function runKey(seq,i){const q=bs(); if(i<0||i>=q.length)return null; let k=1;for(let j=i-1;j>=0&&q[j]===q[i];j--)k++;return q[i]+k;}
+  function directionKey(seq,i){if(i<1)return null; const a=seq[i-1],b=seq[i];return b>a?"UP":b<a?"DOWN":"EQ";}
+  function mirrorKey(seq,i){if(i<3)return null;return String(seq[i-3])+String(seq[i-2])+String(seq[i-1]);}
+  function tripleKey(seq,i){return i>=2?String(seq[i-2])+String(seq[i-1])+String(seq[i]):null;}
+  function pairKey(seq,i){return i>=1?String(seq[i-1])+String(seq[i]):null;}
+  function parityKey(seq,i){return i>=2?[seq[i-2],seq[i-1],seq[i]].map(x=>Number(x)%2?"O":"E").join(""):null;}
+  function colour(n){n=Number(n);if(n===0||n===5)return "V";return n%2?"G":"R";}
+  function colourKey(seq,i){return i>=2?[seq[i-2],seq[i-1],seq[i]].map(colour).join(""):null;}
+  function sixKey(seq,i){const q=bs();return i>=5?q.slice(i-5,i+1).join(""):null;}
+
+  function pdfWalk(seq){let n=0,w=0;for(let i=3;i<seq.length;i++){const a=seq[i-3],b=seq[i-2],c=seq[i-1];if(a===b||a===c||b===c)continue;const pred=(a+b+c)%9; n++;if(seq[i]===pred)w++;}return {n,acc:n?w/n:null};}
+  function pairEval(seq){return empiricalBS(seq,pairKey,5)}
+  function tripleEmp(seq){return empiricalBS(seq,tripleKey,3)}
+  function sixEval(seq){return empiricalBS(seq,sixKey,3)}
+  function directionEval(seq){return empiricalBS(seq,directionKey,5)}
+  function parityEval(seq){return empiricalBS(seq,parityKey,5)}
+  function colourEval(seq){return empiricalBS(seq,colourKey,5)}
+  function mirrorEval(seq){return empiricalBS(seq,mirrorKey,5)}
+
+  function bestDigitFrequency(seq){const counts=Array(10).fill(0);let n=0;for(let i=0;i<seq.length;i++){const key=String(seq[i]); if(i===0)continue; counts[seq[i-1]]++;n++;}const d=counts.indexOf(Math.max(...counts));return {digit:d,n};}
+  function hotCold(seq){const w=seq.slice(-20),c=Array(10).fill(0);w.forEach(x=>c[x]++);const hot=c.indexOf(Math.max(...c)),cold=c.indexOf(Math.min(...c));return {hot,cold};}
+  function runBreak(seq){const q=bs();if(q.length<2)return null;let len=1;for(let i=q.length-2;i>=0&&q[i]===q[q.length-1];i--)len++;return {side:q[q.length-1],len};}
+  function render(){
+    const seq=pcSeq(); if(!seq.length)return;
+    const q=bs(); const pdf=pdfWalk(seq);
+    const evals=[
+      ["PDF-720","distinct ABC → (A+B+C) mod 9",pdf.n,pdf.acc,pdf.acc==null?null:pdf.acc-.10,pdf.n>=30&&pdf.acc>.10],
+      ["PAIR","previous 2-digit state",pairEval(seq).n,pairEval(seq).acc,pairEval(seq).delta,pairEval(seq).n>=20&&pairEval(seq).acc>.5],
+      ["TRIPLE-EMP","previous 3-digit state",tripleEmp(seq).n,tripleEmp(seq).acc,tripleEmp(seq).delta,tripleEmp(seq).n>=20&&tripleEmp(seq).acc>.5],
+      ["BS-6","6-result BIG/SMALL state",sixEval(seq).n,sixEval(seq).acc,sixEval(seq).delta,sixEval(seq).n>=20&&sixEval(seq).acc>.5],
+      ["RUN","run-length state",Math.max(0,q.length-1),null,null,false],
+      ["ALT","alternation grammar",Math.max(0,q.length-2),null,null,false],
+      ["BLOCK","block/staircase grammar",Math.max(0,q.length-3),null,null,false],
+      ["BREAK","post-break state",Math.max(0,q.length-2),null,null,false],
+      ["DIR","digit ↑ ↓ = state",directionEval(seq).n,directionEval(seq).acc,directionEval(seq).delta,directionEval(seq).n>=20&&directionEval(seq).acc>.5],
+      ["PAR3","parity triple state",parityEval(seq).n,parityEval(seq).acc,parityEval(seq).delta,parityEval(seq).n>=20&&parityEval(seq).acc>.5],
+      ["COLOUR","3-colour state",colourEval(seq).n,colourEval(seq).acc,colourEval(seq).delta,colourEval(seq).n>=20&&colourEval(seq).acc>.5],
+      ["MIRROR","3-digit mirror context",mirrorEval(seq).n,mirrorEval(seq).acc,mirrorEval(seq).delta,mirrorEval(seq).n>=20&&mirrorEval(seq).acc>.5]
+    ];
+    const pdfCtx=seq.length>=3?seq.slice(-3):[]; const distinct=pdfCtx.length===3&&new Set(pdfCtx).size===3;
+    const current=distinct?`${pdfCtx.join("-")} → ${(pdfCtx[0]+pdfCtx[1]+pdfCtx[2])%9}`:(pdfCtx.length?pdfCtx.join("-")+" → REPEATED / ABSTAIN":"WAIT");
+    pc$("pcCoverage").textContent="720 / 720";pc$("pcEligible").textContent=distinct?"YES · exact lookup":"NO · abstain";
+    pc$("pcSamples").textContent=`${seq.length} observed · ${pdf.n} PDF-scored`;
+    const viable=evals.filter(x=>x[2]>=20&&Number.isFinite(x[3])); viable.sort((a,b)=>(b[4]??-9)-(a[4]??-9));
+    pc$("pcBest").textContent=viable.length?`${viable[0][0]} · ${pct(viable[0][3])}`:"BUILDING";
+    pc$("pcCurrent").innerHTML=`<strong>Current PDF context:</strong> ${esc(current)} · <strong>PDF source coverage:</strong> 720 distinct ordered contexts. Repeated contexts are deliberately not invented.`;
+    pc$("pcBody").innerHTML=evals.map(x=>{const status=x[2]<20?"BUILDING":x[5]?"CHALLENGER":"OBSERVE";const cls=status==="CHALLENGER"?"good":status==="BUILDING"?"muted":"warn";return `<tr><td><span class="tag">${esc(x[0])}</span></td><td>${esc(x[1])}</td><td>${x[2]}</td><td>${x[3]==null?"—":pct(x[3])}</td><td>${x[4]==null?"—":(x[4]>=0?"+":"")+pct(x[4])}</td><td class="${cls}">${status}</td></tr>`}).join("");
+    const r=runBreak(seq),hc=hotCold(seq),six=currentKeyBS(seq,6),nextTrend=six&&trendNext[six]?trendNext[six]:null;
+    pc$("pcAudit").innerHTML=`<strong>Live pattern state:</strong> ${six?"BS6="+six:"BS6 waiting"} · ${r?`run=${r.side}×${r.len}`:"run=—"} · hot digit=${hc.hot} · cold digit=${hc.cold} · PDF trend-link=${nextTrend||"none/untested"}. These are descriptive states; they become predictive only after chronological out-of-sample evidence.`;
+  }
+  render(); renderForensics(); setInterval(()=>{renderForensics()},1000); setInterval(render,1000);
+})();
+</script>
+
+</body>
+</html>
