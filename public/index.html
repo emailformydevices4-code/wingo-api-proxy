@@ -1,0 +1,48 @@
+
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wingo Server Cognitive Engine</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f5f7fb;color:#172033;margin:0}
+main{max-width:900px;margin:auto;padding:16px}
+.card{background:white;border:1px solid #e5e7eb;border-radius:16px;padding:16px;margin:12px 0}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(max-width:650px){.grid{grid-template-columns:1fr}}
+h1{margin:0 0 4px}.muted{color:#64748b;font-size:13px}.big{font-size:44px;font-weight:900}.green{color:#15803d}.amber{color:#b45309}.red{color:#b91c1c}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+.badge{display:inline-block;padding:5px 9px;border-radius:999px;background:#eef2ff;font-weight:700}
+pre{white-space:pre-wrap;word-break:break-word;background:#0b1020;color:#dbeafe;padding:12px;border-radius:10px;font-size:12px}
+</style>
+</head>
+<body><main>
+<h1>Wingo Server Cognitive Engine</h1>
+<div class="muted">Server-side collector · PDF rule · v7.1 adaptive research · reliability · reversal/drift telemetry</div>
+<div class="grid">
+<div class="card"><div class="muted">SERVER HEALTH</div><div id="health" class="big">—</div><div id="healthNote"></div></div>
+<div class="card"><div class="muted">LATEST ENGINE MODE</div><div id="mode" class="big">—</div><div id="target"></div></div>
+</div>
+<div class="card"><h3>Latest prediction state</h3><pre id="pred">Loading…</pre></div>
+<div class="card"><h3>Component reliability</h3><table><thead><tr><th>Component</th><th>Correct</th><th>Total</th><th>Recent</th></tr></thead><tbody id="rel"></tbody></table></div>
+<div class="card"><h3>Research findings</h3><div id="findings">Loading…</div></div>
+<script>
+const SUPABASE_URL="https://owouneyvnmcffppiphlu.supabase.co";
+const PUBLISHABLE_KEY="sb_publishable_-outzHHu4ec7H6X5Fyt9pQ_4S1ZenJO";
+async function get(){
+ const h=await fetch(SUPABASE_URL+"/functions/v1/wingo-health",{headers:{apikey:PUBLISHABLE_KEY,Authorization:"Bearer "+PUBLISHABLE_KEY}});
+ const j=await h.json(); document.querySelector("#health").textContent=j.status;
+ document.querySelector("#health").className="big "+(j.status==="GREEN"?"green":j.status==="AMBER"?"amber":"red");
+ document.querySelector("#healthNote").textContent=`Last success: ${j.collector.last_success_at||"never"} · failures: ${j.collector.consecutive_failures}`;
+ document.querySelector("#mode").textContent=j.prediction?.final_mode||"WAIT";
+ document.querySelector("#target").textContent=`Target: ${j.prediction?.target_issue||"—"} · confidence: ${j.prediction?.final_confidence??"—"}`;
+ document.querySelector("#pred").textContent=JSON.stringify(j.prediction,null,2);
+ const a=await fetch(SUPABASE_URL+"/functions/v1/wingo-api?type=state",{headers:{apikey:PUBLISHABLE_KEY,Authorization:"Bearer "+PUBLISHABLE_KEY}});
+ const s=await a.json();
+ document.querySelector("#rel").innerHTML=(s.reliability||[]).map(x=>`<tr><td>${x.component}</td><td>${x.correct}</td><td>${x.total}</td><td>${x.recent_correct}/${x.recent_total}</td></tr>`).join("");
+ document.querySelector("#findings").innerHTML=(s.findings||[]).map(x=>`<div><b>${x.title}</b><div class="muted">${x.severity} · ${x.action||""}</div></div>`).join("<hr>")||"No findings yet.";
+}
+get();setInterval(get,5000);
+</script>
+</main></body></html>
