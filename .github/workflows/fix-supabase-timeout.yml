@@ -1,5 +1,9 @@
 name: Fix Supabase Live Timeout
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-supabase-timeout.yml'
   workflow_dispatch:
 permissions:
   contents: write
