@@ -26,11 +26,36 @@ jobs:
           new = '''async function sync(){if(S.busy)return;S.busy=true;try{const [a,b,c,d]=await Promise.all([api("wingo_results","issue_number,result_digit,result_side,result_color,observed_at,source","order=issue_number.desc&limit=600"),api("wingo_three_engine_ledger","*","order=target_issue.desc&limit=500"),api("wingo_fusion_runtime","*","order=last_refresh_at.desc&limit=1"),api("wingo_predictions","target_issue,predicted_digit,predicted_side,pdf_ready,v71_side,v71_confidence,engine_version,created_at","order=created_at.desc&limit=500")]);S.rows=a||[];S.ledger=b||[];S.runtime=c?.[0]||null;S.predictions=d||[];S.latest=S.rows[0]||null;S.target=next(S.latest?.issue_number);S.lastFetch=Date.now();$("health").textContent="LIVE";$("health").className="tag good";main()}catch(e){$("health").textContent="OFFLINE";$("health").className="tag bad";toast(e.message)}finally{S.busy=false}}'''
           s = s.replace(old, new)
           old = 'const r=S.ledger.find(x=>String(x.target_issue)===String(S.target));S.current=r||null;showOutcome(r);'
-          new = 'const r=S.ledger.find(x=>String(x.target_issue)===String(S.target));const pp=S.predictions.find(x=>String(x.target_issue)===String(S.target));S.current=r||null;const settled=[...S.ledger].filter(x=>x&&x.settled&&x.actual_digit!=null&&x.fusion_digit!=null).sort((a,b)=>String(b.target_issue).localeCompare(String(a.target_issue)));showOutcome(settled[0]||null);'
+          new = 'const r=S.ledger.find(x=>String(x.target_issue)===String(S.target));const pp=S.predictions.find(x=>String(x.target_issue)===String(S.target));S.current=r||null;const settled=[...S.ledger].filter(x=>x&&x.settled&&x.actual_digit!=null&&x.fusion_digit!=null&&x.fusion_decision==="PUBLISH").sort((a,b)=>String(b.target_issue).localeCompare(String(a.target_issue)));showOutcome(settled[0]||null);'
           s = s.replace(old, new)
           old = '''if(!r){$("dlabel").textContent="FUSION WAITING";$("fd").textContent="—";$("fd").className="digit abstain";$("fc").textContent="Waiting for the authoritative server decision.";$("fs").textContent=$("ag").textContent=$("pn").textContent="—";["pdfd","vside","vc","vr","vs","vg"].forEach(id=>$(id).textContent="—");$("pdfm").textContent="Waiting for authoritative PDF row."}'''
           new = '''if(!r){$("dlabel").textContent="FUSION WAITING";$("fd").textContent="—";$("fd").className="digit abstain";$("fc").textContent="Server fusion row is still being prepared for this target.";$("fs").textContent=$("ag").textContent=$("pn").textContent="—";$("pdfd").textContent=pp?.predicted_digit??"—";$("pdfm").innerHTML=pp?.pdf_ready?`PDF prediction ready · ${esc(pp.predicted_side||side(pp.predicted_digit))}<br>${esc(pp.engine_version||"server prediction")}`:"Waiting for authoritative PDF row.";$("vside").textContent=pp?.v71_side||"—";$("vc").textContent=pp?.v71_confidence!=null?pct(pp.v71_confidence):"—";$("vr").textContent=pp?"YES":"—";$("vs").textContent=pp?.engine_version||"—";$("vg").textContent="SERVER GATE"}'''
           s = s.replace(old, new)
+
+          # Correct outcome semantics: the animation is about the published BIG/SMALL
+          # decision first, not exact-digit equality.  Example: predicted 8 vs actual 5
+          # is a BIG win because both digits are BIG. Exact digit remains a stronger win.
+          marker = 'showOutcome(settled[0]||null);'
+          override = r'''showOutcome=function(r){
+            if(!r||r.settled===false||r.fusion_decision!=="PUBLISH"||r.fusion_digit==null||r.actual_digit==null)return;
+            const target=String(r.target_issue||"");
+            const key="wingo-outcome-"+target;
+            if(localStorage.getItem(key)==="1")return;
+            const pred=Number(r.fusion_digit),actual=Number(r.actual_digit);
+            if(!Number.isInteger(pred)||!Number.isInteger(actual))return;
+            const ps=r.fusion_side||side(pred),as=r.actual_side||side(actual);
+            const exact=pred===actual,sideWin=ps===as,win=sideWin;
+            const fx=$("resultFx"),icon=$("fxIcon"),title=$("fxTitle"),sub=$("fxSub");
+            if(!fx||!icon||!title||!sub)return;
+            fx.className="result-fx "+(win?"win":"loss");
+            icon.textContent=win?(exact?"✓":"✓"):"✕";
+            title.textContent=win?(exact?"DIGIT + SIDE WIN":ps+" WIN"):"LOSS";
+            sub.textContent="Predicted "+pred+" · "+ps+"  |  Actual "+actual+" · "+as;
+            fx.hidden=false;fx.classList.remove("show");void fx.offsetWidth;fx.classList.add("show");
+            localStorage.setItem(key,"1");
+          };'''
+          if marker in s and 'Correct outcome semantics' not in s:
+              s = s.replace(marker, override + '\n' + marker, 1)
           p.write_text(s, encoding='utf-8')
       - name: Commit patch
         run: |
@@ -38,5 +63,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add public/index.html
           git diff --cached --quiet && exit 0
-          git commit -m 'Fix live prediction fallback and settlement animation [skip ci]'
+          git commit -m 'Fix BIG SMALL win loss animation semantics [skip ci]'
           git push
