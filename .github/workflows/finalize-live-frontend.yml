@@ -1,0 +1,45 @@
+name: Finalize Live Frontend
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/finalize-live-frontend.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch live sync
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('public/index.html')
+          s=p.read_text()
+          start=s.find('async function sync(){')
+          end=s.find('function toast(',start)
+          if start<0 or end<0: raise SystemExit('sync boundaries missing')
+          new='''async function sync(){if(S.busy)return;S.busy=true;let proxyOK=false;try{try{const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),4000);try{const r=await fetch('/api/wingo/live?ts='+Date.now(),{cache:'no-store',headers:{Accept:'application/json'},signal:ctl.signal});if(!r.ok)throw Error('live proxy HTTP '+r.status);const x=await r.json();if(!x||x.ok!==true)throw Error(x?.error||'live proxy unavailable');S.rows=Array.isArray(x.rows)?x.rows:[];S.ledger=Array.isArray(x.ledger)?x.ledger:[];S.predictions=Array.isArray(x.predictions)?x.predictions:[];S.runtime=x.runtime||null;S.latest=x.latest||S.rows[0]||null;S.target=next(S.latest?.issue_number);S.lastFetch=Date.now();proxyOK=true}finally{clearTimeout(tm)}}catch(_){proxyOK=false}if(!proxyOK){const [a,b,c,d]=await Promise.allSettled([api('wingo_results','issue_number,result_digit,result_side,result_color,observed_at,source','order=issue_number.desc&limit=30'),api('wingo_three_engine_ledger','*','order=target_issue.desc&limit=60'),api('wingo_fusion_runtime','*','order=last_refresh_at.desc&limit=1'),api('wingo_predictions','target_issue,predicted_digit,predicted_side,pdf_ready,v71_side,v71_confidence,engine_version,created_at','order=created_at.desc&limit=60')]);if(a.status!=='fulfilled'&&b.status!=='fulfilled'&&d.status!=='fulfilled')throw Error('Live data unavailable');if(a.status==='fulfilled')S.rows=a.value||[];if(b.status==='fulfilled')S.ledger=b.value||[];if(c.status==='fulfilled')S.runtime=c.value?.[0]||null;if(d.status==='fulfilled')S.predictions=d.value||[];S.latest=S.rows[0]||S.latest;S.target=next(S.latest?.issue_number);S.lastFetch=Date.now()}$('health').textContent=proxyOK?'LIVE':'LIVE · DIRECT';$('health').className='tag good';main()}catch(e){$('health').textContent=S.latest?'DEGRADED':'OFFLINE';$('health').className='tag '+(S.latest?'warnc':'bad');if(!S.latest)toast(e.name==='AbortError'?'Live request timed out':'Live sync unavailable')}finally{S.busy=false}}
+'''
+          p.write_text(s[:start]+new+s[end:])
+          PY
+      - name: Validate
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('public/index.html').read_text()
+          js=s.split('<script>\n',1)[1].rsplit('</script>',1)[0]
+          Path('/tmp/wingo.js').write_text(js)
+          assert "fetch('/api/wingo/live?ts='+Date.now()" in s
+          assert "Promise.allSettled" in s
+          PY
+          node --check /tmp/wingo.js
+      - name: Commit final patch and remove workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/index.html
+          git rm -f .github/workflows/finalize-live-frontend.yml
+          git commit -m 'Finalize working live prediction frontend [skip ci]'
+          git push
