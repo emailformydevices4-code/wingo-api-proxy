@@ -24,7 +24,7 @@ jobs:
             '$("dlabel").textContent=pub?"FUSION PUBLISHED":"FUSION ABSTAIN";':'$("dlabel").textContent=pub?"FUSION PUBLISHED":r.fusion_digit!=null?"FUSION CANDIDATE · ABSTAIN":"FUSION WAITING";',
             '$("fd").textContent=pub&&r.fusion_digit!=null?r.fusion_digit:"—";':'$("fd").textContent=r.fusion_digit!=null?r.fusion_digit:"—";',
             '$("fd").className="digit "+(pub?(+r.fusion_digit>=5?"big":"small"):"abstain");':'$("fd").className="digit "+(r.fusion_digit!=null?(+r.fusion_digit>=5?"big":"small"):"abstain");',
-            '$("fs").textContent=pub?(r.fusion_side||side(r.fusion_digit)):"—";':'$("fs").textContent=r.fusion_digit!=null?(r.fusion_side||side(r.fusion_digit)):"—";',
+            "$('fs').textContent=pub?(r.fusion_side||side(r.fusion_digit)):\"—\";":"$('fs').textContent=r.fusion_digit!=null?(r.fusion_side||side(r.fusion_digit)):\"—\";",
             'order=issue_number.desc&limit=600':'order=issue_number.desc&limit=12',
             'order=target_issue.desc&limit=500':'order=target_issue.desc&limit=30',
             'order=created_at.desc&limit=500':'order=created_at.desc&limit=25',
