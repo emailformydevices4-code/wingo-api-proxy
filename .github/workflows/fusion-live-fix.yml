@@ -1,0 +1,62 @@
+name: Fix Fusion Live Display
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'public/index.html'
+      - '.github/workflows/fusion-live-fix.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch fusion frontend
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('public/index.html')
+          s=p.read_text()
+          reps={
+            '$("dlabel").textContent=pub?"FUSION PUBLISHED":"FUSION ABSTAIN";':'$("dlabel").textContent=pub?"FUSION PUBLISHED":r.fusion_digit!=null?"FUSION CANDIDATE · ABSTAIN":"FUSION WAITING";',
+            '$("fd").textContent=pub&&r.fusion_digit!=null?r.fusion_digit:"—";':'$("fd").textContent=r.fusion_digit!=null?r.fusion_digit:"—";',
+            '$("fd").className="digit "+(pub?(+r.fusion_digit>=5?"big":"small"):"abstain");':'$("fd").className="digit "+(r.fusion_digit!=null?(+r.fusion_digit>=5?"big":"small"):"abstain");',
+            '$("fs").textContent=pub?(r.fusion_side||side(r.fusion_digit)):"—";':'$("fs").textContent=r.fusion_digit!=null?(r.fusion_side||side(r.fusion_digit)):"—";',
+            'order=issue_number.desc&limit=600':'order=issue_number.desc&limit=12',
+            'order=target_issue.desc&limit=500':'order=target_issue.desc&limit=30',
+            'order=created_at.desc&limit=500':'order=created_at.desc&limit=25',
+            'setInterval(clock,500);setInterval(sync,3000);sync();clock();':'setInterval(clock,250);setInterval(sync,1000);sync();clock();',
+          }
+          for a,b in reps.items():
+            if a not in s:
+              raise SystemExit(f'Missing expected frontend fragment: {a}')
+            s=s.replace(a,b,1)
+          old='''const [a,b,c,d]=await Promise.all([api("wingo_results","issue_number,result_digit,result_side,result_color,observed_at,source","order=issue_number.desc&limit=12"),api("wingo_three_engine_ledger","*","order=target_issue.desc&limit=30"),api("wingo_fusion_runtime","*","order=last_refresh_at.desc&limit=1"),api("wingo_predictions","target_issue,predicted_digit,predicted_side,pdf_ready,v71_side,v71_confidence,engine_version,created_at","order=created_at.desc&limit=25")]);S.rows=a||[];S.ledger=b||[];S.runtime=c?.[0]||null;S.predictions=d||[];'''
+          new='''const [a,b,d]=await Promise.all([api("wingo_results","issue_number,result_digit,result_side,result_color,observed_at,source","order=issue_number.desc&limit=12"),api("wingo_three_engine_ledger","*","order=target_issue.desc&limit=30"),api("wingo_predictions","target_issue,predicted_digit,predicted_side,pdf_ready,v71_side,v71_confidence,engine_version,created_at","order=created_at.desc&limit=25")]);S.rows=a||[];S.ledger=b||[];S.predictions=d||[];'''
+          if old in s:
+            s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+      - name: Validate
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('public/index.html').read_text()
+          js='\n'.join(re.findall(r'<script>(.*?)</script>',s,re.S))
+          Path('/tmp/index.js').write_text(js)
+          assert 'FUSION CANDIDATE · ABSTAIN' in s
+          assert 'limit=12' in s and 'limit=30' in s and 'limit=25' in s
+          PY
+          node --check /tmp/index.js
+      - name: Commit final patch and clean temporary workflows
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/index.html
+          git rm -f .github/workflows/final-overlay-fix.yml .github/workflows/fast-row-performance.yml .github/workflows/row-speed-patch.yml .github/workflows/fusion-live-fix.yml 2>/dev/null || true
+          git commit -m 'Fix live fusion forecast display [skip ci]'
+          git push
