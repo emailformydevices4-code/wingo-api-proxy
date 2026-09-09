@@ -59,7 +59,56 @@ function main(){const r=S.ledger.find(x=>String(x.target_issue)===String(S.targe
   localStorage.setItem(key,"1");
 };
 showOutcome(settled[0]||null);const p=primary(contiguous(S.rows.slice(0,3)));$("pd").textContent=p?p.digit:"—";$("pm").innerHTML=p?`H=${p.H} · P=${p.P} · 9P=${p.res}<br>context ${esc(p.ctx)} · serial ${p.serial}`:"Waiting for three contiguous observations.";if(!r){$("dlabel").textContent="FUSION WAITING";$("fd").textContent="—";$("fd").className="digit abstain";$("fc").textContent="Server fusion row is still being prepared for this target.";$("fs").textContent=$("ag").textContent=$("pn").textContent="—";$("pdfd").textContent=pp?.pdf_ready?pp.predicted_digit:"—";$("pdfm").innerHTML=pp?.pdf_ready?`PDF prediction ready · ${esc(pp.predicted_side||side(pp.predicted_digit))}<br>${esc(pp.engine_version||"server prediction")}`:"Waiting for authoritative PDF row.";$("vside").textContent="—";$("vc").textContent="—";$("vr").textContent="NO";$("vs").textContent="Not available for this target";$("vg").textContent="WAITING"}else{const pub=String(r.fusion_decision).toUpperCase()==="PUBLISH";$("dlabel").textContent=pub?"FUSION PUBLISHED":r.fusion_digit!=null?"FUSION CANDIDATE · ABSTAIN":"FUSION WAITING";$("fd").textContent=r.fusion_digit!=null?r.fusion_digit:"—";$("fd").className="digit "+(r.fusion_digit!=null?(+r.fusion_digit>=5?"big":"small"):"abstain");$("fc").textContent=pub?`Server confidence ${pct(r.fusion_confidence)} · authoritative ledger`:`No authoritative PUBLISH decision for ${S.target}.`;$('fs').textContent=r.fusion_digit!=null?(r.fusion_side||side(r.fusion_digit)):"—";$('ag').textContent=(r.side_agreement??"—")+"/3";$('pn').textContent=r.fusion_meta?.prior_n??"—";$('pdfd').textContent=r.pdf_digit??"—";$('pdfm').innerHTML=r.pdf_ready?`side ${esc(r.pdf_side||side(r.pdf_digit))}<br>${esc(r.pdf_source||"server ledger")}`:"No eligible PDF prediction for this target.";$('vside').textContent=r.v71_side||"—";$('vc').textContent=r.v71_confidence!=null?pct(r.v71_confidence):"—";$('vr').textContent=r.v71_ready?"YES":"NO";$('vs').textContent=r.v71_source||"—";$('vg').textContent=r.fusion_weights?.v71_gate||"—"}$('rows').textContent=S.rows.length;$('led').textContent=S.ledger.length;$('latest').textContent=S.latest?.issue_number||"—";$('upd').textContent=r?.updated_at?new Date(r.updated_at).toLocaleTimeString():"—";renderHistory10()}
-async function sync(){if(S.busy)return;S.busy=true;try{const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),4500);let r;try{r=await fetch('/api/wingo/live?ts='+Date.now(),{cache:'no-store',headers:{Accept:'application/json'},signal:ctl.signal})}finally{clearTimeout(tm)}if(!r.ok)throw Error('Live proxy HTTP '+r.status);const d=await r.json();if(!d||d.ok!==true)throw Error(d?.error||'Live proxy unavailable');S.rows=Array.isArray(d.rows)?d.rows:[];S.ledger=Array.isArray(d.ledger)?d.ledger:[];S.predictions=Array.isArray(d.predictions)?d.predictions:[];S.latest=d.latest||S.rows[0]||S.latest;S.target=next(S.latest?.issue_number)||S.target;S.lastFetch=Date.now();$('health').textContent='LIVE';$('health').className='tag good';main()}catch(e){$('health').textContent=S.latest?'DEGRADED':'OFFLINE';$('health').className='tag '+(S.latest?'warnc':'bad');if(!S.latest)toast(e.name==='AbortError'?'Live proxy timed out':'Live sync unavailable')}finally{S.busy=false}}
+async function sync(){
+  if(S.busy)return;
+  S.busy=true;
+  const load=async()=>{
+    const [a,b,d]=await Promise.allSettled([
+      api("wingo_results","issue_number,result_digit,result_side,result_color,observed_at,source","order=issue_number.desc&limit=12"),
+      api("wingo_three_engine_ledger","target_issue,source_issue,sequence_id,gap_safe,data_quality,primary_digit,primary_side,primary_ready,pdf_digit,pdf_side,pdf_ready,pdf_source,v71_side,v71_confidence,v71_ready,v71_source,digit_agreement,side_agreement,fusion_digit,fusion_side,fusion_confidence,fusion_weights,fusion_meta,fusion_decision,settled,actual_digit,actual_side,updated_at","order=target_issue.desc&limit=30"),
+      api("wingo_predictions","target_issue,predicted_digit,predicted_side,pdf_ready,engine_version,created_at","order=created_at.desc&limit=25")
+    ]);
+    let ok=0;
+    if(a.status==='fulfilled'){S.rows=a.value||[];ok++}
+    if(b.status==='fulfilled'){S.ledger=b.value||[];ok++}
+    if(d.status==='fulfilled'){S.predictions=d.value||[];ok++}
+    if(!ok)throw Error('Supabase unavailable');
+    S.latest=S.rows[0]||S.latest;
+    S.target=next(S.latest?.issue_number)||S.target;
+    S.lastFetch=Date.now();
+    $("health").textContent=ok===3?"LIVE":"DEGRADED";
+    $("health").className="tag "+(ok===3?"good":"warnc");
+    main();
+    return ok===3;
+  };
+  try{
+    let usedProxy=false;
+    try{
+      const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),1800);
+      try{
+        const r=await fetch('/api/wingo/live?ts='+Date.now(),{cache:'no-store',headers:{Accept:'application/json'},signal:ctl.signal});
+        if(!r.ok)throw Error('proxy '+r.status);
+        const x=await r.json();
+        if(!x||x.ok!==true)throw Error(x?.error||'proxy unavailable');
+        S.rows=Array.isArray(x.rows)?x.rows:[];
+        S.ledger=Array.isArray(x.ledger)?x.ledger:[];
+        S.predictions=Array.isArray(x.predictions)?x.predictions:[];
+        S.latest=x.latest||S.rows[0]||S.latest;
+        S.target=next(S.latest?.issue_number)||S.target;
+        S.lastFetch=Date.now();
+        $("health").textContent="LIVE";
+        $("health").className="tag good";
+        main();
+        usedProxy=true;
+      }finally{clearTimeout(tm)}
+    }catch(_){usedProxy=false}
+    if(!usedProxy)await load();
+  }catch(e){
+    $("health").textContent=S.latest?"DEGRADED":"OFFLINE";
+    $("health").className="tag "+(S.latest?"warnc":"bad");
+    if(!S.latest)toast(e.name==='AbortError'?"Live request timed out":"Live sync unavailable");
+  }finally{S.busy=false}
+}
 function toast(x){$("toast").textContent=x;$("toast").classList.add("show");setTimeout(()=>$('toast').classList.remove('show'),2400)}
 function panel(v){$("menu").classList.remove("open");$("home").style.display="none";$("panel").classList.add("active");const r=S.current,p=primary(contiguous(S.rows.slice(0,3)));let h=`<button class="btn" onclick="home()">← Main engine</button><div style="margin-top:12px">`;if(v==="fusion")h+=`<b>THREE-ENGINE FUSION</b><div class="sub">Authoritative server decision; browser is read-only.</div><div class="kv">${box(r?.fusion_decision,"DECISION")}${box(pct(r?.fusion_confidence),"CONFIDENCE")}${box(r?.fusion_digit,"FUSION DIGIT")}${box(r?.fusion_side,"FUSION SIDE")}${box((r?.digit_agreement??"—")+"/3","DIGIT AGREEMENT")}${box((r?.side_agreement??"—")+"/3","SIDE AGREEMENT")}</div><div class="sub mono" style="margin-top:10px">weights: ${esc(JSON.stringify(r?.fusion_weights||{}))}<br>meta: ${esc(JSON.stringify(r?.fusion_meta||{}))}</div>`;if(v==="history")h+=`<b>PREDICTION HISTORY</b><div class="sub">BIG/SMALL outcome is evaluated independently of exact digit.</div><div class="scroll"><table><tr><th>Target</th><th>Pred</th><th>Side</th><th>Actual</th><th>Side</th><th>Result</th></tr>${S.ledger.filter(x=>x&&x.settled&&x.actual_digit!=null&&x.fusion_digit!=null).slice(0,50).map(x=>{const p=Number(x.fusion_digit),a=Number(x.actual_digit),ps=x.fusion_side||side(p),as=x.actual_side||side(a),win=ps===as,exact=p===a;return `<tr><td class="mono">${esc(String(x.target_issue).slice(-10))}</td><td>${esc(p)}</td><td>${esc(ps)}</td><td>${esc(a)}</td><td>${esc(as)}</td><td class="${win?'winmark':'lossmark'}">${exact?'DIGIT + SIDE WIN':win?ps+' WIN':'LOSS'}</td></tr>`}).join("")}</table></div>`;if(v==="primary")h+=`<b>PRIMARY ENGINE</b><div class="sub">D̂(t+1)=[(D(t)+D(t−1)+D(t−2))²+9((S(t)+1) mod 177)] mod 10</div><div class="kv">${box(p?.digit,"DIGIT")}${box(p?.side,"SIDE")}${box(p?.H,"H")}${box(p?.P,"P")}${box(p?.res,"9P")}${box(p?.serial,"FULL SERIAL")}</div>`;if(v==="pdf"){const pp=S.predictions.find(x=>String(x.target_issue)===String(S.target));h+=`<b>PDFS ENGINE</b><div class="sub">PostgreSQL-authoritative PDF result. No local invention.</div><div class="kv">${box(r?.pdf_digit??(pp?.pdf_ready?pp.predicted_digit:null),"DIGIT")}${box(r?.pdf_side??(pp?.pdf_ready?pp.predicted_side:null),"SIDE")}${box(r?.pdf_ready??pp?.pdf_ready?"YES":"NO","READY")}${box(r?.pdf_source??pp?.engine_version,"SOURCE")}${box(r?.pdf_context,"CONTEXT")}${box(r?.source_issue,"SOURCE ISSUE")}</div>`}if(v==="v71")h+=`<b>V7.1 ENGINE</b><div class="sub">Statistical council; it is shown only from the authoritative fusion ledger. PDF records are never relabeled as v7.1.</div><div class="kv">${box(r?.v71_side,"SIDE")}${box(pct(r?.v71_confidence),"CONFIDENCE")}${box(r?.v71_ready?"YES":"NO","READY")}${box(r?.v71_source,"SOURCE")}${box(r?.fusion_meta?.v71_side_acc,"ROLLING SIDE ACC")}${box(r?.fusion_weights?.v71_gate,"GATE")}</div>`;if(v==="research")h+=`<b>DEEP RESEARCH</b><div class="kv">${box(S.runtime?.model_version,"MODEL VERSION")}${box(S.runtime?.three_engine_count,"THREE-ENGINE ROWS")}${box(S.runtime?.settled_count,"SETTLED")}${box(S.runtime?.row_count,"RESEARCH ROWS")}</div><div class="sub mono">${esc(JSON.stringify(S.runtime?.summary||{},null,2))}</div>`;if(v==="system")h+=`<b>SYSTEM / AUDIT</b><div class="kv">${box("CONNECTED","SUPABASE")}${box(S.latest?.source,"RESULT SOURCE")}${box(r?.data_quality,"DATA QUALITY")}${box(r?.gap_safe?"YES":"—","GAP SAFE")}${box(r?.sequence_id,"SEQUENCE")}${box(new Date(S.lastFetch||Date.now()).toLocaleTimeString(),"LAST SYNC")}</div><p>Collector and prediction publication are not writable from this frontend.</p>`;h+=`</div>`;$("content").innerHTML=h}
 function box(v,l){return`<div class="box"><b>${esc(v??"—")}</b><span>${esc(l)}</span></div>`}function home(){$("panel").classList.remove("active");$("home").style.display="block";main()}$("open").onclick=()=>$('menu').classList.add('open');$('close').onclick=()=>$('menu').classList.remove('open');$('back').onclick=home;$('menu').onclick=e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open')};document.querySelectorAll('.menu-card').forEach(x=>x.onclick=()=>panel(x.dataset.v));setInterval(clock,250);setInterval(sync,1000);sync();clock();
