@@ -1,0 +1,44 @@
+name: Fix Frontend Live Proxy v2
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-frontend-live-proxy-v2.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch frontend sync
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('public/index.html')
+          s=p.read_text()
+          start=s.index('async function sync(){')
+          end=s.index('\nfunction toast(', start)
+          new='''async function sync(){if(S.busy)return;S.busy=true;try{const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),4500);let r;try{r=await fetch('/api/wingo/live?ts='+Date.now(),{cache:'no-store',headers:{Accept:'application/json'},signal:ctl.signal})}finally{clearTimeout(tm)}if(!r.ok)throw Error('Live proxy HTTP '+r.status);const d=await r.json();if(!d||d.ok!==true)throw Error(d?.error||'Live proxy unavailable');S.rows=Array.isArray(d.rows)?d.rows:[];S.ledger=Array.isArray(d.ledger)?d.ledger:[];S.predictions=Array.isArray(d.predictions)?d.predictions:[];S.latest=d.latest||S.rows[0]||S.latest;S.target=next(S.latest?.issue_number)||S.target;S.lastFetch=Date.now();$('health').textContent='LIVE';$('health').className='tag good';main()}catch(e){$('health').textContent=S.latest?'DEGRADED':'OFFLINE';$('health').className='tag '+(S.latest?'warnc':'bad');if(!S.latest)toast(e.name==='AbortError'?'Live proxy timed out':'Live sync unavailable')}finally{S.busy=false}}'''
+          p.write_text(s[:start]+new+s[end:])
+          PY
+      - name: Validate frontend JavaScript
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('public/index.html').read_text()
+          a=s.index('<script>')+8
+          b=s.index('</script>',a)
+          Path('/tmp/index-script.js').write_text(s[a:b])
+          PY
+          node --check /tmp/index-script.js
+          grep -q "fetch('/api/wingo/live?ts='" public/index.html
+      - name: Commit and clean workflows
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add public/index.html
+          git commit -m "Use same-origin live proxy in frontend [skip ci]"
+          git rm .github/workflows/fix-frontend-live-proxy.yml .github/workflows/fix-frontend-live-proxy-v2.yml
+          git commit -m "Remove temporary frontend patch workflows [skip ci]"
+          git push
