@@ -1,5 +1,9 @@
 name: Restore Live Fallback
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/restore-live-fallback.yml'
   workflow_dispatch:
 permissions:
   contents: write
@@ -16,8 +20,7 @@ jobs:
           s=p.read_text()
           start=s.find('async function sync(){')
           end=s.find('function toast(',start)
-          if start<0 or end<0:
-              raise SystemExit('sync boundaries missing')
+          if start<0 or end<0: raise SystemExit('sync boundaries missing')
           new='''async function sync(){
             if(S.busy)return;
             S.busy=true;
@@ -69,15 +72,13 @@ jobs:
             }finally{S.busy=false}
           }
           '''
-          s=s[:start]+new+s[end:]
-          p.write_text(s)
+          p.write_text(s[:start]+new+s[end:])
           PY
       - name: Validate
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          s=Path('public/index.html').read_text()
-          js=s.split('<script>\n',1)[1].rsplit('</script>',1)[0]
+          s=Path('public/index.html').read_text(); js=s.split('<script>\n',1)[1].rsplit('</script>',1)[0]
           Path('/tmp/wingo.js').write_text(js)
           assert 'api("wingo_results"' in s
           assert "fetch('/api/wingo/live?ts='+Date.now()" in s
