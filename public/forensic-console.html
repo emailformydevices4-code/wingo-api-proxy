@@ -8,15 +8,21 @@ async function load(){
   if(!r.ok)throw Error('HTTP '+r.status);
   const d=await r.json(),l=d.live||{},rs=d.research_api||{},cur=rs.current||{},research=rs.research||{},runtime=research.runtime||{},state=research.state||{},rows=l.rows?.length?l.rows:(rs.history?.rows||[]),preds=l.pdf_predictions||[],fallbackPred=cur.prediction||null;
   const target=String(l.target||fallbackPred?.target_issue||runtime.lastPredictionTarget||'');
-  const p=preds.find(x=>String(x.target_issue)===target)||preds[0]||fallbackPred||null;
+  const ledgerRow=(l.ledger||[]).find(x=>String(x.target_issue)===target)||null;
+  const pdf=preds.find(x=>String(x.target_issue)===target)||null;
+  const fusion=ledgerRow?.fusion_digit!=null&&ledgerRow?.fusion_decision==='PUBLISH'?{predicted_digit:ledgerRow.fusion_digit,predicted_side:ledgerRow.fusion_side,predicted_color:null,pdf_ready:false,source_label:'FUSION'}:null;
+  const primary=ledgerRow?.primary_digit!=null&&ledgerRow?.primary_ready?{predicted_digit:ledgerRow.primary_digit,predicted_side:ledgerRow.primary_side,predicted_color:null,pdf_ready:false,source_label:'PRIMARY'}:null;
+  const p=pdf?.pdf_ready?{...pdf,source_label:'PDF'}:(fusion||primary||fallbackPred||pdf||null);
   const o=runtime?.summary?.oos||{};
   const liveBroken=!!d.live_error;
   $('conn').textContent=liveBroken?'LIVE API DEGRADED':'CONNECTED';
   $('conn').className='status '+(liveBroken?'bad':'ok');
   $('issue').textContent=l.source_current?.issueNumber||l.latest?.issue_number||state.latestIssue||research.latest_issue||p?.source_issue||'—';
   $('target').textContent=target||'—';
-  $('pred').textContent=p?.pdf_ready&&p?.predicted_digit!=null?(p.predicted_digit+' / '+(p.predicted_side||'—')):(p?.predicted_digit!=null?(p.predicted_digit+' / '+(p.predicted_side||'—')):'PDF NOT READY');
-  $('predsub').textContent=p?.pdf_ready?('color: '+(p.predicted_color||'—')+' · context: '+(p.pdf_context||'—')):(p?'prediction found · pdf_ready=false':'No published prediction');
+  $('pred').textContent=p?.predicted_digit!=null?(p.predicted_digit+' / '+(p.predicted_side||'—')):'PREDICTION NOT READY';
+  $('predsub').textContent=p?.predicted_digit!=null
+  ?((p.source_label||'PREDICTION')+' · '+(p.predicted_color?'color: '+p.predicted_color+' · ':'')+(p.pdf_context?'context: '+p.pdf_context:'target-matched'))
+  :'No target-matched prediction';
   $('state').textContent=state.status||l.transport||(liveBroken?'RESEARCH FALLBACK':'LIVE');
   $('count').textContent=rows.length||research.history_count||state.historyCount||'—';
   $('exact').textContent=o.n?pct(o.exact):'—';
