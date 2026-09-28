@@ -10,6 +10,7 @@ async function get(base,path,ms=8000){
  return r.json();
 }
 async function optional(path){try{return await get(RESEARCH,path,5000)}catch(e){return{ok:false,error:e.message}}}
+async function optionalLive(path){try{return await get(LIVE,path,6000)}catch(e){return{ok:false,error:e.message}}}
 http.createServer(async(req,res)=>{
  const pathname=new URL(req.url,'http://localhost').pathname;
  try{
