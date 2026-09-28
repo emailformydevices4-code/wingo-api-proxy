@@ -27,7 +27,7 @@ async function buildSnapshot(){
 }
 async function getSnapshot(){
  const now=Date.now();
- if(snapshot && now-snapshotAt<15000)return snapshot;
+ if(snapshot && now-snapshotAt<1000)return snapshot;
  if(snapshotPromise)return snapshotPromise;
  snapshotPromise=buildSnapshot().then(x=>{snapshot=x;snapshotAt=Date.now();return x}).finally(()=>{snapshotPromise=null});
  return snapshotPromise;
