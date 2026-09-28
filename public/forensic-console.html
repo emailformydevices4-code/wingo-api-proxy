@@ -10,7 +10,7 @@ async function load(){
   const p=preds.find(x=>String(x.target_issue)===target)||preds[0]||null;
   const rs=d.research_api||{},rr=rs.research||{},runtime=rr.runtime||{};
   const o=runtime?.summary?.oos||{};
-  $('conn').textContent='CONNECTED';$('conn').className='status ok';
+  $('conn').textContent=d.live_error?'LIVE API DEGRADED':'CONNECTED';$('conn').className='status '+(d.live_error?'bad':'ok');
   $('issue').textContent=l.source_current?.issueNumber||l.latest?.issue_number||'—';
   $('target').textContent=target||'—';
   $('pred').textContent=p?.pdf_ready&&p?.predicted_digit!=null?(p.predicted_digit+' / '+(p.predicted_side||'—')):'PDF NOT READY';
@@ -19,10 +19,12 @@ async function load(){
   $('count').textContent=rows.length;
   $('exact').textContent=o.n?pct(o.exact):'—';
   $('oos').textContent=o.n?('n='+o.n+' · side='+pct(o.side)+' · near1='+pct(o.near1)):'Research OOS not available';
-  $('raw').textContent=JSON.stringify(d,null,2);
+  $('raw').textContent=d.live_error
+  ? 'LIVE API ERROR: '+d.live_error+'\n\nThe console is still alive. Diagnostics and research fallback are below.\n\n'+JSON.stringify(d,null,2)
+  : JSON.stringify(d,null,2);
  }catch(e){
-  $('conn').textContent='ERROR';$('conn').className='status bad';
-  $('raw').textContent=e.stack||String(e);
+  $('conn').textContent='GATEWAY ERROR';$('conn').className='status bad';
+  $('raw').textContent='Gateway request failed: '+(e.stack||String(e));
  }
 }
 load();setInterval(load,3000)
